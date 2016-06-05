@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.boxes.models import Box, BoxVersion, BoxProvider
+
+admin.site.register(Box)
+admin.site.register(BoxVersion)
+admin.site.register(BoxProvider)
