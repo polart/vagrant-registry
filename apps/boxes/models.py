@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.validators import RegexValidator
 from django.db import models
 
@@ -17,18 +19,18 @@ class Box(models.Model):
 
 
 class BoxVersion(models.Model):
-    box = models.ForeignKey('boxes.Box', related_name='versions')
-    date_created = models.DateTimeField(auto_now_add=True)
     # Validate version according to Vagrant docs
     # https://www.vagrantup.com/docs/boxes/versioning.html
-    version = models.CharField(
-        max_length=40,
-        validators=[RegexValidator(
-            regex=r'^(\d+)\.(\d+)(\.(\d+))?$',
-            message='Invalid version number. It must be of the format '
-                    'X.Y.Z where X, Y, and Z are all positive integers.'
-        )]
+    VERSION_VALIDATOR = RegexValidator(
+        regex=r'^(\d+)\.(\d+)(\.(\d+))?$',
+        message='Invalid version number. It must be of the format '
+                'X.Y.Z where X, Y, and Z are all positive integers.'
     )
+
+    box = models.ForeignKey('boxes.Box', related_name='versions')
+    date_created = models.DateTimeField(auto_now_add=True)
+    version = models.CharField(
+        max_length=40, validators=[VERSION_VALIDATOR])
 
     class Meta:
         unique_together = ('box', 'version')
@@ -76,3 +78,49 @@ class BoxProvider(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.version, self.provider)
+
+
+def chunked_upload_path(instance, filename):
+    return 'chunked_uploads/{user}/{filename}.part'.format(
+        user=instance.user,
+        filename=instance.upload_id
+    )
+
+
+class BoxChunkedUpload(models.Model):
+    STARTED = 'S'
+    IN_PROGRESS = 'I'
+    COMPLETED = 'C'
+    STATUS_CHOICES = (
+        (STARTED, 'Started'),
+        (IN_PROGRESS, 'In progress'),
+        (COMPLETED, 'Completed'),
+    )
+
+    user = models.ForeignKey('auth.User', related_name='box_uploads')
+    upload_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_completed = models.DateTimeField(null=True, blank=True)
+    file = models.FileField(max_length=255, upload_to=chunked_upload_path)
+    filename = models.CharField(max_length=255)
+    offset = models.BigIntegerField(default=0)
+    status = models.CharField(
+        max_length=1, choices=STATUS_CHOICES, default=STARTED)
+    name = models.CharField(max_length=255)
+    checksum_type = models.CharField(
+        max_length=10,
+        choices=BoxProvider.CHECKSUM_TYPE_CHOICES,
+        default=BoxProvider.SHA256)
+    checksum = models.CharField(max_length=128)
+    version = models.CharField(
+        max_length=40,
+        validators=[BoxVersion.VERSION_VALIDATOR]
+    )
+    provider = models.CharField(max_length=100)
+
+    def __str__(self):
+        return (
+            '({self.upload_id}) {self.user}/{self.name} v{self.version} '
+            '{self.provider}: {status}'
+            .format(self=self, status=self.get_status_display())
+        )
