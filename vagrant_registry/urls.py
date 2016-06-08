@@ -14,10 +14,37 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
+from rest_framework.routers import DefaultRouter
+
+from apps.boxes import api_views
+
+router = DefaultRouter()
+router.register(r'users', api_views.UserViewSet)
+
+box_list = api_views.BoxViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+box_detail = api_views.BoxViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy'
+})
+
+api_urlpatterns = [
+    url(r'^', include(router.urls)),
+    url(r'^boxes/$', box_list, name='box-list'),
+    url(r'^boxes/(?P<owner__username>[\w.@+-]+)/(?P<name>[\w.@+-]+)/$',
+        box_detail, name='box-detail'),
+    url(r'^docs/', include('rest_framework_swagger.urls')),
+]
 
 urlpatterns = [
+    url(r'^api/', include(api_urlpatterns, namespace='api')),
     url(r'^admin/', admin.site.urls),
+    url(r'^api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
