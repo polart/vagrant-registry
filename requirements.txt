@@ -1,2 +1,4 @@
 Django==1.9.6
 pytz
+djangorestframework==3.3.3
+django-rest-swagger==0.3.7
