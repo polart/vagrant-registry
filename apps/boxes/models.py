@@ -87,7 +87,7 @@ def chunked_upload_path(instance, filename):
     )
 
 
-class BoxChunkedUpload(models.Model):
+class BoxUpload(models.Model):
     STARTED = 'S'
     IN_PROGRESS = 'I'
     COMPLETED = 'C'
