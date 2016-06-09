@@ -83,7 +83,7 @@ class BoxProvider(models.Model):
 def chunked_upload_path(instance, filename):
     return 'chunked_uploads/{user}/{filename}.part'.format(
         user=instance.user,
-        filename=instance.upload_id
+        filename=instance.id
     )
 
 
@@ -97,8 +97,9 @@ class BoxChunkedUpload(models.Model):
         (COMPLETED, 'Completed'),
     )
 
+    id = models.UUIDField(unique=True, default=uuid.uuid4,
+                          editable=False, primary_key=True)
     user = models.ForeignKey('auth.User', related_name='box_uploads')
-    upload_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_completed = models.DateTimeField(null=True, blank=True)
     file = models.FileField(max_length=255, upload_to=chunked_upload_path)
@@ -120,7 +121,7 @@ class BoxChunkedUpload(models.Model):
 
     def __str__(self):
         return (
-            '({self.upload_id}) {self.user}/{self.name} v{self.version} '
+            '({self.id}) {self.user}/{self.name} v{self.version} '
             '{self.provider}: {status}'
             .format(self=self, status=self.get_status_display())
         )
