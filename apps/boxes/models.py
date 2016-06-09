@@ -17,6 +17,10 @@ class Box(models.Model):
     def __str__(self):
         return '{}/{}'.format(self.owner, self.name)
 
+    @property
+    def tag(self):
+        return str(self)
+
 
 class BoxVersion(models.Model):
     # Validate version according to Vagrant docs
@@ -99,19 +103,19 @@ class BoxUpload(models.Model):
 
     id = models.UUIDField(unique=True, default=uuid.uuid4,
                           editable=False, primary_key=True)
-    user = models.ForeignKey('auth.User', related_name='box_uploads')
+    box = models.ForeignKey('Box', related_name='uploads')
     date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     date_completed = models.DateTimeField(null=True, blank=True)
-    file = models.FileField(max_length=255, upload_to=chunked_upload_path)
+    file = models.FileField(
+        max_length=255, upload_to=chunked_upload_path, null=True)
     filename = models.CharField(max_length=255)
     offset = models.BigIntegerField(default=0)
     status = models.CharField(
         max_length=1, choices=STATUS_CHOICES, default=STARTED)
-    name = models.CharField(max_length=255)
     checksum_type = models.CharField(
         max_length=10,
-        choices=BoxProvider.CHECKSUM_TYPE_CHOICES,
-        default=BoxProvider.SHA256)
+        choices=BoxProvider.CHECKSUM_TYPE_CHOICES)
     checksum = models.CharField(max_length=128)
     version = models.CharField(
         max_length=40,
@@ -121,7 +125,7 @@ class BoxUpload(models.Model):
 
     def __str__(self):
         return (
-            '({self.id}) {self.user}/{self.name} v{self.version} '
+            '({self.id}) {self.box.tag} v{self.version} '
             '{self.provider}: {status}'
             .format(self=self, status=self.get_status_display())
         )
