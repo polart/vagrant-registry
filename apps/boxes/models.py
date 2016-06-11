@@ -86,7 +86,7 @@ class BoxProvider(models.Model):
 
 def chunked_upload_path(instance, filename):
     return 'chunked_uploads/{user}/{filename}.part'.format(
-        user=instance.user,
+        user=instance.box.owner,
         filename=instance.id
     )
 
@@ -110,6 +110,7 @@ class BoxUpload(models.Model):
     file = models.FileField(
         max_length=255, upload_to=chunked_upload_path, null=True)
     filename = models.CharField(max_length=255)
+    file_size = models.BigIntegerField(default=0)
     offset = models.BigIntegerField(default=0)
     status = models.CharField(
         max_length=1, choices=STATUS_CHOICES, default=STARTED)
