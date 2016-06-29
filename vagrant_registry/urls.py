@@ -52,7 +52,7 @@ api_urlpatterns = [
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/$',
         box_upload_list, name='boxupload-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',
-        box_upload_detail, name='boxupload-detail'),
+        api_views.FileUploadView.as_view(), name='boxupload-detail'),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 ]
 

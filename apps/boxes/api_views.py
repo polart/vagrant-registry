@@ -1,9 +1,16 @@
+from collections import namedtuple
+
+import re
 from django.contrib.auth.models import User
+from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, GenericAPIView
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
 
 from apps.boxes.models import Box, BoxUpload
-from apps.boxes.serializer import UserSerializer, BoxSerializer, BoxUploadSerializer
+from apps.boxes.serializer import (
+    UserSerializer, BoxSerializer, BoxUploadSerializer)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -29,8 +36,6 @@ class BoxViewSet(viewsets.ModelViewSet):
         for field, kwarg in self.multi_lookup_map.items():
             filter[field] = self.kwargs[kwarg]
 
-        print(filter)
-
         obj = get_object_or_404(queryset, **filter)
         self.check_object_permissions(self.request, obj)
         return obj
@@ -39,3 +44,100 @@ class BoxViewSet(viewsets.ModelViewSet):
 class BoxUploadViewSet(viewsets.ModelViewSet):
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
+
+
+class BoxUploadParser(FileUploadParser):
+    media_type = 'application/octet-stream'
+
+    def get_filename(self, stream, media_type, parser_context):
+        return 'vagrant.box'
+
+
+class FileUploadView(GenericAPIView):
+    # parser_classes = (FormParser, MultiPartParser, )
+    parser_classes = (BoxUploadParser,)
+    queryset = BoxUpload.objects.all()
+    multi_lookup_map = {
+        'box__owner__username': 'username',
+        'box__name': 'box_name',
+        'pk': 'pk',
+    }
+    content_range_pattern = re.compile(
+        r'^bytes (?P<start>\d+)-(?P<end>\d+)/(?P<total>\d+)$'
+    )
+    ContentRange = namedtuple('ContentRange', ['start', 'end', 'total'])
+
+    def get_object(self):
+        if getattr(self, '_obj', None):
+            return self._obj
+        queryset = self.get_queryset()
+        filter = {}
+        for field, kwarg in self.multi_lookup_map.items():
+            filter[field] = self.kwargs.pop(kwarg)
+
+        self._obj = get_object_or_404(queryset, **filter)
+        self.check_object_permissions(self.request, self._obj)
+        return self._obj
+
+    def _get_content_range_header(self, request):
+        content_range = request.META.get('HTTP_CONTENT_RANGE', '')
+        match = self.content_range_pattern.match(content_range)
+        if match:
+            return self.ContentRange(
+                start=int(match.group('start')),
+                end=int(match.group('end')),
+                total=int(match.group('total')),
+            )
+        else:
+            return None
+
+    def _get_range_not_satisfiable_response(self, msg):
+        box_upload = self.get_object()
+        return Response(
+            status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
+            data={'detail': msg,
+                  'offset': box_upload.offset,
+                  'file_size': box_upload.file_size})
+
+    def put(self, request, **kwargs):
+        box_upload = self.get_object()
+
+        new_chunk = request.data.get('file')
+        if not new_chunk:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={'detail': "File data wasn't provided."})
+
+        crange = self._get_content_range_header(request)
+        if not crange:
+            return self._get_range_not_satisfiable_response(
+                '"Content-Range" header is missing or invalid.')
+        if box_upload.offset != crange.start:
+            return self._get_range_not_satisfiable_response(
+                "First byte position ({}) doesn't much current offset ({})."
+                .format(crange.start, box_upload.offset))
+        if box_upload.file_size != crange.total:
+            return self._get_range_not_satisfiable_response(
+                "Complete length ({}) specified in header doesn't match "
+                "file size ({}) specified when upload was initiated."
+                .format(crange.total, box_upload.file_size))
+        if crange.end > crange.total:
+            return self._get_range_not_satisfiable_response(
+                'Last byte position ({}) is greater than complete '
+                'length ({}).'
+                .format(crange.end, crange.total))
+        if new_chunk.size != crange.end - crange.start:
+            return self._get_range_not_satisfiable_response(
+                "Uploaded content length ({}) doesn't much content "
+                "range ({}) specified in the header."
+                .format(new_chunk.size, crange.end - crange.start))
+
+        try:
+            box_upload.append_chunk(new_chunk)
+        except AssertionError as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={'detail': str(e)})
+
+        if crange.end == crange.total:
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_202_ACCEPTED)

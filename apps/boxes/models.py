@@ -2,6 +2,9 @@ import uuid
 
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils import timezone
+
+from apps.boxes.utils import get_file_hash
 
 
 class Box(models.Model):
@@ -70,6 +73,7 @@ class BoxProvider(models.Model):
     provider = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=user_box_upload_path)
+    file_size = models.BigIntegerField(default=0)
     checksum_type = models.CharField(
         max_length=10,
         choices=CHECKSUM_TYPE_CHOICES,
@@ -108,7 +112,8 @@ class BoxUpload(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     date_completed = models.DateTimeField(null=True, blank=True)
     file = models.FileField(
-        max_length=255, upload_to=chunked_upload_path, null=True)
+        max_length=255, upload_to=chunked_upload_path,
+        null=True, blank=True)
     filename = models.CharField(max_length=255)
     file_size = models.BigIntegerField(default=0)
     offset = models.BigIntegerField(default=0)
@@ -130,3 +135,61 @@ class BoxUpload(models.Model):
             '{self.provider}: {status}'
             .format(self=self, status=self.get_status_display())
         )
+
+    def append_chunk(self, chunk):
+        if self.file:
+            # Close file opened by Django in 'rb' mode
+            self.file.file.close()
+            self.file.file.open(mode='ab')
+            self.file.file.write(chunk.read())
+            self.file.file.close()
+        else:
+            self.file.save(name=chunk.name, content=chunk)
+
+        size = self.file.size
+        self.offset = size
+        if size == self.file_size:
+            self._complete_upload()
+        else:
+            self.status = self.IN_PROGRESS
+
+        self.save()
+        self.file.close()
+
+    def _complete_upload(self):
+        file_hash = get_file_hash(self.file, self.checksum_type)
+        assert file_hash == self.checksum, \
+            "Checksum of uploaded file ({}) doesn't match " \
+            "provided checksum ({}) when upload was initiated. " \
+            "Checksum type is {}."\
+            .format(file_hash, self.checksum,
+                    self.get_checksum_type_display())
+
+        self.status = self.COMPLETED
+        self.date_completed = timezone.now()
+        box_version = self._create_box_version()
+        self._create_box_provider(box_version)
+
+    def _create_box_version(self):
+        return self.box.versions.get_or_create(version=self.version)[0]
+
+    def _create_box_provider(self, box_version):
+        assert not self._is_version_provider_exists(), \
+            'Provider "{}" already exists for version "{}"'\
+            .format(self.provider, self.version)
+        box_provider = BoxProvider(
+            version=box_version,
+            provider=self.provider,
+            checksum_type=self.checksum_type,
+            checksum=self.checksum,
+        )
+        box_provider.file.save(name=str(self.file), content=self.file)
+        box_provider.save()
+
+    def _is_version_provider_exists(self):
+        try:
+            BoxProvider.objects.get(provider=self.provider,
+                                    version__version=self.version)
+            return True
+        except BoxProvider.DoesNotExist:
+            return False

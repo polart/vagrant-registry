@@ -24,8 +24,8 @@ class BoxProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxProvider
-        fields = ('date_created', 'checksum_type', 'checksum',
-                  'description', 'file', )
+        fields = ('provider', 'date_created', 'checksum_type', 'checksum',
+                  'description', 'file', 'file_size',)
 
 
 class BoxVersionSerializer(serializers.ModelSerializer):
@@ -63,13 +63,13 @@ class BoxUploadSerializer(serializers.ModelSerializer):
     tag = serializers.ReadOnlyField(source='box.tag')
     status = serializers.SerializerMethodField()
     date_completed = serializers.ReadOnlyField()
-    filename = serializers.ReadOnlyField()
+    file_size = serializers.ReadOnlyField()
     offset = serializers.ReadOnlyField()
 
     class Meta:
         model = BoxUpload
         fields = ('url', 'id', 'user', 'date_created', 'date_modified',
-                  'date_completed', 'filename', 'offset', 'status',
+                  'date_completed', 'file_size', 'offset', 'status',
                   'tag', 'checksum_type', 'checksum', 'version',
                   'provider',)
 

@@ -31,12 +31,35 @@ class BoxFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: 'box{0}'.format(n))
 
 
+class BoxVersionFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.BoxVersion
+
+    box = factory.SubFactory(BoxFactory)
+    version = '0.0.1'
+
+
+FILE_CONTENT = b'test'
+
+
+class BoxProviderFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.BoxProvider
+
+    version = factory.SubFactory(BoxVersionFactory)
+    provider = 'virtualbox'
+    file = factory.django.FileField(data=FILE_CONTENT)
+    checksum = factory.LazyAttribute(
+        lambda o: hashlib.sha256(FILE_CONTENT).hexdigest())
+    checksum_type = BoxProvider.SHA256
+
+
 class BoxUploadFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.BoxUpload
 
     class Params:
-        file_content = b'0123456789'
+        file_content = b'test'
 
     box = factory.SubFactory(BoxFactory)
     version = '1.0.0'
