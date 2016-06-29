@@ -4,9 +4,11 @@ import re
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.generics import get_object_or_404, GenericAPIView
+from rest_framework.generics import get_object_or_404
+from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload
 from apps.boxes.serializer import (
@@ -53,8 +55,8 @@ class BoxUploadParser(FileUploadParser):
         return 'vagrant.box'
 
 
-class FileUploadView(GenericAPIView):
-    # parser_classes = (FormParser, MultiPartParser, )
+class FileUploadView(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)
     queryset = BoxUpload.objects.all()
     multi_lookup_map = {
@@ -99,7 +101,7 @@ class FileUploadView(GenericAPIView):
                   'offset': box_upload.offset,
                   'file_size': box_upload.file_size})
 
-    def put(self, request, **kwargs):
+    def update(self, request, **kwargs):
         box_upload = self.get_object()
 
         new_chunk = request.data.get('file')
@@ -137,7 +139,10 @@ class FileUploadView(GenericAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST,
                             data={'detail': str(e)})
 
+        serializer = self.get_serializer(box_upload)
         if crange.end == crange.total:
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data,
+                            status=status.HTTP_201_CREATED)
         else:
-            return Response(status=status.HTTP_202_ACCEPTED)
+            return Response(data=serializer.data,
+                            status=status.HTTP_202_ACCEPTED)

@@ -39,8 +39,9 @@ box_upload_list = api_views.BoxUploadViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_upload_detail = api_views.BoxUploadViewSet.as_view({
+box_upload_detail = api_views.FileUploadView.as_view({
     'get': 'retrieve',
+    'put': 'update',
     'delete': 'destroy'
 })
 
@@ -52,7 +53,7 @@ api_urlpatterns = [
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/$',
         box_upload_list, name='boxupload-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',
-        api_views.FileUploadView.as_view(), name='boxupload-detail'),
+        box_upload_detail, name='boxupload-detail'),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 ]
 

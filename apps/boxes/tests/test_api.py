@@ -10,7 +10,11 @@ class FileUploadViewTestCase(APITestCase):
 
     def setUp(self):
         self.factory = APIRequestFactory()
-        self.view = FileUploadView.as_view()
+        self.view = FileUploadView.as_view({
+            'get': 'retrieve',
+            'put': 'update',
+            'delete': 'destroy'
+        })
 
     def get_request(self, data, content_range):
         return self.factory.put(
