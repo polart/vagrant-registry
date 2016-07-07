@@ -50,6 +50,31 @@ class BoxSerializer(serializers.ModelSerializer):
                   'name', 'description', 'versions',)
 
 
+class BoxProviderMetadataSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='provider')
+
+    class Meta:
+        model = BoxProvider
+        fields = ('name', 'checksum_type', 'checksum',)
+
+
+class BoxVersionMetadataSerializer(serializers.ModelSerializer):
+    providers = BoxProviderMetadataSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = BoxVersion
+        fields = ('version', 'providers',)
+
+
+class BoxMetadataSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='tag')
+    versions = BoxVersionMetadataSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Box
+        fields = ('name', 'description', 'versions',)
+
+
 class BoxUploadSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
         view_name="api:boxupload-detail",

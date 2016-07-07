@@ -18,11 +18,11 @@ class Box(models.Model):
         unique_together = ('owner', 'name')
 
     def __str__(self):
-        return '{}/{}'.format(self.owner, self.name)
+        return self.tag
 
     @property
     def tag(self):
-        return str(self)
+        return '{}/{}'.format(self.owner, self.name)
 
 
 class BoxVersion(models.Model):

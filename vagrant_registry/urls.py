@@ -44,12 +44,17 @@ box_upload_detail = api_views.FileUploadView.as_view({
     'put': 'update',
     'delete': 'destroy'
 })
+box_metadata_detail = api_views.BoxMetadataViewSet.as_view({
+    'get': 'retrieve',
+})
 
 api_urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^boxes/$', box_list, name='box-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         box_detail, name='box-detail'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/metadata/$',
+        box_metadata_detail, name='boxmetadata-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/$',
         box_upload_list, name='boxupload-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',

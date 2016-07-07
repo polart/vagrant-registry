@@ -12,7 +12,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload
 from apps.boxes.serializer import (
-    UserSerializer, BoxSerializer, BoxUploadSerializer)
+    UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -34,11 +34,30 @@ class BoxViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         queryset = self.get_queryset()
-        filter = {}
+        filters = {}
         for field, kwarg in self.multi_lookup_map.items():
-            filter[field] = self.kwargs[kwarg]
+            filters[field] = self.kwargs[kwarg]
 
-        obj = get_object_or_404(queryset, **filter)
+        obj = get_object_or_404(queryset, **filters)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+class BoxMetadataViewSet(RetrieveModelMixin, GenericViewSet):
+    queryset = Box.objects.all()
+    serializer_class = BoxMetadataSerializer
+    multi_lookup_map = {
+        'owner__username': 'username',
+        'name': 'box_name'
+    }
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filters = {}
+        for field, kwarg in self.multi_lookup_map.items():
+            filters[field] = self.kwargs[kwarg]
+
+        obj = get_object_or_404(queryset, **filters)
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -73,11 +92,11 @@ class FileUploadView(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
         if getattr(self, '_obj', None):
             return self._obj
         queryset = self.get_queryset()
-        filter = {}
+        filters = {}
         for field, kwarg in self.multi_lookup_map.items():
-            filter[field] = self.kwargs.pop(kwarg)
+            filters[field] = self.kwargs.pop(kwarg)
 
-        self._obj = get_object_or_404(queryset, **filter)
+        self._obj = get_object_or_404(queryset, **filters)
         self.check_object_permissions(self.request, self._obj)
         return self._obj
 
