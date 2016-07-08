@@ -92,7 +92,7 @@ class BoxUploadSerializer(serializers.ModelSerializer):
     tag = serializers.ReadOnlyField(source='box.tag')
     status = serializers.SerializerMethodField()
     date_completed = serializers.ReadOnlyField()
-    file_size = serializers.ReadOnlyField()
+    file_size = serializers.IntegerField(required=True)
     offset = serializers.ReadOnlyField()
 
     class Meta:

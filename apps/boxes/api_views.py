@@ -66,6 +66,16 @@ class BoxUploadViewSet(viewsets.ModelViewSet):
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
 
+    def perform_create(self, serializer):
+        box = get_object_or_404(
+            Box.objects.all(),
+            **{
+                'owner__username': self.kwargs['username'],
+                'name': self.kwargs['box_name'],
+            }
+        )
+        serializer.save(box=box)
+
 
 class BoxUploadParser(FileUploadParser):
     media_type = 'application/octet-stream'

@@ -195,6 +195,7 @@ class BoxUpload(models.Model):
             provider=self.provider,
             checksum_type=self.checksum_type,
             checksum=self.checksum,
+            file_size=self.file_size,
         )
         box_provider.file.save(name=str(self.file), content=self.file)
         box_provider.save()
