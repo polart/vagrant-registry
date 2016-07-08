@@ -52,10 +52,14 @@ class BoxSerializer(serializers.ModelSerializer):
 
 class BoxProviderMetadataSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='provider')
+    url = serializers.SerializerMethodField('get_download_url')
 
     class Meta:
         model = BoxProvider
-        fields = ('name', 'checksum_type', 'checksum',)
+        fields = ('name', 'url', 'checksum_type', 'checksum',)
+
+    def get_download_url(self, obj):
+        return self.context.get('request').build_absolute_uri(obj.download_url)
 
 
 class BoxVersionMetadataSerializer(serializers.ModelSerializer):

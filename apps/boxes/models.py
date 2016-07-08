@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
@@ -86,6 +87,18 @@ class BoxProvider(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.version, self.provider)
+
+    @property
+    def download_url(self):
+        return reverse(
+            'downloads-box',
+            kwargs={
+                'username': self.version.box.owner.username,
+                'box_name': self.version.box.name,
+                'version': self.version.version,
+                'provider': self.provider
+            }
+        )
 
 
 def chunked_upload_path(instance, filename):

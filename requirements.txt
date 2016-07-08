@@ -2,4 +2,5 @@ Django==1.9.6
 pytz
 djangorestframework==3.3.3
 django-rest-swagger==0.3.7
+django-sendfile==0.3.10
 factory-boy==2.7.0

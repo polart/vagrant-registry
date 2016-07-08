@@ -125,3 +125,9 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
 REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
+
+
+SENDFILE_BACKEND = 'sendfile.backends.development'
+
+
+LOGIN_URL = '/admin/login/'
