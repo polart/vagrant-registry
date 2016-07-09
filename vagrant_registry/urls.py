@@ -20,7 +20,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
 from apps.boxes import api_views
-from apps.boxes.views import DownloadBoxView
+from apps.boxes.views import DownloadBoxView, BoxMetadataView
 
 router = DefaultRouter()
 router.register(r'users', api_views.UserViewSet)
@@ -105,8 +105,11 @@ urlpatterns = [
     url(r'^api/', include(api_urlpatterns, namespace='api')),
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls')),
+
     url(r'^downloads/boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/'
         r'version/(?P<version>\d+\.\d+\.\d+)/'
         r'provider/(?P<provider>[\w.@+-]+)/$',
-        DownloadBoxView.as_view(), name='downloads-box')
+        DownloadBoxView.as_view(), name='downloads-box'),
+    url(r'^(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
+        BoxMetadataView.as_view(), name='box-metadata'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
