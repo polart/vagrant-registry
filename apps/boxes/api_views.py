@@ -15,56 +15,51 @@ from apps.boxes.serializer import (
     UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer)
 
 
+class QuerySetFilterMixin:
+    # model_field : url_kwarg
+    queryset_filters = {}
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        filters = {}
+        for model_field, url_kwarg in self.queryset_filters.items():
+            filters[model_field] = self.kwargs[url_kwarg]
+        return queryset.filter(**filters)
+
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
 
 
-class BoxViewSet(viewsets.ModelViewSet):
+class BoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
-    multi_lookup_map = {
-        'owner__username': 'username',
-        'name': 'box_name'
-    }
+    lookup_field = 'name'
+    lookup_url_kwarg = 'box_name'
+    queryset_filters = {'owner__username': 'username'}
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    def get_object(self):
-        queryset = self.get_queryset()
-        filters = {}
-        for field, kwarg in self.multi_lookup_map.items():
-            filters[field] = self.kwargs[kwarg]
 
-        obj = get_object_or_404(queryset, **filters)
-        self.check_object_permissions(self.request, obj)
-        return obj
-
-
-class BoxMetadataViewSet(RetrieveModelMixin, GenericViewSet):
+class BoxMetadataViewSet(QuerySetFilterMixin, RetrieveModelMixin,
+                         GenericViewSet):
     queryset = Box.objects.all()
     serializer_class = BoxMetadataSerializer
-    multi_lookup_map = {
-        'owner__username': 'username',
-        'name': 'box_name'
-    }
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        filters = {}
-        for field, kwarg in self.multi_lookup_map.items():
-            filters[field] = self.kwargs[kwarg]
-
-        obj = get_object_or_404(queryset, **filters)
-        self.check_object_permissions(self.request, obj)
-        return obj
+    lookup_field = 'name'
+    lookup_url_kwarg = 'box_name'
+    queryset_filters = {'owner__username': 'username'}
 
 
-class BoxUploadViewSet(viewsets.ModelViewSet):
+class BoxUploadViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
+    queryset_filters = {
+        'box__owner__username': 'username',
+        'box__name': 'box_name'
+    }
 
     def perform_create(self, serializer):
         box = get_object_or_404(
@@ -84,31 +79,20 @@ class BoxUploadParser(FileUploadParser):
         return 'vagrant.box'
 
 
-class FileUploadView(RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+class FileUploadView(QuerySetFilterMixin, RetrieveModelMixin,
+                     DestroyModelMixin, GenericViewSet):
     serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)
     queryset = BoxUpload.objects.all()
-    multi_lookup_map = {
+    queryset_filters = {
         'box__owner__username': 'username',
-        'box__name': 'box_name',
-        'pk': 'pk',
+        'box__name': 'box_name'
     }
+
     content_range_pattern = re.compile(
         r'^bytes (?P<start>\d+)-(?P<end>\d+)/(?P<total>\d+)$'
     )
     ContentRange = namedtuple('ContentRange', ['start', 'end', 'total'])
-
-    def get_object(self):
-        if getattr(self, '_obj', None):
-            return self._obj
-        queryset = self.get_queryset()
-        filters = {}
-        for field, kwarg in self.multi_lookup_map.items():
-            filters[field] = self.kwargs.pop(kwarg)
-
-        self._obj = get_object_or_404(queryset, **filters)
-        self.check_object_permissions(self.request, self._obj)
-        return self._obj
 
     def _get_content_range_header(self, request):
         content_range = request.META.get('HTTP_CONTENT_RANGE', '')

@@ -202,8 +202,9 @@ class BoxUpload(models.Model):
 
     def _is_version_provider_exists(self):
         try:
-            BoxProvider.objects.get(provider=self.provider,
-                                    version__version=self.version)
+            (self.box
+             .versions.get(version=self.version)
+             .providers.get(provider=self.provider))
             return True
-        except BoxProvider.DoesNotExist:
+        except (BoxVersion.DoesNotExist, BoxProvider.DoesNotExist):
             return False
