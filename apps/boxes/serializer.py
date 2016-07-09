@@ -44,11 +44,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BoxProviderSerializer(serializers.ModelSerializer):
+    download_url = serializers.SerializerMethodField()
 
     class Meta:
         model = BoxProvider
         fields = ('provider', 'date_created', 'checksum_type', 'checksum',
-                  'description', 'file', 'file_size',)
+                  'description', 'download_url', 'file_size',)
+
+    def get_download_url(self, obj):
+        return self.context.get('request').build_absolute_uri(obj.download_url)
 
 
 class BoxVersionSerializer(serializers.ModelSerializer):

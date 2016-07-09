@@ -101,6 +101,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^downloads/boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/'
-        r'(?P<version>(\d+)\.(\d+)\.(\d+))/(?P<provider>[\w.@+-]+)/$',
+        r'version/(?P<version>\d+\.\d+\.\d+)/'
+        r'provider/(?P<provider>[\w.@+-]+)/$',
         DownloadBoxView.as_view(), name='downloads-box')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
