@@ -36,6 +36,28 @@ box_detail = api_views.BoxViewSet.as_view({
     'delete': 'destroy'
 })
 
+box_version_list = api_views.BoxVersionViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+box_version_detail = api_views.BoxVersionViewSet.as_view({
+    'get': 'retrieve',
+    # 'put': 'update',
+    # 'patch': 'partial_update',
+    'delete': 'destroy'
+})
+
+box_provider_list = api_views.BoxProviderViewSet.as_view({
+    'get': 'list',
+    # 'post': 'create'
+})
+box_provider_detail = api_views.BoxProviderViewSet.as_view({
+    'get': 'retrieve',
+    # 'put': 'update',
+    # 'patch': 'partial_update',
+    'delete': 'destroy'
+})
+
 box_upload_list = api_views.BoxUploadViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -56,6 +78,17 @@ api_urlpatterns = [
         box_detail, name='box-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/metadata/$',
         box_metadata_detail, name='boxmetadata-detail'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/$',
+        box_version_list, name='boxversion-list'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/'
+        r'(?P<version>\d+\.\d+\.\d+)/$',
+        box_version_detail, name='boxversion-detail'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/'
+        r'(?P<version>\d+\.\d+\.\d+)/providers/$',
+        box_provider_list, name='boxprovider-list'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/'
+        r'(?P<version>\d+\.\d+\.\d+)/providers/(?P<provider>[\w.@+-]+)/$',
+        box_provider_detail, name='boxprovider-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/$',
         box_upload_list, name='boxupload-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',

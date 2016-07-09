@@ -10,9 +10,10 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from apps.boxes.models import Box, BoxUpload
+from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
 from apps.boxes.serializer import (
-    UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer)
+    UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
+    BoxProviderSerializer)
 
 
 class QuerySetFilterMixin:
@@ -42,6 +43,50 @@ class BoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class BoxVersionViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+    queryset = BoxVersion.objects.all()
+    serializer_class = BoxVersionSerializer
+    lookup_field = 'version'
+    lookup_url_kwarg = 'version'
+    queryset_filters = {
+        'box__owner__username': 'username',
+        'box__name': 'box_name'
+    }
+
+    def perform_create(self, serializer):
+        box = get_object_or_404(
+            Box.objects.all(),
+            **{
+                'box__owner__username': self.kwargs['username'],
+                'box__name': self.kwargs['box_name'],
+            }
+        )
+        serializer.save(box=box)
+
+
+class BoxProviderViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+    queryset = BoxProvider.objects.all()
+    serializer_class = BoxProviderSerializer
+    lookup_field = 'provider'
+    lookup_url_kwarg = 'provider'
+    queryset_filters = {
+        'version__box__owner__username': 'username',
+        'version__box__name': 'box_name',
+        'version__version': 'version',
+    }
+
+    def perform_create(self, serializer):
+        box_version = get_object_or_404(
+            BoxVersion.objects.all(),
+            **{
+                'version__box__owner__username': self.kwargs['username'],
+                'version__box__name': self.kwargs['box_name'],
+                'version__version': self.kwargs['version'],
+            }
+        )
+        serializer.save(version=box_version)
 
 
 class BoxMetadataViewSet(QuerySetFilterMixin, RetrieveModelMixin,
