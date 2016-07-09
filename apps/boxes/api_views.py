@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
-from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin
+from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -34,7 +34,12 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
 
-class BoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+class AllBoxViewSet(ListModelMixin, GenericViewSet):
+    queryset = Box.objects.all()
+    serializer_class = BoxSerializer
+
+
+class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
     lookup_field = 'name'
@@ -42,7 +47,13 @@ class BoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
     queryset_filters = {'owner__username': 'username'}
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        owner = get_object_or_404(
+            User.objects.all(),
+            **{
+                'username': self.kwargs['username'],
+            }
+        )
+        serializer.save(owner=owner)
 
 
 class BoxVersionViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):

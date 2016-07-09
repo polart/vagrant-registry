@@ -25,11 +25,15 @@ from apps.boxes.views import DownloadBoxView
 router = DefaultRouter()
 router.register(r'users', api_views.UserViewSet)
 
-box_list = api_views.BoxViewSet.as_view({
+all_box_list = api_views.AllBoxViewSet.as_view({
+    'get': 'list',
+})
+
+box_list = api_views.UserBoxViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_detail = api_views.BoxViewSet.as_view({
+box_detail = api_views.UserBoxViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
@@ -73,7 +77,8 @@ box_metadata_detail = api_views.BoxMetadataViewSet.as_view({
 
 api_urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^boxes/$', box_list, name='box-list'),
+    url(r'^boxes/$', all_box_list, name='boxall-list'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/$', box_list, name='box-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         box_detail, name='box-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/metadata/$',
