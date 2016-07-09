@@ -28,7 +28,7 @@ class QuerySetFilterMixin:
         return queryset.filter(**filters)
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
