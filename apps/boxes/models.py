@@ -9,10 +9,20 @@ from apps.boxes.utils import get_file_hash
 
 
 class Box(models.Model):
+    PRIVATE = 'PT'
+    USERS = 'AU'
+    PUBLIC = 'PC'
+    VISIBILITY_CHOICES = (
+        (PRIVATE, 'Private'),
+        (USERS, 'All users'),
+        (PUBLIC, 'Public'),
+    )
+
     owner = models.ForeignKey('auth.User', related_name='boxes')
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    private = models.BooleanField(default=True)
+    visibility = models.CharField(
+        max_length=2, choices=VISIBILITY_CHOICES, default=PRIVATE)
     name = models.CharField(max_length=255)
     description = models.TextField()
 

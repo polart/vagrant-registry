@@ -74,7 +74,7 @@ class BoxSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Box
-        fields = ('url', 'owner', 'date_created', 'date_modified', 'private',
+        fields = ('url', 'owner', 'date_created', 'date_modified', 'visibility',
                   'name', 'description', 'versions',)
 
 
