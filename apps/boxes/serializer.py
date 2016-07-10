@@ -48,8 +48,9 @@ class BoxProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxProvider
-        fields = ('provider', 'date_created', 'checksum_type', 'checksum',
-                  'description', 'download_url', 'file_size',)
+        fields = ('provider', 'date_created', 'date_modified',
+                  'checksum_type', 'checksum', 'description',
+                  'download_url', 'file_size',)
 
     def get_download_url(self, obj):
         return self.context.get('request').build_absolute_uri(obj.download_url)
@@ -60,7 +61,7 @@ class BoxVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxVersion
-        fields = ('date_created', 'version', 'providers',)
+        fields = ('date_created', 'date_modified', 'version', 'providers',)
 
 
 class BoxSerializer(serializers.ModelSerializer):
@@ -73,7 +74,7 @@ class BoxSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Box
-        fields = ('url', 'owner', 'date_created', 'private',
+        fields = ('url', 'owner', 'date_created', 'date_modified', 'private',
                   'name', 'description', 'versions',)
 
 

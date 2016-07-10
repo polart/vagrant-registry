@@ -11,6 +11,7 @@ from apps.boxes.utils import get_file_hash
 class Box(models.Model):
     owner = models.ForeignKey('auth.User', related_name='boxes')
     date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -37,6 +38,7 @@ class BoxVersion(models.Model):
 
     box = models.ForeignKey('boxes.Box', related_name='versions')
     date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     version = models.CharField(
         max_length=40, validators=[VERSION_VALIDATOR])
 
@@ -59,7 +61,7 @@ def user_box_upload_path(instance, filename):
 
 
 class BoxProvider(models.Model):
-    # Vagrant currently only supports these  types
+    # Vagrant currently only supports these types
     # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
     MD5 = 'md5'
     SHA1 = 'sha1'
@@ -73,6 +75,7 @@ class BoxProvider(models.Model):
     version = models.ForeignKey('boxes.BoxVersion', related_name='providers')
     provider = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     file = models.FileField(upload_to=user_box_upload_path)
     file_size = models.BigIntegerField(default=0)
     checksum_type = models.CharField(
