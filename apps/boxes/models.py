@@ -23,8 +23,9 @@ class Box(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     visibility = models.CharField(
         max_length=2, choices=VISIBILITY_CHOICES, default=PRIVATE)
-    name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(max_length=30)
+    short_description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
 
     class Meta:
         unique_together = ('owner', 'name')
@@ -51,6 +52,7 @@ class BoxVersion(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     version = models.CharField(
         max_length=40, validators=[VERSION_VALIDATOR])
+    description = models.TextField(blank=True)
 
     class Meta:
         unique_together = ('box', 'version')
@@ -93,7 +95,6 @@ class BoxProvider(models.Model):
         choices=CHECKSUM_TYPE_CHOICES,
         default=SHA256)
     checksum = models.CharField(max_length=128)
-    description = models.TextField()
 
     class Meta:
         unique_together = ('version', 'provider')

@@ -49,7 +49,7 @@ class BoxProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoxProvider
         fields = ('provider', 'date_created', 'date_modified',
-                  'checksum_type', 'checksum', 'description',
+                  'checksum_type', 'checksum',
                   'download_url', 'file_size',)
 
     def get_download_url(self, obj):
@@ -61,7 +61,8 @@ class BoxVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxVersion
-        fields = ('date_created', 'date_modified', 'version', 'providers',)
+        fields = ('date_created', 'date_modified', 'version', 'description',
+                  'providers',)
 
 
 class BoxSerializer(serializers.ModelSerializer):
@@ -75,7 +76,7 @@ class BoxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Box
         fields = ('url', 'owner', 'date_created', 'date_modified', 'visibility',
-                  'name', 'description', 'versions',)
+                  'name', 'short_description', 'description', 'versions',)
 
 
 class BoxProviderMetadataSerializer(serializers.ModelSerializer):
@@ -99,7 +100,9 @@ class BoxVersionMetadataSerializer(serializers.ModelSerializer):
 
 
 class BoxMetadataSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='tag')
+    name = serializers.CharField(source='tag', read_only=True)
+    description = serializers.CharField(
+        source='short_description', read_only=True)
     versions = BoxVersionMetadataSerializer(many=True, read_only=True)
 
     class Meta:
