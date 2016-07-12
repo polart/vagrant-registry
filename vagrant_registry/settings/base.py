@@ -29,6 +29,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
+    'guardian',
 ]
 
 LOCAL_APPS = [
@@ -68,6 +69,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'vagrant_registry.wsgi.application'
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+]
 
 
 # Database
@@ -130,6 +137,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 
 

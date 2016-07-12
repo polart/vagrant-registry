@@ -7,10 +7,12 @@ from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.parsers import FileUploadParser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
+from apps.boxes.permissions import BoxPermissions, IsStaffUserOrReadOnly
 from apps.boxes.serializer import (
     UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
     BoxProviderSerializer)
@@ -29,6 +31,7 @@ class QuerySetFilterMixin:
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, IsStaffUserOrReadOnly, )
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
@@ -40,6 +43,7 @@ class AllBoxViewSet(ListModelMixin, GenericViewSet):
 
 
 class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+    permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
     lookup_field = 'name'
@@ -57,6 +61,7 @@ class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
 
 
 class BoxVersionViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+    permission_classes = (BoxPermissions, )
     queryset = BoxVersion.objects.all()
     serializer_class = BoxVersionSerializer
     lookup_field = 'version'
@@ -78,6 +83,7 @@ class BoxVersionViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
 
 
 class BoxProviderViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+    permission_classes = (BoxPermissions, )
     queryset = BoxProvider.objects.all()
     serializer_class = BoxProviderSerializer
     lookup_field = 'provider'
@@ -102,6 +108,7 @@ class BoxProviderViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
 
 class BoxMetadataViewSet(QuerySetFilterMixin, RetrieveModelMixin,
                          GenericViewSet):
+    permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxMetadataSerializer
     lookup_field = 'name'
@@ -110,6 +117,7 @@ class BoxMetadataViewSet(QuerySetFilterMixin, RetrieveModelMixin,
 
 
 class BoxUploadViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+    permission_classes = (BoxPermissions, )
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
     queryset_filters = {
@@ -137,6 +145,7 @@ class BoxUploadParser(FileUploadParser):
 
 class FileUploadView(QuerySetFilterMixin, RetrieveModelMixin,
                      DestroyModelMixin, GenericViewSet):
+    permission_classes = (BoxPermissions, )
     serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)
     queryset = BoxUpload.objects.all()

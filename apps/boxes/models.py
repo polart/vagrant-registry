@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
+from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
 
 from apps.boxes.utils import get_file_hash
 
@@ -29,6 +30,10 @@ class Box(models.Model):
 
     class Meta:
         unique_together = ('owner', 'name')
+        permissions = (
+            ('pull_box', 'Pull box'),
+            ('push_box', 'Push box'),
+        )
 
     def __str__(self):
         return self.tag
@@ -36,6 +41,14 @@ class Box(models.Model):
     @property
     def tag(self):
         return '{}/{}'.format(self.owner, self.name)
+
+
+class BoxUserObjectPermission(UserObjectPermissionBase):
+    content_object = models.ForeignKey(Box)
+
+
+class BoxGroupObjectPermission(GroupObjectPermissionBase):
+    content_object = models.ForeignKey(Box)
 
 
 class BoxVersion(models.Model):
@@ -59,6 +72,14 @@ class BoxVersion(models.Model):
 
     def __str__(self):
         return '{} v{}'.format(self.box, self.version)
+
+    @property
+    def owner(self):
+        return self.box.owner
+
+    @property
+    def visibility(self):
+        return self.box.visibility
 
 
 def user_box_upload_path(instance, filename):
@@ -114,6 +135,14 @@ class BoxProvider(models.Model):
             }
         )
 
+    @property
+    def owner(self):
+        return self.version.box.owner
+
+    @property
+    def visibility(self):
+        return self.version.box.visibility
+
 
 def chunked_upload_path(instance, filename):
     return 'chunked_uploads/{user}/{filename}.part'.format(
@@ -162,6 +191,14 @@ class BoxUpload(models.Model):
             '{self.provider}: {status}'
             .format(self=self, status=self.get_status_display())
         )
+
+    @property
+    def owner(self):
+        return self.box.owner
+
+    @property
+    def visibility(self):
+        return self.box.visibility
 
     def append_chunk(self, chunk):
         if self.file:
