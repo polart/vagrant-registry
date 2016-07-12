@@ -1,17 +1,18 @@
-from rest_framework.permissions import DjangoModelPermissions, IsAdminUser, SAFE_METHODS
+from rest_framework.permissions import (
+    DjangoModelPermissions, IsAdminUser, SAFE_METHODS)
 
 from apps.boxes.models import Box
 
 
 class BoxPermissions(DjangoModelPermissions):
     perms_map = {
-        'GET': [],
-        'OPTIONS': [],
-        'HEAD': [],
-        'POST': ['boxes.add_box'],
-        'PUT': ['boxes.change_box'],
-        'PATCH': ['boxes.change_box'],
-        'DELETE': ['boxes.delete_box'],
+        'GET': ['boxes.pull_box'],
+        'OPTIONS': ['boxes.pull_box'],
+        'HEAD': ['boxes.pull_box'],
+        'POST': ['boxes.push_box'],
+        'PUT': ['boxes.push_box'],
+        'PATCH': ['boxes.push_box'],
+        'DELETE': ['boxes.push_box'],
     }
     authenticated_users_only = False
 
@@ -32,20 +33,17 @@ class BoxPermissions(DjangoModelPermissions):
             elif obj.visibility == Box.PRIVATE:
                 return (
                     is_authenticated and
-                    request.user.has_perm('boxes.pull_box', obj)
+                    request.user.has_perm(self.perms_map[request.method], obj)
                 )
             else:
                 # Unrecognised visibility option
                 return False
 
         else:
-            if request.method in ['POST']:
-                return (
-                    is_authenticated and
-                    request.user.has_perm('boxes.push_box', obj)
-                )
-            else:
-                return False
+            return (
+                is_authenticated and
+                request.user.has_perm(self.perms_map[request.method], obj)
+            )
 
 
 class IsStaffUserOrReadOnly(IsAdminUser):

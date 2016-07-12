@@ -31,8 +31,8 @@ class Box(models.Model):
     class Meta:
         unique_together = ('owner', 'name')
         permissions = (
-            ('pull_box', 'Pull box'),
-            ('push_box', 'Push box'),
+            ('pull_box', 'Can pull box'),
+            ('push_box', 'Can push box'),
         )
 
     def __str__(self):
