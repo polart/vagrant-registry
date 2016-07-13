@@ -99,11 +99,20 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BoxProviderSerializer(serializers.ModelSerializer):
+    url = MultiLookupHyperlinkedIdentityField(
+        view_name="api:boxprovider-detail",
+        multi_lookup_map={
+            'owner.username': 'username',
+            'version.box.name': 'box_name',
+            'version.version': 'version',
+            'provider': 'provider'
+        }
+    )
     download_url = serializers.SerializerMethodField()
 
     class Meta:
         model = BoxProvider
-        fields = ('provider', 'date_created', 'date_modified',
+        fields = ('url', 'provider', 'date_created', 'date_modified',
                   'checksum_type', 'checksum',
                   'download_url', 'file_size',)
 
@@ -112,18 +121,29 @@ class BoxProviderSerializer(serializers.ModelSerializer):
 
 
 class BoxVersionSerializer(serializers.ModelSerializer):
+    url = MultiLookupHyperlinkedIdentityField(
+        view_name="api:boxversion-detail",
+        multi_lookup_map={
+            'owner.username': 'username',
+            'box.name': 'box_name',
+            'version': 'version'
+        }
+    )
     providers = BoxProviderSerializer(many=True, read_only=True)
 
     class Meta:
         model = BoxVersion
-        fields = ('date_created', 'date_modified', 'version', 'description',
-                  'providers',)
+        fields = ('url', 'date_created', 'date_modified', 'version',
+                  'description', 'providers',)
 
 
 class BoxSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
         view_name="api:box-detail",
-        multi_lookup_map={'owner.username': 'username', 'name': 'box_name'}
+        multi_lookup_map={
+            'owner.username': 'username',
+            'name': 'box_name'
+        }
     )
     owner = serializers.ReadOnlyField(source='owner.username')
     versions = BoxVersionSerializer(many=True, read_only=True)
