@@ -133,9 +133,9 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
 REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

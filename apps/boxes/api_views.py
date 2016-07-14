@@ -2,6 +2,7 @@ from collections import namedtuple
 
 import re
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import Http404
 from guardian.shortcuts import get_users_with_perms, get_user_perms, remove_perm
 from rest_framework import status
@@ -40,8 +41,25 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class AllBoxViewSet(ListModelMixin, GenericViewSet):
+    permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        if user.is_anonymous():
+            return queryset.filter(visibility=Box.PUBLIC)
+        if user.is_staff:
+            return queryset
+
+        return (queryset
+                .filter(
+                    Q(boxuserobjectpermission__user=user) |
+                    Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
+                    Q(owner=user))
+                .distinct())
 
 
 class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
@@ -51,6 +69,22 @@ class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
     lookup_field = 'name'
     lookup_url_kwarg = 'box_name'
     queryset_filters = {'owner__username': 'username'}
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        if user.is_anonymous():
+            return queryset.filter(visibility=Box.PUBLIC)
+        if user.is_staff:
+            return queryset
+
+        return (queryset
+                .filter(
+                    Q(boxuserobjectpermission__user=user) |
+                    Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
+                    Q(owner=user))
+                .distinct())
 
     def perform_create(self, serializer):
         owner = get_object_or_404(

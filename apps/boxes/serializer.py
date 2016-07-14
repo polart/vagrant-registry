@@ -112,6 +112,7 @@ class BoxUserSerializer(UserSerializer):
         ('pull_box', 'push_box',): 'rw',
     }
     PERMS_ALL = set(chain(*PERMS_MAP.keys()))
+
     permissions = ObjectPermissionsField(perms_map=PERMS_MAP)
 
     class Meta:
@@ -178,6 +179,11 @@ class BoxVersionSerializer(serializers.ModelSerializer):
 
 
 class BoxSerializer(serializers.ModelSerializer):
+    PERMS_MAP = {
+        ('pull_box',): 'r',
+        ('pull_box', 'push_box',): 'rw',
+    }
+
     url = MultiLookupHyperlinkedIdentityField(
         view_name="api:box-detail",
         multi_lookup_map={
@@ -188,12 +194,13 @@ class BoxSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     versions = BoxVersionSerializer(many=True, read_only=True)
     team = serializers.SerializerMethodField()
+    user_permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = Box
         fields = ('url', 'owner', 'date_created', 'date_modified', 'visibility',
                   'name', 'short_description', 'description', 'team',
-                  'versions',)
+                  'user_permissions', 'versions',)
 
     def get_team(self, obj):
         queryset = get_users_with_perms(obj).exclude(id=obj.owner_id)
@@ -206,6 +213,32 @@ class BoxSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')},
             many=True)
         return serializer.data
+
+    def get_user_permissions(self, obj):
+        user = self.context.get('request').user
+        is_authenticated = user and user.is_authenticated()
+        is_staff = is_authenticated and user.is_staff
+        is_owner = is_authenticated and obj.owner == user
+
+        if is_staff or is_owner:
+            # Staff and owner have all permissions on the box
+            return 'rw'
+
+        if not is_authenticated and obj.visibility == Box.PUBLIC:
+            return 'r'
+
+        perms = tuple(sorted(user.get_all_permissions(obj=obj)))
+        perms = self.PERMS_MAP.get(perms, '')
+
+        if perms:
+            return perms
+        else:
+            if obj.visibility == Box.USERS or obj.visibility == Box.PUBLIC:
+                return 'r'
+            else:
+                raise AssertionError("Can't determine permission "
+                                     "for user {} and box {}"
+                                     .format(user, obj))
 
 
 class BoxProviderMetadataSerializer(serializers.ModelSerializer):

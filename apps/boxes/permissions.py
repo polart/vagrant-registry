@@ -16,6 +16,21 @@ class BoxPermissions(DjangoModelPermissions):
     }
     authenticated_users_only = False
 
+    def has_permission(self, request, view):
+        # Workaround to ensure DjangoModelPermissions are not applied
+        # to the root view when using DefaultRouter.
+        if getattr(view, '_ignore_model_permissions', False):
+            return True
+
+        if request.user.is_anonymous() and request.method in SAFE_METHODS:
+            return True
+
+        return (
+            request.user and
+            request.user.is_authenticated() and
+            request.user.has_perms(self.perms_map[request.method])
+        )
+
     def has_object_permission(self, request, view, obj):
         is_authenticated = request.user and request.user.is_authenticated()
         is_staff = is_authenticated and request.user.is_staff
@@ -33,7 +48,7 @@ class BoxPermissions(DjangoModelPermissions):
             elif obj.visibility == Box.PRIVATE:
                 return (
                     is_authenticated and
-                    request.user.has_perm(self.perms_map[request.method], obj)
+                    request.user.has_perms(self.perms_map[request.method], obj)
                 )
             else:
                 # Unrecognised visibility option
@@ -42,7 +57,7 @@ class BoxPermissions(DjangoModelPermissions):
         else:
             return (
                 is_authenticated and
-                request.user.has_perm(self.perms_map[request.method], obj)
+                request.user.has_perms(self.perms_map[request.method], obj)
             )
 
 
