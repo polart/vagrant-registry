@@ -2,6 +2,8 @@ from collections import namedtuple
 
 import re
 from django.contrib.auth.models import User
+from django.http import Http404
+from guardian.shortcuts import get_users_with_perms, get_user_perms, remove_perm
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
@@ -15,7 +17,7 @@ from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
 from apps.boxes.permissions import BoxPermissions, IsStaffUserOrReadOnly
 from apps.boxes.serializer import (
     UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
-    BoxProviderSerializer)
+    BoxProviderSerializer, BoxUserSerializer)
 
 
 class QuerySetFilterMixin:
@@ -58,6 +60,70 @@ class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
             }
         )
         serializer.save(owner=owner)
+
+
+class TeamBoxViewSet(QuerySetFilterMixin, GenericViewSet):
+    permission_classes = (BoxPermissions, )
+    queryset = Box.objects.all()
+    serializer_class = BoxUserSerializer
+    lookup_field = 'name'
+    lookup_url_kwarg = 'box_name'
+    queryset_filters = {'owner__username': 'username'}
+
+    def list(self, request, *args, **kwargs):
+        box = self.get_object()
+        queryset = get_users_with_perms(box).exclude(id=box.owner_id)
+
+        for user in queryset:
+            setattr(user, '_perm_obj', box)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        box = self.get_object()
+        user = get_object_or_404(
+            User.objects.all(),
+            **{
+                'username': self.kwargs['member_username'],
+            }
+        )
+        perms = get_user_perms(user, box)
+        if not perms:
+            raise Http404
+
+        setattr(user, '_perm_obj', box)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        box = self.get_object()
+        user = get_object_or_404(
+            User.objects.all(),
+            **{
+                'username': self.kwargs['member_username'],
+            }
+        )
+        setattr(user, '_perm_obj', box)
+
+        serializer = self.get_serializer(instance=user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(box=box)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        box = self.get_object()
+        user = get_object_or_404(
+            User.objects.all(),
+            **{
+                'username': self.kwargs['member_username'],
+            }
+        )
+
+        for perm in BoxUserSerializer.PERMS_ALL:
+            print('remove perm -- ', perm)
+            remove_perm(perm, user, obj=box)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BoxVersionViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):

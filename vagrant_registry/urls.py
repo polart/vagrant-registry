@@ -40,6 +40,15 @@ box_detail = api_views.UserBoxViewSet.as_view({
     'delete': 'destroy'
 })
 
+team_box_list = api_views.TeamBoxViewSet.as_view({
+    'get': 'list',
+})
+team_box_detail = api_views.TeamBoxViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'delete': 'destroy'
+})
+
 box_version_list = api_views.BoxVersionViewSet.as_view({
     'get': 'list',
     'post': 'create'
@@ -81,6 +90,11 @@ api_urlpatterns = [
     url(r'^boxes/(?P<username>[\w.@+-]+)/$', box_list, name='box-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         box_detail, name='box-detail'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/team/$',
+        team_box_list, name='teambox-list'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/team/'
+        r'(?P<member_username>[\w.@+-]+)/$',
+        team_box_detail, name='teambox-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/metadata/$',
         box_metadata_detail, name='boxmetadata-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/$',
