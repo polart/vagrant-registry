@@ -109,6 +109,8 @@ class Box(models.Model):
             return visibility_perms[self.visibility]
 
     def user_has_perms(self, perms, user):
+        if not perms:
+            return True
         user_perms = self.get_perms_for_user(user)
         return all([p in user_perms for p in perms])
 

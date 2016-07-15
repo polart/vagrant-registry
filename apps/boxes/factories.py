@@ -35,6 +35,7 @@ class BoxFactory(factory.DjangoModelFactory):
 
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda n: 'box{0}'.format(n))
+    visibility = models.Box.PRIVATE
 
 
 class BoxVersionFactory(factory.DjangoModelFactory):
