@@ -25,7 +25,7 @@ from apps.boxes.views import DownloadBoxView, BoxMetadataView
 router = DefaultRouter()
 router.register(r'users', api_views.UserViewSet)
 
-all_box_list = api_views.AllBoxViewSet.as_view({
+all_box_list = api_views.BoxViewSet.as_view({
     'get': 'list',
 })
 
@@ -40,47 +40,47 @@ box_detail = api_views.UserBoxViewSet.as_view({
     'delete': 'destroy'
 })
 
-team_box_list = api_views.TeamBoxViewSet.as_view({
+team_box_list = api_views.UserBoxTeamViewSet.as_view({
     'get': 'list',
 })
-team_box_detail = api_views.TeamBoxViewSet.as_view({
+team_box_detail = api_views.UserBoxTeamViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
 })
 
-box_version_list = api_views.BoxVersionViewSet.as_view({
+box_version_list = api_views.UserBoxVersionViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_version_detail = api_views.BoxVersionViewSet.as_view({
+box_version_detail = api_views.UserBoxVersionViewSet.as_view({
     'get': 'retrieve',
     # 'put': 'update',
     # 'patch': 'partial_update',
     'delete': 'destroy'
 })
 
-box_provider_list = api_views.BoxProviderViewSet.as_view({
+box_provider_list = api_views.UserBoxProviderViewSet.as_view({
     'get': 'list',
     # 'post': 'create'
 })
-box_provider_detail = api_views.BoxProviderViewSet.as_view({
+box_provider_detail = api_views.UserBoxProviderViewSet.as_view({
     'get': 'retrieve',
     # 'put': 'update',
     # 'patch': 'partial_update',
     'delete': 'destroy'
 })
 
-box_upload_list = api_views.BoxUploadViewSet.as_view({
+box_upload_list = api_views.UserBoxUploadViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_upload_detail = api_views.FileUploadView.as_view({
+box_upload_detail = api_views.UserBoxUploadHandlerViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
 })
-box_metadata_detail = api_views.BoxMetadataViewSet.as_view({
+box_metadata_detail = api_views.UserBoxMetadataViewSet.as_view({
     'get': 'retrieve',
 })
 

@@ -1,58 +1,15 @@
-from itertools import chain
-
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import User
 from guardian.shortcuts import remove_perm, assign_perm, get_users_with_perms
 from rest_framework import serializers
 from rest_framework.serializers import raise_errors_on_nested_writes
 
 from apps.boxes.fields import (
-    MultiLookupHyperlinkedIdentityField, MultiLookupHyperlinkedRelatedField)
+    MultiLookupHyperlinkedIdentityField, MultiLookupHyperlinkedRelatedField,
+    BoxModelPermissionsField, BoxObjectPermissionsField)
 from apps.boxes.models import Box, BoxVersion, BoxProvider, BoxUpload
 
 
-class BoxUserPermissionsField(serializers.Field):
-
-    def __init__(self, *args, **kwargs):
-        self.perms_map = kwargs.pop('perms_map', {})
-        self.perms_map_rev = {v: k for k, v in self.perms_map.items()}
-        super().__init__(*args, **kwargs)
-
-    def get_attribute(self, obj):
-        # We pass the object instance onto `to_representation`,
-        # not just the field attribute.
-        return obj
-
-    def to_representation(self, obj):
-        return self.perms_map.get(tuple(sorted(obj.get_all_permissions())), '')
-
-    def to_internal_value(self, data):
-        if data not in ['r', 'rw', '']:
-            raise serializers.ValidationError('invalid perms')
-        return self.perms_map_rev.get(data, [])
-
-
-class ObjectPermissionsField(BoxUserPermissionsField):
-
-    def to_representation(self, obj):
-        perm_obj = getattr(obj, '_perm_obj', None)
-        perms = tuple(sorted(obj.get_all_permissions(perm_obj)))
-        return self.perms_map.get(perms, '')
-
-
-class UserPermissionsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Permission
-        fields = ('name', 'codename', )
-        extra_kwargs = {'name': {'read_only': True}}
-
-
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    PERMS_MAP = {
-        ('boxes.pull_box',): 'r',
-        ('boxes.pull_box', 'boxes.push_box',): 'rw',
-    }
-    PERMS_ALL = set(chain(*PERMS_MAP.keys()))
-
     url = serializers.HyperlinkedIdentityField(
         view_name="api:user-detail", lookup_field='username')
     boxes = MultiLookupHyperlinkedRelatedField(
@@ -61,7 +18,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         multi_lookup_map={'owner.username': 'username', 'name': 'box_name'}
     )
-    boxes_permissions = BoxUserPermissionsField(perms_map=PERMS_MAP)
+    boxes_permissions = BoxModelPermissionsField()
 
     class Meta:
         model = User
@@ -83,16 +40,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         if new_perms is None:
             return
 
-        for perm in self.PERMS_ALL.difference(new_perms):
-            print('remove perm -- ', perm)
+        for perm in set(Box.all_perms).difference(new_perms):
             remove_perm(perm, instance)
 
         for perm in new_perms:
-            print('add perm -- ', perm)
             assign_perm(perm, instance)
 
     def update(self, instance, validated_data):
-        print('valid data -- ', validated_data)
         raise_errors_on_nested_writes('update', self, validated_data)
 
         for attr, value in validated_data.items():
@@ -106,14 +60,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
-class BoxUserSerializer(UserSerializer):
-    PERMS_MAP = {
-        ('pull_box',): 'r',
-        ('pull_box', 'push_box',): 'rw',
-    }
-    PERMS_ALL = set(chain(*PERMS_MAP.keys()))
-
-    permissions = ObjectPermissionsField(perms_map=PERMS_MAP)
+class BoxTeamMemberSerializer(UserSerializer):
+    permissions = BoxObjectPermissionsField()
 
     class Meta:
         model = User
@@ -126,12 +74,10 @@ class BoxUserSerializer(UserSerializer):
             return
 
         box = validated_data['box']
-        for perm in self.PERMS_ALL.difference(new_perms):
-            print('remove perm -- ', perm)
+        for perm in set(Box.all_perms).difference(new_perms):
             remove_perm(perm, instance, obj=box)
 
         for perm in new_perms:
-            print('add perm -- ', perm)
             assign_perm(perm, instance, obj=box)
 
     def update(self, instance, validated_data):
@@ -208,7 +154,7 @@ class BoxSerializer(serializers.ModelSerializer):
         for user in queryset:
             setattr(user, '_perm_obj', obj)
 
-        serializer = BoxUserSerializer(
+        serializer = BoxTeamMemberSerializer(
             queryset,
             context={'request': self.context.get('request')},
             many=True)
@@ -216,29 +162,12 @@ class BoxSerializer(serializers.ModelSerializer):
 
     def get_user_permissions(self, obj):
         user = self.context.get('request').user
-        is_authenticated = user and user.is_authenticated()
-        is_staff = is_authenticated and user.is_staff
-        is_owner = is_authenticated and obj.owner == user
-
-        if is_staff or is_owner:
-            # Staff and owner have all permissions on the box
+        if obj.user_can_push(user):
             return 'rw'
-
-        if not is_authenticated and obj.visibility == Box.PUBLIC:
+        elif obj.user_can_pull(user):
             return 'r'
-
-        perms = tuple(sorted(user.get_all_permissions(obj=obj)))
-        perms = self.PERMS_MAP.get(perms, '')
-
-        if perms:
-            return perms
         else:
-            if obj.visibility == Box.USERS or obj.visibility == Box.PUBLIC:
-                return 'r'
-            else:
-                raise AssertionError("Can't determine permission "
-                                     "for user {} and box {}"
-                                     .format(user, obj))
+            return ''
 
 
 class BoxProviderMetadataSerializer(serializers.ModelSerializer):

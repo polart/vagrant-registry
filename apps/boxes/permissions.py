@@ -1,7 +1,6 @@
+from django.http import Http404
 from rest_framework.permissions import (
     DjangoModelPermissions, IsAdminUser, SAFE_METHODS)
-
-from apps.boxes.models import Box
 
 
 class BoxPermissions(DjangoModelPermissions):
@@ -10,9 +9,9 @@ class BoxPermissions(DjangoModelPermissions):
         'OPTIONS': ['boxes.pull_box'],
         'HEAD': ['boxes.pull_box'],
         'POST': ['boxes.push_box'],
-        'PUT': ['boxes.push_box'],
-        'PATCH': ['boxes.push_box'],
-        'DELETE': ['boxes.push_box'],
+        'PUT': ['boxes.update_box'],
+        'PATCH': ['boxes.update_box'],
+        'DELETE': ['boxes.delete_box'],
     }
     authenticated_users_only = False
 
@@ -31,34 +30,29 @@ class BoxPermissions(DjangoModelPermissions):
             request.user.has_perms(self.perms_map[request.method])
         )
 
+    def get_required_object_permissions(self, method):
+        return [perm.split('.')[-1] for perm in self.perms_map[method]]
+
     def has_object_permission(self, request, view, obj):
-        is_authenticated = request.user and request.user.is_authenticated()
-        is_staff = is_authenticated and request.user.is_staff
-        is_owner = is_authenticated and obj.owner == request.user
+        perms = self.get_required_object_permissions(request.method)
+        if not obj.user_has_perms(perms, request.user):
+            # If the user does not have permissions we need to determine if
+            # they have read permissions to see 403, or not, and simply see
+            # a 404 response.
 
-        if is_staff or is_owner:
-            # Staff and owner have all permissions on the box
-            return True
+            if request.method in SAFE_METHODS:
+                # Read permissions already checked and failed, no need
+                # to make another lookup.
+                raise Http404
 
-        if request.method in SAFE_METHODS:
-            if obj.visibility == Box.PUBLIC:
-                return True
-            elif obj.visibility == Box.USERS:
-                return is_authenticated
-            elif obj.visibility == Box.PRIVATE:
-                return (
-                    is_authenticated and
-                    request.user.has_perms(self.perms_map[request.method], obj)
-                )
-            else:
-                # Unrecognised visibility option
-                return False
+            read_perms = self.get_required_object_permissions('GET')
+            if not obj.user_has_perms(read_perms, request.user):
+                raise Http404
 
-        else:
-            return (
-                is_authenticated and
-                request.user.has_perms(self.perms_map[request.method], obj)
-            )
+            # Has read permissions.
+            return False
+
+        return True
 
 
 class IsStaffUserOrReadOnly(IsAdminUser):

@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.test import APITestCase, APIRequestFactory
 
-from apps.boxes.api_views import FileUploadView
+from apps.boxes.api_views import UserBoxUploadHandlerViewSet
 from apps.boxes.factories import BoxUploadFactory, BoxProviderFactory
 from apps.boxes.models import BoxUpload
 
@@ -10,7 +10,7 @@ class FileUploadViewTestCase(APITestCase):
 
     def setUp(self):
         self.factory = APIRequestFactory()
-        self.view = FileUploadView.as_view({
+        self.view = UserBoxUploadHandlerViewSet.as_view({
             'get': 'retrieve',
             'put': 'update',
             'delete': 'destroy'

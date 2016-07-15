@@ -18,19 +18,36 @@ from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
 from apps.boxes.permissions import BoxPermissions, IsStaffUserOrReadOnly
 from apps.boxes.serializer import (
     UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
-    BoxProviderSerializer, BoxUserSerializer)
+    BoxProviderSerializer, BoxTeamMemberSerializer)
 
 
-class QuerySetFilterMixin:
-    # model_field : url_kwarg
-    queryset_filters = {}
+class UserBoxMixin:
+    permission_classes = (BoxPermissions, )
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        filters = {}
-        for model_field, url_kwarg in self.queryset_filters.items():
-            filters[model_field] = self.kwargs[url_kwarg]
-        return queryset.filter(**filters)
+    def get_user_object(self):
+        try:
+            return User.objects.get(username=self.kwargs['username'])
+        except User.DoesNotExist:
+            raise Http404
+
+    def get_box_object(self):
+        # No need to filter queryset, because filtering is done
+        # in `get_box_queryset`
+        queryset = self.get_box_queryset()
+
+        obj = get_object_or_404(queryset, **{
+            'name': self.kwargs['box_name']
+        })
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    def get_box_queryset(self):
+        return (Box.objects
+                .by_owner(self.get_user_object())
+                .for_user(self.request.user))
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -40,72 +57,45 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
 
-class AllBoxViewSet(ListModelMixin, GenericViewSet):
+class BoxViewSet(ListModelMixin, GenericViewSet):
     permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        user = self.request.user
-
-        if user.is_anonymous():
-            return queryset.filter(visibility=Box.PUBLIC)
-        if user.is_staff:
-            return queryset
-
-        return (queryset
-                .filter(
-                    Q(boxuserobjectpermission__user=user) |
-                    Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
-                    Q(owner=user))
-                .distinct())
+        return Box.objects.for_user(self.request.user)
 
 
-class UserBoxViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
-    lookup_field = 'name'
-    lookup_url_kwarg = 'box_name'
-    queryset_filters = {'owner__username': 'username'}
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        user = self.request.user
+        return self.get_box_queryset()
 
-        if user.is_anonymous():
-            return queryset.filter(visibility=Box.PUBLIC)
-        if user.is_staff:
-            return queryset
-
-        return (queryset
-                .filter(
-                    Q(boxuserobjectpermission__user=user) |
-                    Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
-                    Q(owner=user))
-                .distinct())
+    def get_object(self):
+        return self.get_box_object()
 
     def perform_create(self, serializer):
-        owner = get_object_or_404(
-            User.objects.all(),
-            **{
-                'username': self.kwargs['username'],
-            }
-        )
-        serializer.save(owner=owner)
+        serializer.save(owner=self.get_user_object())
 
 
-class TeamBoxViewSet(QuerySetFilterMixin, GenericViewSet):
+class UserBoxTeamViewSet(UserBoxMixin, GenericViewSet):
     permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
-    serializer_class = BoxUserSerializer
+    serializer_class = BoxTeamMemberSerializer
     lookup_field = 'name'
     lookup_url_kwarg = 'box_name'
-    queryset_filters = {'owner__username': 'username'}
+
+    def get_member_user(self):
+        try:
+            return User.objects.get(username=self.kwargs['member_username'])
+        except User.DoesNotExist:
+            raise Http404
 
     def list(self, request, *args, **kwargs):
-        box = self.get_object()
+        box = self.get_box_object()
         queryset = get_users_with_perms(box).exclude(id=box.owner_id)
 
         for user in queryset:
@@ -115,13 +105,8 @@ class TeamBoxViewSet(QuerySetFilterMixin, GenericViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        box = self.get_object()
-        user = get_object_or_404(
-            User.objects.all(),
-            **{
-                'username': self.kwargs['member_username'],
-            }
-        )
+        box = self.get_box_object()
+        user = self.get_member_user()
         perms = get_user_perms(user, box)
         if not perms:
             raise Http404
@@ -131,13 +116,8 @@ class TeamBoxViewSet(QuerySetFilterMixin, GenericViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        box = self.get_object()
-        user = get_object_or_404(
-            User.objects.all(),
-            **{
-                'username': self.kwargs['member_username'],
-            }
-        )
+        box = self.get_box_object()
+        user = self.get_member_user()
         setattr(user, '_perm_obj', box)
 
         serializer = self.get_serializer(instance=user, data=request.data)
@@ -147,93 +127,61 @@ class TeamBoxViewSet(QuerySetFilterMixin, GenericViewSet):
 
     def destroy(self, request, *args, **kwargs):
         box = self.get_object()
-        user = get_object_or_404(
-            User.objects.all(),
-            **{
-                'username': self.kwargs['member_username'],
-            }
-        )
+        user = self.get_member_user()
 
-        for perm in BoxUserSerializer.PERMS_ALL:
-            print('remove perm -- ', perm)
+        for perm in Box.all_perms:
             remove_perm(perm, user, obj=box)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BoxVersionViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxPermissions, )
-    queryset = BoxVersion.objects.all()
+    queryset = BoxVersion.objects.none()
     serializer_class = BoxVersionSerializer
     lookup_field = 'version'
     lookup_url_kwarg = 'version'
-    queryset_filters = {
-        'box__owner__username': 'username',
-        'box__name': 'box_name'
-    }
+
+    def get_queryset(self):
+        return self.get_box_object().versions.all()
 
     def perform_create(self, serializer):
-        box = get_object_or_404(
-            Box.objects.all(),
-            **{
-                'box__owner__username': self.kwargs['username'],
-                'box__name': self.kwargs['box_name'],
-            }
-        )
-        serializer.save(box=box)
+        serializer.save(box=self.get_box_object())
 
 
-class BoxProviderViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+class UserBoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxPermissions, )
-    queryset = BoxProvider.objects.all()
+    queryset = BoxProvider.objects.none()
     serializer_class = BoxProviderSerializer
     lookup_field = 'provider'
     lookup_url_kwarg = 'provider'
-    queryset_filters = {
-        'version__box__owner__username': 'username',
-        'version__box__name': 'box_name',
-        'version__version': 'version',
-    }
+
+    def get_box_version_object(self):
+        return get_object_or_404(
+            self.get_box_object().versions.all(),
+            **{'version__version': self.kwargs['version']}
+        )
+
+    def get_queryset(self):
+        return self.get_box_version_object().providers.all()
 
     def perform_create(self, serializer):
-        box_version = get_object_or_404(
-            BoxVersion.objects.all(),
-            **{
-                'version__box__owner__username': self.kwargs['username'],
-                'version__box__name': self.kwargs['box_name'],
-                'version__version': self.kwargs['version'],
-            }
-        )
-        serializer.save(version=box_version)
+        serializer.save(version=self.get_box_version_object())
 
 
-class BoxMetadataViewSet(QuerySetFilterMixin, RetrieveModelMixin,
-                         GenericViewSet):
-    permission_classes = (BoxPermissions, )
-    queryset = Box.objects.all()
+class UserBoxMetadataViewSet(UserBoxViewSet):
     serializer_class = BoxMetadataSerializer
-    lookup_field = 'name'
-    lookup_url_kwarg = 'box_name'
-    queryset_filters = {'owner__username': 'username'}
 
 
-class BoxUploadViewSet(QuerySetFilterMixin, viewsets.ModelViewSet):
+class UserBoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxPermissions, )
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
-    queryset_filters = {
-        'box__owner__username': 'username',
-        'box__name': 'box_name'
-    }
+
+    def get_queryset(self):
+        return self.get_box_object().uploads.all()
 
     def perform_create(self, serializer):
-        box = get_object_or_404(
-            Box.objects.all(),
-            **{
-                'owner__username': self.kwargs['username'],
-                'name': self.kwargs['box_name'],
-            }
-        )
-        serializer.save(box=box)
+        serializer.save(box=self.get_box_object())
 
 
 class BoxUploadParser(FileUploadParser):
@@ -243,16 +191,12 @@ class BoxUploadParser(FileUploadParser):
         return 'vagrant.box'
 
 
-class FileUploadView(QuerySetFilterMixin, RetrieveModelMixin,
-                     DestroyModelMixin, GenericViewSet):
+class UserBoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
+                                  DestroyModelMixin, GenericViewSet):
     permission_classes = (BoxPermissions, )
     serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)
-    queryset = BoxUpload.objects.all()
-    queryset_filters = {
-        'box__owner__username': 'username',
-        'box__name': 'box_name'
-    }
+    queryset = BoxUpload.objects.none()
 
     content_range_pattern = re.compile(
         r'^bytes (?P<start>\d+)-(?P<end>\d+)/(?P<total>\d+)$'
@@ -278,6 +222,9 @@ class FileUploadView(QuerySetFilterMixin, RetrieveModelMixin,
             data={'detail': msg,
                   'offset': box_upload.offset,
                   'file_size': box_upload.file_size})
+
+    def get_queryset(self):
+        return self.get_box_object().uploads.all()
 
     def update(self, request, **kwargs):
         box_upload = self.get_object()

@@ -3,10 +3,41 @@ import uuid
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
+from guardian.shortcuts import get_user_perms
 
 from apps.boxes.utils import get_file_hash
+
+
+class BoxQuerySet(models.QuerySet):
+
+    def private(self):
+        return self.filter(visibility=Box.PRIVATE)
+
+    def with_users(self):
+        return self.filter(visibility=Box.USERS)
+
+    def public(self):
+        return self.filter(visibility=Box.PUBLIC)
+
+    def for_user(self, user):
+        if user.is_anonymous():
+            return self.filter(visibility=Box.PUBLIC)
+        if user.is_staff:
+            # Staff has access to all boxes
+            return self
+
+        return (self
+                .filter(
+                    Q(boxuserobjectpermission__user=user) |
+                    Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
+                    Q(owner=user))
+                .distinct())
+
+    def by_owner(self, user):
+        return self.filter(owner=user)
 
 
 class Box(models.Model):
@@ -18,6 +49,8 @@ class Box(models.Model):
         (USERS, 'All users'),
         (PUBLIC, 'Public'),
     )
+
+    objects = BoxQuerySet.as_manager()
 
     owner = models.ForeignKey('auth.User', related_name='boxes')
     date_created = models.DateTimeField(auto_now_add=True)
@@ -39,8 +72,51 @@ class Box(models.Model):
         return self.tag
 
     @property
+    def all_perms(self):
+        return 'boxes.pull_box', 'boxes.push_box',
+
+    @property
     def tag(self):
         return '{}/{}'.format(self.owner, self.name)
+
+    def get_perms_for_user(self, user):
+        is_authenticated = user and user.is_authenticated()
+        is_staff = is_authenticated and user.is_staff
+        is_owner = is_authenticated and self.owner == user
+
+        if is_staff or is_owner:
+            # Staff and owner have all permissions on the box
+            return ['boxes.pull_box', 'boxes.push_box',
+                    'boxes.update_box', 'boxes.delete_box']
+
+        if is_authenticated:
+            visibility_perms = {
+                self.PUBLIC: ['boxes.pull_box'],
+                self.USERS: ['boxes.pull_box'],
+                self.PRIVATE: [],
+            }
+            user_perms = get_user_perms(user, self)
+            if user_perms:
+                return ['boxes.' + p for p in user_perms]
+            return visibility_perms[self.visibility]
+
+        else:
+            visibility_perms = {
+                self.PUBLIC: ['boxes.pull_box'],
+                self.USERS: [],
+                self.PRIVATE: [],
+            }
+            return visibility_perms[self.visibility]
+
+    def user_has_perms(self, perms, user):
+        user_perms = self.get_perms_for_user(user)
+        return all([p in user_perms for p in perms])
+
+    def user_can_pull(self, user):
+        return 'boxes.pull_box' in self.get_perms_for_user(user)
+
+    def user_can_push(self, user):
+        return 'boxes.push_box' in self.get_perms_for_user(user)
 
 
 class BoxUserObjectPermission(UserObjectPermissionBase):
@@ -80,6 +156,9 @@ class BoxVersion(models.Model):
     @property
     def visibility(self):
         return self.box.visibility
+
+    def user_has_perms(self, perms, user):
+        return perms in self.box.get_perms_for_user(user)
 
 
 def user_box_upload_path(instance, filename):
@@ -142,6 +221,9 @@ class BoxProvider(models.Model):
     @property
     def visibility(self):
         return self.version.box.visibility
+
+    def user_has_perms(self, perms, user):
+        return perms in self.version.box.get_perms_for_user(user)
 
 
 def chunked_upload_path(instance, filename):
