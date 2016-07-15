@@ -23,6 +23,12 @@ class AdminFactory(UserFactory):
     is_superuser = True
 
 
+class StaffFactory(UserFactory):
+    first_name = 'Staff'
+    is_staff = True
+    is_superuser = False
+
+
 class BoxFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Box

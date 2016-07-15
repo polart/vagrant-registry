@@ -158,7 +158,7 @@ class BoxVersion(models.Model):
         return self.box.visibility
 
     def user_has_perms(self, perms, user):
-        return perms in self.box.get_perms_for_user(user)
+        return self.box.user_has_perms(perms, user)
 
 
 def user_box_upload_path(instance, filename):
@@ -223,7 +223,7 @@ class BoxProvider(models.Model):
         return self.version.box.visibility
 
     def user_has_perms(self, perms, user):
-        return perms in self.version.box.get_perms_for_user(user)
+        return self.version.box.user_has_perms(perms, user)
 
 
 def chunked_upload_path(instance, filename):
@@ -282,6 +282,9 @@ class BoxUpload(models.Model):
     def visibility(self):
         return self.box.visibility
 
+    def user_has_perms(self, perms, user):
+        return self.box.user_has_perms(perms, user)
+
     def append_chunk(self, chunk):
         if self.file:
             # Close file opened by Django in 'rb' mode
@@ -311,10 +314,10 @@ class BoxUpload(models.Model):
             .format(file_hash, self.checksum,
                     self.get_checksum_type_display())
 
-        self.status = self.COMPLETED
-        self.date_completed = timezone.now()
         box_version = self._create_box_version()
         self._create_box_provider(box_version)
+        self.status = self.COMPLETED
+        self.date_completed = timezone.now()
 
     def _create_box_version(self):
         return self.box.versions.get_or_create(version=self.version)[0]

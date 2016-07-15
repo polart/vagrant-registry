@@ -21,20 +21,21 @@ class BoxPermissions(DjangoModelPermissions):
         if getattr(view, '_ignore_model_permissions', False):
             return True
 
-        if request.user.is_anonymous() and request.method in SAFE_METHODS:
+        user = request.user
+        if user.is_anonymous() and request.method in SAFE_METHODS:
+            return True
+
+        if user.is_authenticated() and user.is_staff:
             return True
 
         return (
-            request.user and
-            request.user.is_authenticated() and
-            request.user.has_perms(self.perms_map[request.method])
+            user and
+            user.is_authenticated() and
+            user.has_perms(self.perms_map[request.method])
         )
 
-    def get_required_object_permissions(self, method):
-        return [perm.split('.')[-1] for perm in self.perms_map[method]]
-
     def has_object_permission(self, request, view, obj):
-        perms = self.get_required_object_permissions(request.method)
+        perms = self.perms_map[request.method]
         if not obj.user_has_perms(perms, request.user):
             # If the user does not have permissions we need to determine if
             # they have read permissions to see 403, or not, and simply see
@@ -45,7 +46,7 @@ class BoxPermissions(DjangoModelPermissions):
                 # to make another lookup.
                 raise Http404
 
-            read_perms = self.get_required_object_permissions('GET')
+            read_perms = self.perms_map['GET']
             if not obj.user_has_perms(read_perms, request.user):
                 raise Http404
 

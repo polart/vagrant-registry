@@ -1,20 +1,23 @@
 from rest_framework import status
-from rest_framework.test import APITestCase, APIRequestFactory
+from rest_framework.test import (
+    APITestCase, APIRequestFactory, force_authenticate)
 
-from apps.boxes.api_views import UserBoxUploadHandlerViewSet
-from apps.boxes.factories import BoxUploadFactory, BoxProviderFactory
+from apps.boxes.factories import (
+    BoxUploadFactory, BoxProviderFactory, StaffFactory)
 from apps.boxes.models import BoxUpload
+from vagrant_registry.urls import box_upload_detail
 
 
 class FileUploadViewTestCase(APITestCase):
 
+    @classmethod
+    def setUpTestData(cls):
+        # User staff user, so there is no need to assign permissions
+        cls.user = StaffFactory()
+
     def setUp(self):
         self.factory = APIRequestFactory()
-        self.view = UserBoxUploadHandlerViewSet.as_view({
-            'get': 'retrieve',
-            'put': 'update',
-            'delete': 'destroy'
-        })
+        self.view = box_upload_detail
 
     def get_request(self, data, content_range):
         return self.factory.put(
@@ -28,7 +31,11 @@ class FileUploadViewTestCase(APITestCase):
         data = file_data.encode()
         return data, len(file_data.encode())
 
+    def force_auth(self, request, user):
+        force_authenticate(request, user=user)
+
     def get_response(self, request, bu_factory):
+        self.force_auth(request, bu_factory.box.owner)
         return self.view(
             request,
             username=bu_factory.box.owner.username,
@@ -37,7 +44,7 @@ class FileUploadViewTestCase(APITestCase):
         )
 
     def test_unsupported_media_type(self):
-        bu_factory = BoxUploadFactory()
+        bu_factory = BoxUploadFactory(box__owner=self.user)
 
         request = self.factory.put('/url/', data='data')
         response = self.get_response(request, bu_factory)
@@ -46,7 +53,7 @@ class FileUploadViewTestCase(APITestCase):
                          status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_content_range_header_is_required(self):
-        bu_factory = BoxUploadFactory()
+        bu_factory = BoxUploadFactory(box__owner=self.user)
 
         request = self.factory.put('/url/', 'test',
                                    content_type='application/octet-stream',)
@@ -58,7 +65,7 @@ class FileUploadViewTestCase(APITestCase):
         self.assertIn('Content-Range', str(response.content))
 
     def test_invalid_content_range_header_not_accepted(self):
-        bu_factory = BoxUploadFactory()
+        bu_factory = BoxUploadFactory(box__owner=self.user)
 
         request = self.get_request('test', (1, 'a', None))
         response = self.get_response(request, bu_factory)
@@ -70,7 +77,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_invalid_offset_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(file_content=file_data, offset=5)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data, offset=5)
 
         request = self.get_request(file_data, (2, 2 + file_len, file_len))
         response = self.get_response(request, bu_factory)
@@ -80,7 +88,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_invalid_complete_length_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         request = self.get_request(file_data, (0, file_len, file_len + 10))
         response = self.get_response(request, bu_factory)
@@ -90,7 +99,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_invalid_last_byte_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         request = self.get_request(file_data, (0, file_len + 10, file_len))
         response = self.get_response(request, bu_factory)
@@ -100,7 +110,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_invalid_content_length_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         request = self.get_request(file_data, (2, file_len, file_len))
         response = self.get_response(request, bu_factory)
@@ -110,7 +121,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_invalid_content_not_accepted(self):
         file_data, file_len = self.get_file_length('test')
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         request = self.get_request('poop', (0, file_len, file_len))
         response = self.get_response(request, bu_factory)
@@ -119,8 +131,9 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_upload_not_accepted_when_provider_already_exists(self):
         file_data, file_len = self.get_file_length('test')
-        bp_factory = BoxProviderFactory()
-        bu_factory = BoxUploadFactory(file_content=file_data,
+        bp_factory = BoxProviderFactory(version__box__owner=self.user)
+        bu_factory = BoxUploadFactory(box=bp_factory.version.box,
+                                      file_content=file_data,
                                       version=bp_factory.version.version,
                                       provider=bp_factory.provider)
 
@@ -131,7 +144,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_empty_file_data_not_allowed(self):
         file_data, file_len = self.get_file_length('')
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         request = self.get_request(file_data, (0, file_len, file_len))
         response = self.get_response(request, bu_factory)
@@ -140,7 +154,8 @@ class FileUploadViewTestCase(APITestCase):
 
     def test_box_uploaded_successfully_at_once(self):
         file_data, file_len = self.get_file_length('Ї12\n345\t6789')
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         request = self.get_request(file_data, (0, file_len, file_len))
         response = self.get_response(request, bu_factory)
@@ -164,7 +179,8 @@ class FileUploadViewTestCase(APITestCase):
         chunks_num = 5
         _, chunk_len = self.get_file_length(chunk)
         file_data, file_len = self.get_file_length(''.join([chunk]*chunks_num))
-        bu_factory = BoxUploadFactory(file_content=file_data)
+        bu_factory = BoxUploadFactory(box__owner=self.user,
+                                      file_content=file_data)
 
         for i in range(chunks_num):
             request = self.get_request(
