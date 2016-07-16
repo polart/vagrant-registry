@@ -2,9 +2,9 @@ from rest_framework import status
 from rest_framework.test import (
     APITestCase, APIRequestFactory, force_authenticate)
 
-from apps.boxes.factories import (
-    BoxUploadFactory, BoxProviderFactory, StaffFactory)
 from apps.boxes.models import BoxUpload
+from apps.factories import (
+    BoxUploadFactory, BoxProviderFactory, StaffFactory)
 from vagrant_registry.urls import box_upload_detail
 
 

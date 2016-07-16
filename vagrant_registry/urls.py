@@ -1,86 +1,72 @@
-"""vagrant_registry URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.9/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
-"""
 from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
-from apps.boxes import api_views
+from apps.users import api_views as users_api_views
+from apps.boxes import api_views as boxes_api_views
 from apps.boxes.views import DownloadBoxView, BoxMetadataView
 
 router = DefaultRouter()
-router.register(r'users', api_views.UserViewSet)
+router.register(r'users', users_api_views.UserViewSet)
 
-all_box_list = api_views.BoxViewSet.as_view({
+all_box_list = boxes_api_views.BoxViewSet.as_view({
     'get': 'list',
 })
 
-box_list = api_views.UserBoxViewSet.as_view({
+box_list = boxes_api_views.UserBoxViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_detail = api_views.UserBoxViewSet.as_view({
+box_detail = boxes_api_views.UserBoxViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
 })
 
-team_box_list = api_views.UserBoxTeamViewSet.as_view({
+team_box_list = boxes_api_views.UserBoxTeamViewSet.as_view({
     'get': 'list',
 })
-team_box_detail = api_views.UserBoxTeamViewSet.as_view({
+team_box_detail = boxes_api_views.UserBoxTeamViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
 })
 
-box_version_list = api_views.UserBoxVersionViewSet.as_view({
+box_version_list = boxes_api_views.UserBoxVersionViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_version_detail = api_views.UserBoxVersionViewSet.as_view({
+box_version_detail = boxes_api_views.UserBoxVersionViewSet.as_view({
     'get': 'retrieve',
     # 'put': 'update',
     # 'patch': 'partial_update',
     'delete': 'destroy'
 })
 
-box_provider_list = api_views.UserBoxProviderViewSet.as_view({
+box_provider_list = boxes_api_views.UserBoxProviderViewSet.as_view({
     'get': 'list',
     # 'post': 'create'
 })
-box_provider_detail = api_views.UserBoxProviderViewSet.as_view({
+box_provider_detail = boxes_api_views.UserBoxProviderViewSet.as_view({
     'get': 'retrieve',
     # 'put': 'update',
     # 'patch': 'partial_update',
     'delete': 'destroy'
 })
 
-box_upload_list = api_views.UserBoxUploadViewSet.as_view({
+box_upload_list = boxes_api_views.UserBoxUploadViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
-box_upload_detail = api_views.UserBoxUploadHandlerViewSet.as_view({
+box_upload_detail = boxes_api_views.UserBoxUploadHandlerViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
 })
-box_metadata_detail = api_views.UserBoxMetadataViewSet.as_view({
+box_metadata_detail = boxes_api_views.UserBoxMetadataViewSet.as_view({
     'get': 'retrieve',
 })
 

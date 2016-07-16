@@ -1,11 +1,12 @@
 from django.contrib.auth.models import AnonymousUser
 from django.http.response import Http404
 from guardian.shortcuts import assign_perm
-from rest_framework.test import APITestCase, APIRequestFactory, force_authenticate
+from rest_framework.test import APITestCase, APIRequestFactory
 
-from apps.boxes.factories import StaffFactory, UserFactory, BoxFactory
 from apps.boxes.models import Box
-from apps.boxes.permissions import UserPermissions, BoxPermissions
+from apps.boxes.permissions import BoxPermissions
+from apps.users.permissions import UserPermissions
+from apps.factories import StaffFactory, UserFactory, BoxFactory
 
 
 class BoxPermissionsTestCase(APITestCase):

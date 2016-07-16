@@ -2,7 +2,6 @@ from collections import namedtuple
 
 import re
 from django.contrib.auth.models import User
-from django.db.models import Q
 from django.http import Http404
 from guardian.shortcuts import get_users_with_perms, get_user_perms, remove_perm
 from rest_framework import status
@@ -10,14 +9,13 @@ from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.parsers import FileUploadParser
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
-from apps.boxes.permissions import BoxPermissions, UserPermissions
-from apps.boxes.serializer import (
-    UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
+from apps.boxes.permissions import BoxPermissions
+from apps.boxes.serializers import (
+    BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
     BoxProviderSerializer, BoxTeamMemberSerializer)
 
 
@@ -48,13 +46,6 @@ class UserBoxMixin:
         return (Box.objects
                 .by_owner(self.get_user_object())
                 .for_user(self.request.user))
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (UserPermissions,)
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    lookup_field = 'username'
 
 
 class BoxViewSet(ListModelMixin, GenericViewSet):

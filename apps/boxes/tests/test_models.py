@@ -4,8 +4,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from guardian.shortcuts import assign_perm
 
-from apps.boxes.factories import StaffFactory, BoxFactory, UserFactory
 from apps.boxes.models import Box
+from apps.factories import StaffFactory, BoxFactory, UserFactory
 
 
 class BoxModelTestCase(TestCase):
