@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
-from apps.boxes.permissions import BoxPermissions, IsStaffUserOrReadOnly
+from apps.boxes.permissions import BoxPermissions, UserPermissions
 from apps.boxes.serializer import (
     UserSerializer, BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
     BoxProviderSerializer, BoxTeamMemberSerializer)
@@ -51,7 +51,7 @@ class UserBoxMixin:
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsStaffUserOrReadOnly, )
+    permission_classes = (UserPermissions,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'

@@ -9,6 +9,15 @@ class BoxPermissions(DjangoModelPermissions):
         'OPTIONS': ['boxes.pull_box'],
         'HEAD': ['boxes.pull_box'],
         'POST': ['boxes.push_box'],
+        'PUT': ['boxes.push_box'],
+        'PATCH': ['boxes.push_box'],
+        'DELETE': ['boxes.push_box'],
+    }
+    obj_perms_map = {
+        'GET': ['boxes.pull_box'],
+        'OPTIONS': ['boxes.pull_box'],
+        'HEAD': ['boxes.pull_box'],
+        'POST': ['boxes.push_box'],
         'PUT': ['boxes.update_box'],
         'PATCH': ['boxes.update_box'],
         'DELETE': ['boxes.delete_box'],
@@ -35,7 +44,7 @@ class BoxPermissions(DjangoModelPermissions):
         )
 
     def has_object_permission(self, request, view, obj):
-        perms = self.perms_map[request.method]
+        perms = self.obj_perms_map[request.method]
         if not obj.user_has_perms(perms, request.user):
             # If the user does not have permissions we need to determine if
             # they have read permissions to see 403, or not, and simply see
@@ -46,7 +55,7 @@ class BoxPermissions(DjangoModelPermissions):
                 # to make another lookup.
                 raise Http404
 
-            read_perms = self.perms_map['GET']
+            read_perms = self.obj_perms_map['GET']
             if not obj.user_has_perms(read_perms, request.user):
                 raise Http404
 
@@ -56,11 +65,21 @@ class BoxPermissions(DjangoModelPermissions):
         return True
 
 
-class IsStaffUserOrReadOnly(IsAdminUser):
+class UserPermissions(IsAdminUser):
 
     def has_permission(self, request, view):
+        user = request.user
+        if user.is_anonymous():
+            raise Http404
         return (
-            request.method in SAFE_METHODS or
-            request.user and
-            request.user.is_staff
+            user.is_staff or
+            request.method in SAFE_METHODS + ('PATCH',)
         )
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if request.method in SAFE_METHODS or user.is_staff:
+            return True
+        if request.method in ['PATCH'] and user == obj:
+            return True
+        return False
