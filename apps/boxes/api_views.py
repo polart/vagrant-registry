@@ -2,12 +2,14 @@ from collections import namedtuple
 
 import re
 from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
 from django.http import Http404
-from guardian.shortcuts import get_users_with_perms, get_user_perms, remove_perm
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.mixins import RetrieveModelMixin, DestroyModelMixin, ListModelMixin
+from rest_framework.mixins import (
+    RetrieveModelMixin, DestroyModelMixin, ListModelMixin)
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -15,8 +17,8 @@ from rest_framework.viewsets import GenericViewSet
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
 from apps.boxes.permissions import BoxPermissions
 from apps.boxes.serializers import (
-    BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer, BoxVersionSerializer,
-    BoxProviderSerializer, BoxTeamMemberSerializer)
+    BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer,
+    BoxVersionSerializer, BoxProviderSerializer, BoxMemberSerializer)
 
 
 class UserBoxMixin:
@@ -72,57 +74,28 @@ class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
         serializer.save(owner=self.get_user_object())
 
 
-class UserBoxTeamViewSet(UserBoxMixin, GenericViewSet):
+class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
-    serializer_class = BoxTeamMemberSerializer
-    lookup_field = 'name'
-    lookup_url_kwarg = 'box_name'
+    serializer_class = BoxMemberSerializer
+    lookup_field = 'user__username'
+    lookup_url_kwarg = 'member_username'
 
-    def get_member_user(self):
+    def get_queryset(self):
+        a = self.get_box_object().boxmember_set.all()
+        print('queryset -- ', a)
+        return a
+
+    def perform_create(self, serializer):
         try:
-            return User.objects.get(username=self.kwargs['member_username'])
+            user = User.objects.get(username=self.kwargs['member_username'])
         except User.DoesNotExist:
             raise Http404
-
-    def list(self, request, *args, **kwargs):
-        box = self.get_box_object()
-        queryset = get_users_with_perms(box).exclude(id=box.owner_id)
-
-        for user in queryset:
-            setattr(user, '_perm_obj', box)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
-        box = self.get_box_object()
-        user = self.get_member_user()
-        perms = get_user_perms(user, box)
-        if not perms:
-            raise Http404
-
-        setattr(user, '_perm_obj', box)
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
-
-    def update(self, request, *args, **kwargs):
-        box = self.get_box_object()
-        user = self.get_member_user()
-        setattr(user, '_perm_obj', box)
-
-        serializer = self.get_serializer(instance=user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(box=box)
-        return Response(serializer.data)
-
-    def destroy(self, request, *args, **kwargs):
-        box = self.get_object()
-        user = self.get_member_user()
-
-        for perm in Box.all_perms:
-            remove_perm(perm, user, obj=box)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            serializer.save(box=self.get_box_object(), user=user)
+        except IntegrityError:
+            raise ValidationError("User '{}' already added to the box"
+                                  .format(user))
 
 
 class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):

@@ -127,6 +127,12 @@ class BoxMember(models.Model):
         blank=True,
     )
 
+    class Meta:
+        unique_together = ('user', 'box',)
+
+    def user_has_perms(self, perms, user):
+        return self.box.user_has_perms(perms, user)
+
 
 class BoxVersion(models.Model):
     # Validate version according to Vagrant docs

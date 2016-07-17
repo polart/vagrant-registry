@@ -26,12 +26,14 @@ box_detail = boxes_api_views.UserBoxViewSet.as_view({
     'delete': 'destroy'
 })
 
-team_box_list = boxes_api_views.UserBoxTeamViewSet.as_view({
+box_member_list = boxes_api_views.UserBoxMemberViewSet.as_view({
     'get': 'list',
 })
-team_box_detail = boxes_api_views.UserBoxTeamViewSet.as_view({
+box_member_detail = boxes_api_views.UserBoxMemberViewSet.as_view({
     'get': 'retrieve',
+    'post': 'create',
     'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 })
 
@@ -76,11 +78,11 @@ api_urlpatterns = [
     url(r'^boxes/(?P<username>[\w.@+-]+)/$', box_list, name='box-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         box_detail, name='box-detail'),
-    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/team/$',
-        team_box_list, name='teambox-list'),
-    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/team/'
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/members/$',
+        box_member_list, name='boxmember-list'),
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/members/'
         r'(?P<member_username>[\w.@+-]+)/$',
-        team_box_detail, name='teambox-detail'),
+        box_member_detail, name='boxmember-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/metadata/$',
         box_metadata_detail, name='boxmetadata-detail'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/$',
