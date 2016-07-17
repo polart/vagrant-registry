@@ -77,22 +77,22 @@ class Box(models.Model):
 
         if is_staff or is_owner:
             # Staff and owner have all permissions on the box
-            return 'RW'
+            return BoxMember.PERM_RWD
 
         if is_authenticated:
             try:
                 return self.boxmember_set.get(user=user).permissions
             except BoxMember.DoesNotExist:
                 visibility_perms = {
-                    self.PUBLIC: 'R',
-                    self.USERS: 'R',
+                    self.PUBLIC: BoxMember.PERM_R,
+                    self.USERS: BoxMember.PERM_R,
                     self.PRIVATE: '',
                 }
                 return visibility_perms[self.visibility]
 
         else:
             visibility_perms = {
-                self.PUBLIC: 'R',
+                self.PUBLIC: BoxMember.PERM_R,
                 self.USERS: '',
                 self.PRIVATE: '',
             }
@@ -110,11 +110,12 @@ class Box(models.Model):
 
 
 class BoxMember(models.Model):
-    PERM_READ = 'R'
-    PERM_READ_WRITE = 'RW'
+    PERM_R = 'R'
+    PERM_RW = 'RW'
+    PERM_RWD = 'RWD'    # only for box owners and staff users
     PERMS_CHOICES = (
-        (PERM_READ, 'View/pull box'),
-        (PERM_READ_WRITE, 'View/pull/push box')
+        (PERM_R, 'View/pull box'),
+        (PERM_RW, 'View/pull/push box')
     )
 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
@@ -122,7 +123,7 @@ class BoxMember(models.Model):
     permissions = models.CharField(
         max_length=2,
         choices=PERMS_CHOICES,
-        default=PERM_READ_WRITE,
+        default=PERM_RW,
         blank=True,
     )
 

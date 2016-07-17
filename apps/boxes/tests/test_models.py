@@ -18,13 +18,13 @@ class BoxModelTestCase(TestCase):
         user = StaffFactory()
         for visibility, _ in Box.VISIBILITY_CHOICES:
             box = BoxFactory(visibility=visibility)
-            self.check_perms(user, box, 'RW')
+            self.check_perms(user, box, BoxMember.PERM_RWD)
 
     def test_get_perms_for_owner(self):
         user = UserFactory()
         for visibility, _ in Box.VISIBILITY_CHOICES:
             box = BoxFactory(visibility=visibility, owner=user)
-            self.check_perms(user, box, 'RW')
+            self.check_perms(user, box, BoxMember.PERM_RWD)
 
     def test_get_perms_for_anonymous(self):
         user = AnonymousUser()
@@ -36,7 +36,7 @@ class BoxModelTestCase(TestCase):
         self.check_perms(user, box, '')
 
         box = BoxFactory(visibility=Box.PUBLIC)
-        self.check_perms(user, box, 'R')
+        self.check_perms(user, box, BoxMember.PERM_R)
 
     def test_get_perms_for_authenticated(self):
         user = UserFactory()
@@ -45,40 +45,40 @@ class BoxModelTestCase(TestCase):
         self.check_perms(user, box, '')
 
         box = BoxFactory(visibility=Box.USERS)
-        self.check_perms(user, box, 'R')
+        self.check_perms(user, box, BoxMember.PERM_R)
 
         box = BoxFactory(visibility=Box.PUBLIC)
-        self.check_perms(user, box, 'R')
+        self.check_perms(user, box, BoxMember.PERM_R)
 
     def test_get_perms_for_user_with_pull_access(self):
         user = UserFactory()
 
         box = BoxFactory(visibility=Box.PRIVATE)
-        box.share_with(user, BoxMember.PERM_READ)
-        self.check_perms(user, box, 'R')
+        box.share_with(user, BoxMember.PERM_R)
+        self.check_perms(user, box, BoxMember.PERM_R)
 
         box = BoxFactory(visibility=Box.USERS)
-        box.share_with(user, BoxMember.PERM_READ)
-        self.check_perms(user, box, 'R')
+        box.share_with(user, BoxMember.PERM_R)
+        self.check_perms(user, box, BoxMember.PERM_R)
 
         box = BoxFactory(visibility=Box.PUBLIC)
-        box.share_with(user, BoxMember.PERM_READ)
-        self.check_perms(user, box, 'R')
+        box.share_with(user, BoxMember.PERM_R)
+        self.check_perms(user, box, BoxMember.PERM_R)
 
     def test_get_perms_for_user_with_push_access(self):
         user = UserFactory()
 
         box = BoxFactory(visibility=Box.PRIVATE)
-        box.share_with(user, BoxMember.PERM_READ_WRITE)
-        self.check_perms(user, box, 'RW')
+        box.share_with(user, BoxMember.PERM_RW)
+        self.check_perms(user, box, BoxMember.PERM_RW)
 
         box = BoxFactory(visibility=Box.USERS)
-        box.share_with(user, BoxMember.PERM_READ_WRITE)
-        self.check_perms(user, box, 'RW')
+        box.share_with(user, BoxMember.PERM_RW)
+        self.check_perms(user, box, BoxMember.PERM_RW)
 
         box = BoxFactory(visibility=Box.PUBLIC)
-        box.share_with(user, BoxMember.PERM_READ_WRITE)
-        self.check_perms(user, box, 'RW')
+        box.share_with(user, BoxMember.PERM_RW)
+        self.check_perms(user, box, BoxMember.PERM_RW)
 
     @patch('apps.boxes.models.Box.get_perms_for_user')
     def test_user_has_perms(self, mock_get_perms):
@@ -87,16 +87,16 @@ class BoxModelTestCase(TestCase):
         mock_get_perms.return_value = ''
         self.assertFalse(box.user_has_perms('user', 'R'))
 
-        mock_get_perms.return_value = 'R'
+        mock_get_perms.return_value = BoxMember.PERM_R
         self.assertFalse(box.user_has_perms('user', 'RW'))
 
         mock_get_perms.return_value = ''
         self.assertTrue(box.user_has_perms('user', ''))
 
-        mock_get_perms.return_value = 'R'
+        mock_get_perms.return_value = BoxMember.PERM_R
         self.assertTrue(box.user_has_perms('user', 'R'))
 
-        mock_get_perms.return_value = 'RW'
+        mock_get_perms.return_value = BoxMember.PERM_RW
         self.assertTrue(box.user_has_perms('user', 'R'))
 
     def test_get_boxes_for_staff(self):
@@ -123,9 +123,9 @@ class BoxModelTestCase(TestCase):
         b1 = BoxFactory(visibility=Box.PRIVATE)
         b2 = BoxFactory(visibility=Box.PRIVATE, owner=user)
         b3 = BoxFactory(visibility=Box.PRIVATE)
-        b3.share_with(user, BoxMember.PERM_READ_WRITE)
+        b3.share_with(user, BoxMember.PERM_RW)
         b4 = BoxFactory(visibility=Box.PRIVATE)
-        b4.share_with(user, BoxMember.PERM_READ)
+        b4.share_with(user, BoxMember.PERM_R)
         b5 = BoxFactory(visibility=Box.USERS)
         b6 = BoxFactory(visibility=Box.PUBLIC)
 

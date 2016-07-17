@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 from apps.boxes import models
 from apps.boxes.models import BoxProvider
+from apps.users.models import UserProfile
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -15,6 +16,19 @@ class UserFactory(factory.DjangoModelFactory):
     last_name = factory.Sequence(lambda n: 'User{0}'.format(n))
     is_staff = False
     is_superuser = False
+    # We pass in 'user' to link the generated Profile to our just-generated
+    # User. This will call UserProfileFactory(user=our_new_user),
+    # thus skipping the SubFactory.
+    profile = factory.RelatedFactory('apps.factories.UserProfileFactory', 'user')
+
+
+class UserProfileFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = UserProfile
+
+    # We pass in profile=None to prevent UserFactory from creating another
+    # profile (this disables the RelatedFactory)
+    user = factory.SubFactory(UserFactory, profile=None)
 
 
 class AdminFactory(UserFactory):
