@@ -5,8 +5,6 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
-from guardian.shortcuts import get_user_perms
 
 from apps.boxes.utils import get_file_hash
 
@@ -31,7 +29,7 @@ class BoxQuerySet(models.QuerySet):
 
         return (self
                 .filter(
-                    Q(boxuserobjectpermission__user=user) |
+                    Q(shared_with=user) |
                     Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
                     Q(owner=user))
                 .distinct())
@@ -60,20 +58,13 @@ class Box(models.Model):
     name = models.CharField(max_length=30)
     short_description = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
+    shared_with = models.ManyToManyField('auth.User', through='boxes.BoxMember')
 
     class Meta:
         unique_together = ('owner', 'name')
-        permissions = (
-            ('pull_box', 'Can pull box'),
-            ('push_box', 'Can push box'),
-        )
 
     def __str__(self):
         return self.tag
-
-    @property
-    def all_perms(self):
-        return 'boxes.pull_box', 'boxes.push_box',
 
     @property
     def tag(self):
@@ -86,47 +77,54 @@ class Box(models.Model):
 
         if is_staff or is_owner:
             # Staff and owner have all permissions on the box
-            return ['boxes.pull_box', 'boxes.push_box',
-                    'boxes.update_box', 'boxes.delete_box']
+            return 'RW'
 
         if is_authenticated:
-            visibility_perms = {
-                self.PUBLIC: ['boxes.pull_box'],
-                self.USERS: ['boxes.pull_box'],
-                self.PRIVATE: [],
-            }
-            user_perms = get_user_perms(user, self)
-            if user_perms:
-                return ['boxes.' + p for p in user_perms]
-            return visibility_perms[self.visibility]
+            try:
+                return self.boxmember_set.get(user=user).permissions
+            except BoxMember.DoesNotExist:
+                visibility_perms = {
+                    self.PUBLIC: 'R',
+                    self.USERS: 'R',
+                    self.PRIVATE: '',
+                }
+                return visibility_perms[self.visibility]
 
         else:
             visibility_perms = {
-                self.PUBLIC: ['boxes.pull_box'],
-                self.USERS: [],
-                self.PRIVATE: [],
+                self.PUBLIC: 'R',
+                self.USERS: '',
+                self.PRIVATE: '',
             }
             return visibility_perms[self.visibility]
 
-    def user_has_perms(self, perms, user):
-        if not perms:
-            return True
-        user_perms = self.get_perms_for_user(user)
-        return all([p in user_perms for p in perms])
+    def user_has_perms(self, user, perms):
+        return perms in self.get_perms_for_user(user) if perms else True
 
-    def user_can_pull(self, user):
-        return 'boxes.pull_box' in self.get_perms_for_user(user)
-
-    def user_can_push(self, user):
-        return 'boxes.push_box' in self.get_perms_for_user(user)
+    def share_with(self, user, perms):
+        BoxMember.objects.create(
+            user=user,
+            box=self,
+            permissions=perms,
+        )
 
 
-class BoxUserObjectPermission(UserObjectPermissionBase):
-    content_object = models.ForeignKey(Box)
+class BoxMember(models.Model):
+    PERM_READ = 'R'
+    PERM_READ_WRITE = 'RW'
+    PERMS_CHOICES = (
+        (PERM_READ, 'View/pull box'),
+        (PERM_READ_WRITE, 'View/pull/push box')
+    )
 
-
-class BoxGroupObjectPermission(GroupObjectPermissionBase):
-    content_object = models.ForeignKey(Box)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    box = models.ForeignKey('boxes.Box', on_delete=models.CASCADE)
+    permissions = models.CharField(
+        max_length=2,
+        choices=PERMS_CHOICES,
+        default=PERM_READ_WRITE,
+        blank=True,
+    )
 
 
 class BoxVersion(models.Model):
