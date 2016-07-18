@@ -3,16 +3,16 @@ from django.http.response import Http404
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from apps.boxes.models import Box, BoxMember
-from apps.boxes.permissions import BoxPermissions
+from apps.boxes.permissions import BoxPermissions, IsStaffOrBoxOwnerPermissions
 from apps.factories import StaffFactory, UserFactory, BoxFactory
 from apps.users.models import UserProfile
 
 
-class BoxPermissionsTestCase(APITestCase):
+class PermissionsTestCase(APITestCase):
 
     def setUp(self):
         self.factory = APIRequestFactory()
-        self.perm = BoxPermissions()
+        self.perm = None
 
     def check_model_perms(self, checks, user):
         for method, check in checks.items():
@@ -37,12 +37,22 @@ class BoxPermissionsTestCase(APITestCase):
                 with self.assertRaises(check, msg=fail_msg):
                     self.perm.has_object_permission(request, 'view', obj)
 
-    def check_box_obj_perms(self, checks, user, box_owner=None, shared_with=None):
+    def check_box_obj_perms(self, checks, user, box_owner=None,
+                            share_with=None, share_perm=None):
         if box_owner is None:
             box_owner = UserFactory()
         for visibility in [Box.PRIVATE, Box.USERS, Box.PUBLIC]:
             box = BoxFactory(visibility=visibility, owner=box_owner)
+            if share_with:
+                box.share_with(share_with, share_perm)
             self.check_obj_perms(checks, user, box)
+
+
+class BoxPermissionsTestCase(PermissionsTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.perm = BoxPermissions()
 
     def test_staff_perms(self):
         user = StaffFactory()
@@ -173,3 +183,60 @@ class BoxPermissionsTestCase(APITestCase):
         box = BoxFactory(visibility=Box.USERS)
         self.check_obj_perms(checks, user, box)
 
+
+class IsStaffOrBoxOwnerPermissionsTestCase(PermissionsTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.perm = IsStaffOrBoxOwnerPermissions()
+
+    def test_anonymous_perms(self):
+        user = AnonymousUser()
+        checks = {
+            'GET': False,
+            'PATCH': False,
+            'POST': False,
+            'DELETE': False,
+        }
+        self.check_box_obj_perms(checks, user)
+
+    def test_staff_perms(self):
+        user = StaffFactory()
+        checks = {
+            'GET': True,
+            'PATCH': True,
+            'POST': True,
+            'DELETE': True,
+        }
+        self.check_box_obj_perms(checks, user)
+
+    def test_box_owner_perms(self):
+        user = UserFactory()
+        checks = {
+            'GET': True,
+            'PATCH': True,
+            'POST': True,
+            'DELETE': True,
+        }
+        self.check_box_obj_perms(checks, user, box_owner=user)
+
+    def test_authenticated_perms(self):
+        user = UserFactory()
+        checks = {
+            'GET': False,
+            'PATCH': False,
+            'POST': False,
+            'DELETE': False,
+        }
+        self.check_box_obj_perms(checks, user)
+
+    def test_box_member_perms(self):
+        user = UserFactory()
+        checks = {
+            'GET': False,
+            'PATCH': False,
+            'POST': False,
+            'DELETE': False,
+        }
+        self.check_box_obj_perms(checks, user, share_with=user,
+                                 share_perm=BoxMember.PERM_RW)

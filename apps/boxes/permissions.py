@@ -62,3 +62,10 @@ class BoxPermissions(BasePermission):
         return True
 
 
+class IsStaffOrBoxOwnerPermissions(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.user.is_authenticated and
+            (request.user.is_staff or request.user == obj.owner)
+        )

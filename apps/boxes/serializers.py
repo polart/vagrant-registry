@@ -79,8 +79,7 @@ class BoxSerializer(serializers.ModelSerializer):
     )
     owner = serializers.ReadOnlyField(source='owner.username')
     versions = BoxVersionSerializer(many=True, read_only=True)
-    members = BoxMemberSerializer(
-        many=True, read_only=True, source='boxmember_set')
+    members = serializers.SerializerMethodField()
     user_permissions = serializers.SerializerMethodField()
 
     class Meta:
@@ -88,6 +87,16 @@ class BoxSerializer(serializers.ModelSerializer):
         fields = ('url', 'owner', 'date_created', 'date_modified', 'visibility',
                   'name', 'short_description', 'description', 'members',
                   'user_permissions', 'versions',)
+
+    def get_members(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated and (user.is_staff or user == obj.owner):
+            return BoxMemberSerializer(
+                obj.boxmember_set.all(),
+                context={'request': self.context.get('request')},
+                many=True,).data
+        else:
+            return []
 
     def get_user_permissions(self, obj):
         user = self.context.get('request').user

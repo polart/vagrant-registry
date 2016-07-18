@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
-from apps.boxes.permissions import BoxPermissions
+from apps.boxes.permissions import BoxPermissions, IsStaffOrBoxOwnerPermissions
 from apps.boxes.serializers import (
     BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer,
     BoxVersionSerializer, BoxProviderSerializer, BoxMemberSerializer)
@@ -75,16 +75,17 @@ class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
 
 
 class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
-    permission_classes = (BoxPermissions, )
+    permission_classes = (BoxPermissions, IsStaffOrBoxOwnerPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxMemberSerializer
     lookup_field = 'user__username'
     lookup_url_kwarg = 'member_username'
 
     def get_queryset(self):
-        a = self.get_box_object().boxmember_set.all()
-        print('queryset -- ', a)
-        return a
+        box = self.get_box_object()
+        if self.request.user.is_staff or self.request.user == box.owner:
+            return box.boxmember_set.all()
+        return box.boxmember_set.none()
 
     def perform_create(self, serializer):
         try:
