@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 
 from apps.users.permissions import UserPermissions
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import UserSerializer, ForStaffUserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -10,3 +10,8 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+
+    def get_serializer_class(self):
+        if self.request.user.is_staff:
+            return ForStaffUserSerializer
+        return self.serializer_class
