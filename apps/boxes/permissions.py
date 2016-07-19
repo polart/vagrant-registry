@@ -5,15 +5,15 @@ from apps.boxes.models import BoxMember
 from apps.users.models import UserProfile
 
 
-class BoxPermissions(BasePermission):
+class BaseBoxPermissions(BasePermission):
     boxes_perms_map = {
-        'GET': UserProfile.BOXES_READ,
-        'OPTIONS': UserProfile.BOXES_READ,
-        'HEAD': UserProfile.BOXES_READ,
-        'POST': UserProfile.BOXES_READ_WRITE,
-        'PUT': UserProfile.BOXES_READ_WRITE,
-        'PATCH': UserProfile.BOXES_READ_WRITE,
-        'DELETE': UserProfile.BOXES_READ_WRITE,
+        'GET': UserProfile.BOXES_PERM_R,
+        'OPTIONS': UserProfile.BOXES_PERM_R,
+        'HEAD': UserProfile.BOXES_PERM_R,
+        'POST': UserProfile.BOXES_PERM_RW,
+        'PUT': UserProfile.BOXES_PERM_RW,
+        'PATCH': UserProfile.BOXES_PERM_RW,
+        'DELETE': UserProfile.BOXES_PERM_RW,
     }
     obj_perms_map = {
         'GET': BoxMember.PERM_R,
@@ -22,7 +22,7 @@ class BoxPermissions(BasePermission):
         'POST': BoxMember.PERM_RW,
         'PUT': BoxMember.PERM_RW,
         'PATCH': BoxMember.PERM_RW,
-        'DELETE': BoxMember.PERM_RWD,
+        'DELETE': BoxMember.PERM_RW,
     }
 
     def has_permission(self, request, view):
@@ -62,10 +62,80 @@ class BoxPermissions(BasePermission):
         return True
 
 
+class BoxPermissions(BaseBoxPermissions):
+    obj_perms_map = {
+        'GET': BoxMember.PERM_R,
+        'OPTIONS': BoxMember.PERM_R,
+        'HEAD': BoxMember.PERM_R,
+        'POST': BoxMember.PERM_OWNER_OR_STAFF,
+        'PUT': BoxMember.PERM_OWNER_OR_STAFF,
+        'PATCH': BoxMember.PERM_OWNER_OR_STAFF,
+        'DELETE': BoxMember.PERM_OWNER_OR_STAFF,
+    }
+
+
+class BoxVersionPermissions(BaseBoxPermissions):
+    obj_perms_map = {
+        'GET': BoxMember.PERM_R,
+        'OPTIONS': BoxMember.PERM_R,
+        'HEAD': BoxMember.PERM_R,
+        'POST': BoxMember.PERM_RW,
+        'PUT': BoxMember.PERM_RW,
+        'PATCH': BoxMember.PERM_RW,
+        'DELETE': BoxMember.PERM_OWNER_OR_STAFF,
+    }
+
+
+class BoxProviderPermissions(BaseBoxPermissions):
+    obj_perms_map = {
+        'GET': BoxMember.PERM_R,
+        'OPTIONS': BoxMember.PERM_R,
+        'HEAD': BoxMember.PERM_R,
+        'POST': BoxMember.PERM_RW,
+        'PUT': BoxMember.PERM_RW,
+        'PATCH': BoxMember.PERM_RW,
+        'DELETE': BoxMember.PERM_OWNER_OR_STAFF,
+    }
+
+
+class BoxMemberPermissions(BaseBoxPermissions):
+    obj_perms_map = {
+        'GET': BoxMember.PERM_OWNER_OR_STAFF,
+        'OPTIONS': BoxMember.PERM_R,
+        'HEAD': BoxMember.PERM_R,
+        'POST': BoxMember.PERM_OWNER_OR_STAFF,
+        'PUT': BoxMember.PERM_OWNER_OR_STAFF,
+        'PATCH': BoxMember.PERM_OWNER_OR_STAFF,
+        'DELETE': BoxMember.PERM_OWNER_OR_STAFF,
+    }
+
+
+class BoxUploadPermissions(BaseBoxPermissions):
+    obj_perms_map = {
+        'GET': BoxMember.PERM_R,
+        'OPTIONS': BoxMember.PERM_R,
+        'HEAD': BoxMember.PERM_R,
+        'POST': BoxMember.PERM_RW,
+        'PUT': BoxMember.PERM_RW,
+        'PATCH': BoxMember.PERM_RW,
+        'DELETE': BoxMember.PERM_RW,
+    }
+
+
 class IsStaffOrBoxOwnerPermissions(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return (
             request.user.is_authenticated and
             (request.user.is_staff or request.user == obj.owner)
+        )
+
+
+class IsStaffOrRequestedUserPermissions(BasePermission):
+
+    def has_permission(self, request, view):
+        return (
+            request.method in SAFE_METHODS or
+            request.user.is_authenticated and
+            (request.user.is_staff or request.user.username == view.kwargs['username'])
         )

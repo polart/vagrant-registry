@@ -62,7 +62,7 @@ class UserViewSetTestCase(APITestCase):
             'username': 'testuser',
             'email': 'test@email.com',
             'password': 'pass',
-            'boxes_permissions': UserProfile.BOXES_READ,
+            'boxes_permissions': UserProfile.BOXES_PERM_R,
         }
         request = self.factory.post('/url/', data)
         force_authenticate(request, user=self.staff)

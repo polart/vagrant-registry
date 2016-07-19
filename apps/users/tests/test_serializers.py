@@ -17,7 +17,7 @@ class UserSerializerTestCase(APITestCase):
             'email': 'test@email.com',
             'password': 'pass',
             'profile': {
-                'boxes_permissions': UserProfile.BOXES_READ,
+                'boxes_permissions': UserProfile.BOXES_PERM_R,
             }
         }
         user = self.serializer.create(data)
@@ -34,7 +34,7 @@ class UserSerializerTestCase(APITestCase):
             'email': 'test@email.com',
             'password': 'pass',
             'profile': {
-                'boxes_permissions': UserProfile.BOXES_READ,
+                'boxes_permissions': UserProfile.BOXES_PERM_R,
             }
         }
         user = self.serializer.update(user, data)

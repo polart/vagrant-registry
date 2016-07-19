@@ -3,12 +3,12 @@ from django.db import models
 
 class UserProfile(models.Model):
     BOXES_NONE = ''
-    BOXES_READ = 'R'
-    BOXES_READ_WRITE = 'RW'
+    BOXES_PERM_R = 'R'
+    BOXES_PERM_RW = 'RW'
     BOXES_PERMS_CHOICES = (
         (BOXES_NONE, 'No permissions'),
-        (BOXES_READ, 'View/pull boxes'),
-        (BOXES_READ_WRITE, 'View/pull/push boxes')
+        (BOXES_PERM_R, 'View/pull boxes'),
+        (BOXES_PERM_RW, 'View/pull/push boxes')
     )
 
     user = models.OneToOneField(
@@ -20,7 +20,7 @@ class UserProfile(models.Model):
     boxes_permissions = models.CharField(
         max_length=2,
         choices=BOXES_PERMS_CHOICES,
-        default=BOXES_READ_WRITE,
+        default=BOXES_PERM_RW,
         blank=True,
     )
 

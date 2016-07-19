@@ -15,14 +15,34 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
-from apps.boxes.permissions import BoxPermissions, IsStaffOrBoxOwnerPermissions
+from apps.boxes.permissions import (
+    BoxPermissions, BaseBoxPermissions, BoxMemberPermissions,
+    BoxProviderPermissions, BoxVersionPermissions,
+    IsStaffOrRequestedUserPermissions, BoxUploadPermissions)
 from apps.boxes.serializers import (
     BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer,
     BoxVersionSerializer, BoxProviderSerializer, BoxMemberSerializer)
 
 
 class UserBoxMixin:
-    permission_classes = (BoxPermissions, )
+    box_permission_classes = (BaseBoxPermissions, )
+
+    def get_box_object_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        return [permission() for permission in self.box_permission_classes]
+
+    def check_box_object_permissions(self, request, obj):
+        """
+        Check if the request should be permitted for a given object.
+        Raises an appropriate exception if the request is not permitted.
+        """
+        for permission in self.get_box_object_permissions():
+            if not permission.has_object_permission(request, self, obj):
+                self.permission_denied(
+                    request, message=getattr(permission, 'message', None)
+                )
 
     def get_user_object(self):
         try:
@@ -40,7 +60,7 @@ class UserBoxMixin:
         })
 
         # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
+        self.check_box_object_permissions(self.request, obj)
 
         return obj
 
@@ -60,7 +80,7 @@ class BoxViewSet(ListModelMixin, GenericViewSet):
 
 
 class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
-    permission_classes = (BoxPermissions, )
+    permission_classes = (IsStaffOrRequestedUserPermissions, BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
 
@@ -71,11 +91,16 @@ class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
         return self.get_box_object()
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.get_user_object())
+        user = self.get_user_object()
+        try:
+            serializer.save(owner=user)
+        except IntegrityError:
+            raise ValidationError("User {} already has box with the name '{}'"
+                                  .format(user, serializer.initial_data['name']))
 
 
 class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
-    permission_classes = (BoxPermissions, IsStaffOrBoxOwnerPermissions, )
+    permission_classes = (IsStaffOrRequestedUserPermissions, BoxMemberPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxMemberSerializer
     lookup_field = 'user__username'
@@ -100,7 +125,7 @@ class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
 
 
 class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
-    permission_classes = (BoxPermissions, )
+    permission_classes = (BoxVersionPermissions, )
     queryset = BoxVersion.objects.none()
     serializer_class = BoxVersionSerializer
     lookup_field = 'version'
@@ -114,7 +139,7 @@ class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
 
 
 class UserBoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
-    permission_classes = (BoxPermissions, )
+    permission_classes = (BoxProviderPermissions, )
     queryset = BoxProvider.objects.none()
     serializer_class = BoxProviderSerializer
     lookup_field = 'provider'
@@ -123,14 +148,11 @@ class UserBoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
     def get_box_version_object(self):
         return get_object_or_404(
             self.get_box_object().versions.all(),
-            **{'version__version': self.kwargs['version']}
+            **{'version': self.kwargs['version']}
         )
 
     def get_queryset(self):
         return self.get_box_version_object().providers.all()
-
-    def perform_create(self, serializer):
-        serializer.save(version=self.get_box_version_object())
 
 
 class UserBoxMetadataViewSet(UserBoxViewSet):
@@ -138,7 +160,7 @@ class UserBoxMetadataViewSet(UserBoxViewSet):
 
 
 class UserBoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
-    permission_classes = (BoxPermissions, )
+    permission_classes = (BoxUploadPermissions, )
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
 
@@ -158,7 +180,7 @@ class BoxUploadParser(FileUploadParser):
 
 class UserBoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
                                   DestroyModelMixin, GenericViewSet):
-    permission_classes = (BoxPermissions, )
+    permission_classes = (BoxUploadPermissions, )
     serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)
     queryset = BoxUpload.objects.none()

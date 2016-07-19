@@ -55,7 +55,16 @@ class Box(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     visibility = models.CharField(
         max_length=2, choices=VISIBILITY_CHOICES, default=PRIVATE)
-    name = models.CharField(max_length=30)
+    name = models.CharField(
+        max_length=30,
+        validators=[
+            RegexValidator(
+                r'^[\w]+$',
+                'Enter a valid name. This value may contain only '
+                'letters and numbers.'
+            ),
+        ],
+    )
     short_description = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     shared_with = models.ManyToManyField('auth.User', through='boxes.BoxMember')
@@ -77,7 +86,7 @@ class Box(models.Model):
 
         if is_staff or is_owner:
             # Staff and owner have all permissions on the box
-            return BoxMember.PERM_RWD
+            return BoxMember.PERM_OWNER_OR_STAFF
 
         if is_authenticated:
             try:
@@ -86,20 +95,23 @@ class Box(models.Model):
                 visibility_perms = {
                     self.PUBLIC: BoxMember.PERM_R,
                     self.USERS: BoxMember.PERM_R,
-                    self.PRIVATE: '',
+                    self.PRIVATE: BoxMember.PERM_NONE,
                 }
                 return visibility_perms[self.visibility]
 
         else:
             visibility_perms = {
                 self.PUBLIC: BoxMember.PERM_R,
-                self.USERS: '',
-                self.PRIVATE: '',
+                self.USERS: BoxMember.PERM_NONE,
+                self.PRIVATE: BoxMember.PERM_NONE,
             }
             return visibility_perms[self.visibility]
 
-    def user_has_perms(self, user, perms):
-        return perms in self.get_perms_for_user(user) if perms else True
+    def user_has_perms(self, user, need_perms):
+        has_perms = self.get_perms_for_user(user)
+        if has_perms == BoxMember.PERM_OWNER_OR_STAFF:
+            return True
+        return need_perms in has_perms if need_perms else True
 
     def share_with(self, user, perms):
         BoxMember.objects.create(
@@ -112,7 +124,8 @@ class Box(models.Model):
 class BoxMember(models.Model):
     PERM_R = 'R'
     PERM_RW = 'RW'
-    PERM_RWD = 'RWD'    # only for box owners and staff users
+    PERM_OWNER_OR_STAFF = 'FULL'
+    PERM_NONE = ''
     PERMS_CHOICES = (
         (PERM_R, 'View/pull box'),
         (PERM_RW, 'View/pull/push box')

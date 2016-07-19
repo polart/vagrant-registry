@@ -129,7 +129,7 @@ class BoxPermissionsTestCase(PermissionsTestCase):
         self.check_model_perms(checks, user)
 
     def test_authenticated_with_read_boxes_perms(self):
-        user = UserFactory(profile__boxes_permissions=UserProfile.BOXES_READ)
+        user = UserFactory(profile__boxes_permissions=UserProfile.BOXES_PERM_R)
         checks = {
             'GET': True,
             'PATCH': False,
@@ -164,8 +164,8 @@ class BoxPermissionsTestCase(PermissionsTestCase):
         user = UserFactory()
         checks = {
             'GET': True,
-            'PATCH': True,
-            'POST': True,
+            'PATCH': False,
+            'POST': False,
             'DELETE': False,
         }
         box = BoxFactory(visibility=Box.PRIVATE)

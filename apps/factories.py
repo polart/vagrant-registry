@@ -29,6 +29,7 @@ class UserProfileFactory(factory.DjangoModelFactory):
     # We pass in profile=None to prevent UserFactory from creating another
     # profile (this disables the RelatedFactory)
     user = factory.SubFactory(UserFactory, profile=None)
+    boxes_permissions = UserProfile.BOXES_PERM_RW
 
 
 class AdminFactory(UserFactory):
@@ -89,3 +90,4 @@ class BoxUploadFactory(factory.DjangoModelFactory):
     checksum = factory.LazyAttribute(
         lambda o: hashlib.sha256(o.file_content).hexdigest())
     checksum_type = BoxProvider.SHA256
+    offset = 0

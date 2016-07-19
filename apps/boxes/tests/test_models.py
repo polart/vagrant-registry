@@ -18,13 +18,13 @@ class BoxModelTestCase(TestCase):
         user = StaffFactory()
         for visibility, _ in Box.VISIBILITY_CHOICES:
             box = BoxFactory(visibility=visibility)
-            self.check_perms(user, box, BoxMember.PERM_RWD)
+            self.check_perms(user, box, BoxMember.PERM_OWNER_OR_STAFF)
 
     def test_get_perms_for_owner(self):
         user = UserFactory()
         for visibility, _ in Box.VISIBILITY_CHOICES:
             box = BoxFactory(visibility=visibility, owner=user)
-            self.check_perms(user, box, BoxMember.PERM_RWD)
+            self.check_perms(user, box, BoxMember.PERM_OWNER_OR_STAFF)
 
     def test_get_perms_for_anonymous(self):
         user = AnonymousUser()
