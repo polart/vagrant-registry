@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
+from rest_framework.authtoken import views as rf_views
 from rest_framework.routers import DefaultRouter
 
 from apps.users import api_views as users_api_views
@@ -107,6 +108,9 @@ urlpatterns = [
     url(r'^api/', include(api_urlpatterns, namespace='api')),
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls')),
+    url(r'^api-token-auth/$', rf_views.obtain_auth_token),
+    url(r'^api-token-auth/(?P<token>\w+)/',
+        users_api_views.IsTokenAuthenticated.as_view()),
 
     url(r'^downloads/boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/'
         r'version/(?P<version>\d+\.\d+\.\d+)/'
