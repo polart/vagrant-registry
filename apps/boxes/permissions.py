@@ -32,7 +32,7 @@ class BaseBoxPermissions(BasePermission):
             return True
 
         user = request.user
-        if user.is_anonymous():
+        if user.is_anonymous:
             return request.method in SAFE_METHODS
 
         if user.is_staff:
@@ -125,10 +125,14 @@ class BoxUploadPermissions(BaseBoxPermissions):
 class IsStaffOrBoxOwnerPermissions(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return (
+        # .is_authenticated returns CallableTrue, which cannot be
+        # compared with True
+        # Use it in a bizarre way, until if fixed
+        # See https://code.djangoproject.com/ticket/26988
+        return True if (
             request.user.is_authenticated and
             (request.user.is_staff or request.user == obj.owner)
-        )
+        ) else False
 
 
 class IsStaffOrRequestedUserPermissions(BasePermission):

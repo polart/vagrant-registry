@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from apps.users import api_views as users_api_views
 from apps.boxes import api_views as boxes_api_views
 from apps.boxes.views import DownloadBoxView, BoxMetadataView
+from apps.views import schema_view
 
 router = DefaultRouter()
 router.register(r'users', users_api_views.UserViewSet)
@@ -101,7 +102,7 @@ api_urlpatterns = [
         box_upload_list, name='boxupload-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',
         box_upload_detail, name='boxupload-detail'),
-    url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^docs/', schema_view),
 ]
 
 urlpatterns = [

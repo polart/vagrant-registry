@@ -6,7 +6,7 @@ class UserPermissions(IsAdminUser):
 
     def has_permission(self, request, view):
         user = request.user
-        if user.is_anonymous():
+        if user.is_anonymous:
             raise Http404
         return (
             user.is_staff or

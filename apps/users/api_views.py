@@ -16,7 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
     def get_serializer_class(self):
-        if self.request.user.is_staff:
+        if hasattr(self, 'request') and self.request.user.is_staff:
             return ForStaffUserSerializer
         return self.serializer_class
 

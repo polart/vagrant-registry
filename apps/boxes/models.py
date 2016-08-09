@@ -1,6 +1,6 @@
 import uuid
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
@@ -21,7 +21,7 @@ class BoxQuerySet(models.QuerySet):
         return self.filter(visibility=Box.PUBLIC)
 
     def for_user(self, user):
-        if user.is_anonymous():
+        if user.is_anonymous:
             return self.filter(visibility=Box.PUBLIC)
         if user.is_staff:
             # Staff has access to all boxes
@@ -50,7 +50,8 @@ class Box(models.Model):
 
     objects = BoxQuerySet.as_manager()
 
-    owner = models.ForeignKey('auth.User', related_name='boxes')
+    owner = models.ForeignKey(
+        'auth.User', related_name='boxes', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     visibility = models.CharField(
@@ -80,7 +81,7 @@ class Box(models.Model):
         return '{}/{}'.format(self.owner, self.name)
 
     def get_perms_for_user(self, user):
-        is_authenticated = user and user.is_authenticated()
+        is_authenticated = user and user.is_authenticated
         is_staff = is_authenticated and user.is_staff
         is_owner = is_authenticated and self.owner == user
 
@@ -156,7 +157,8 @@ class BoxVersion(models.Model):
                 'X.Y.Z where X, Y, and Z are all positive integers.'
     )
 
-    box = models.ForeignKey('boxes.Box', related_name='versions')
+    box = models.ForeignKey(
+        'boxes.Box', related_name='versions', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     version = models.CharField(
@@ -204,7 +206,8 @@ class BoxProvider(models.Model):
         (SHA256, 'sha256'),
     )
 
-    version = models.ForeignKey('boxes.BoxVersion', related_name='providers')
+    version = models.ForeignKey(
+        'boxes.BoxVersion', related_name='providers', on_delete=models.CASCADE)
     provider = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -265,7 +268,8 @@ class BoxUpload(models.Model):
 
     id = models.UUIDField(unique=True, default=uuid.uuid4,
                           editable=False, primary_key=True)
-    box = models.ForeignKey('Box', related_name='uploads')
+    box = models.ForeignKey(
+        'Box', related_name='uploads', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     date_completed = models.DateTimeField(null=True, blank=True)

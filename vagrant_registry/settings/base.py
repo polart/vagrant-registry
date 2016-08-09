@@ -73,7 +73,6 @@ WSGI_APPLICATION = 'vagrant_registry.wsgi.application'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'guardian.backends.ObjectPermissionBackend',
 ]
 
 
@@ -148,3 +147,4 @@ SENDFILE_BACKEND = 'sendfile.backends.development'
 
 
 LOGIN_URL = '/admin/login/'
+LOGOUT_URL = '/admin/logout/'
