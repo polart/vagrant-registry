@@ -168,7 +168,19 @@ class UserBoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
         return self.get_box_object().uploads.all()
 
     def perform_create(self, serializer):
-        serializer.save(box=self.get_box_object())
+        box = self.get_box_object()
+        version = serializer.validated_data['version']
+        provider = serializer.validated_data['provider']
+        try:
+            (box
+             .versions.get(version=version)
+             .providers.get(provider=provider))
+            raise ValidationError(
+                'Provider "{}" already exists for version "{}"'
+                .format(provider, version)
+            )
+        except (BoxVersion.DoesNotExist, BoxProvider.DoesNotExist):
+            serializer.save(box=box)
 
 
 class BoxUploadParser(FileUploadParser):

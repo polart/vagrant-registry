@@ -445,6 +445,28 @@ class UserBoxUploadViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
+    def test_upload_cannot_be_initiated_for_existing_provider(self):
+        user = UserFactory()
+        box = BoxFactory(owner=user)
+        box_version = BoxVersionFactory(box=box)
+        box_provider = BoxProviderFactory(version=box_version)
+
+        data = {
+            'file_size': 100,
+            'checksum_type': BoxProvider.SHA256,
+            'checksum': 'asdf',
+            'version': box_version.version,
+            'provider': box_provider.provider,
+        }
+        request = self.factory.post('/url/', data=data)
+        force_authenticate(request, user=user)
+        response = self.view_list(
+            request,
+            username=box.owner.username,
+            box_name=box.name)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
