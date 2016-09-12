@@ -165,7 +165,7 @@ class BoxVersion(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     version = models.CharField(
         max_length=40, validators=[VERSION_VALIDATOR])
-    description = models.TextField(blank=True)
+    changes = models.TextField(blank=True)
 
     class Meta:
         unique_together = ('box', 'version')

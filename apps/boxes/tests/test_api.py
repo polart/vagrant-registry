@@ -245,7 +245,7 @@ class UserBoxVersionViewSetTestCase(APITestCase):
 
         data = {
             'version': '1.0.1',
-            'description': 'Some description',
+            'changes': 'Initial release',
         }
         request = self.factory.post('/url/', data=data)
         force_authenticate(request, user=user)
@@ -264,7 +264,7 @@ class UserBoxVersionViewSetTestCase(APITestCase):
 
         data = {
             'version': '1.0.1',
-            'description': 'Some description',
+            'changes': 'Initial release',
         }
         request = self.factory.post('/url/', data=data)
         force_authenticate(request, user=user)

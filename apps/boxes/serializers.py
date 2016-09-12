@@ -61,7 +61,7 @@ class BoxVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoxVersion
         fields = ('url', 'date_created', 'date_modified', 'version',
-                  'description', 'providers',)
+                  'changes', 'providers',)
 
 
 class BoxSerializer(serializers.ModelSerializer):
