@@ -147,14 +147,15 @@ class BoxUploadSerializer(serializers.ModelSerializer):
     tag = serializers.ReadOnlyField(source='box.tag')
     status = serializers.SerializerMethodField()
     date_completed = serializers.ReadOnlyField()
+    date_expires = serializers.ReadOnlyField(source='expires')
     file_size = serializers.IntegerField(required=True)
     offset = serializers.ReadOnlyField()
 
     class Meta:
         model = BoxUpload
         fields = ('url', 'id', 'user', 'date_created', 'date_modified',
-                  'date_completed', 'file_size', 'offset', 'status',
-                  'tag', 'checksum_type', 'checksum', 'version',
+                  'date_completed', 'date_expires', 'file_size', 'offset',
+                  'status', 'tag', 'checksum_type', 'checksum', 'version',
                   'provider',)
 
     def get_status(self, obj):

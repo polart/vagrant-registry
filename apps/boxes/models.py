@@ -1,10 +1,12 @@
 import uuid
+from datetime import timedelta
 
 from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from django.conf import settings
 
 from apps.boxes.utils import get_file_hash
 
@@ -256,6 +258,23 @@ def chunked_upload_path(instance, filename):
     )
 
 
+class BoxUploadQuerySet(models.QuerySet):
+
+    def active(self):
+        expire_date = timezone.now() - timedelta(hours=settings.BOX_UPLOAD_EXPIRE_AFTER)
+        return self.exclude(
+            Q(status=BoxUpload.COMPLETED) |
+            Q(date_created__lt=expire_date)
+        )
+
+    def not_active(self):
+        expire_date = timezone.now() - timedelta(hours=settings.BOX_UPLOAD_EXPIRE_AFTER)
+        return self.filter(
+            Q(status=BoxUpload.COMPLETED) |
+            Q(date_created__lt=expire_date)
+        )
+
+
 class BoxUpload(models.Model):
     STARTED = 'S'
     IN_PROGRESS = 'I'
@@ -265,6 +284,8 @@ class BoxUpload(models.Model):
         (IN_PROGRESS, 'In progress'),
         (COMPLETED, 'Completed'),
     )
+
+    objects = BoxUploadQuerySet.as_manager()
 
     id = models.UUIDField(unique=True, default=uuid.uuid4,
                           editable=False, primary_key=True)
@@ -306,10 +327,21 @@ class BoxUpload(models.Model):
     def visibility(self):
         return self.box.visibility
 
+    @property
+    def expires(self):
+        return self.date_created + timedelta(hours=settings.BOX_UPLOAD_EXPIRE_AFTER)
+
+    @property
+    def expired(self):
+        return self.expires < timezone.now()
+
     def user_has_perms(self, perms, user):
         return self.box.user_has_perms(perms, user)
 
     def append_chunk(self, chunk):
+        assert self.status != self.COMPLETED, "Upload already completed"
+        assert not self.expired, "Upload expired"
+
         if self.file:
             # Close file opened by Django in 'rb' mode
             self.file.file.close()

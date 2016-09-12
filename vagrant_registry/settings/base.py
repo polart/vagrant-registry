@@ -145,6 +145,7 @@ REST_FRAMEWORK = {
 
 SENDFILE_BACKEND = 'sendfile.backends.development'
 
+BOX_UPLOAD_EXPIRE_AFTER = 24    # hours
 
 LOGIN_URL = '/admin/login/'
 LOGOUT_URL = '/admin/logout/'
