@@ -106,7 +106,7 @@ class BoxModelTestCase(TestCase):
         b2 = BoxFactory(visibility=Box.USERS)
         b3 = BoxFactory(visibility=Box.PUBLIC)
 
-        self.assertListEqual(list(Box.objects.for_user(user)), [b1, b2, b3])
+        self.assertCountEqual(list(Box.objects.for_user(user)), [b1, b2, b3])
 
     def test_get_boxes_for_anonymous(self):
         user = AnonymousUser()
@@ -115,7 +115,7 @@ class BoxModelTestCase(TestCase):
         b2 = BoxFactory(visibility=Box.USERS)
         b3 = BoxFactory(visibility=Box.PUBLIC)
 
-        self.assertListEqual(list(Box.objects.for_user(user)), [b3])
+        self.assertCountEqual(list(Box.objects.for_user(user)), [b3])
 
     def test_get_boxes_for_authenticated(self):
         user = UserFactory()
@@ -129,5 +129,5 @@ class BoxModelTestCase(TestCase):
         b5 = BoxFactory(visibility=Box.USERS)
         b6 = BoxFactory(visibility=Box.PUBLIC)
 
-        self.assertListEqual(list(Box.objects.for_user(user)),
-                             [b2, b3, b4, b5, b6])
+        self.assertCountEqual(list(Box.objects.for_user(user)),
+                              [b2, b3, b4, b5, b6])

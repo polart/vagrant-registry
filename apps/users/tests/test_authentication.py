@@ -1,4 +1,3 @@
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from apps.factories import UserFactory
@@ -21,7 +20,7 @@ class QueryStringBasedTokenAuthenticationTestCase(APITestCase):
 
     def test_token_in_query_string(self):
         user = UserFactory()
-        token = Token.objects.create(user=user)
+        token = user.auth_token
         request = self.factory.get('/url/')
         request.query_params = {'auth_token': token.key}
 

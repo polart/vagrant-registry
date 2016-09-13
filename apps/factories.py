@@ -1,6 +1,7 @@
 import factory
 import hashlib
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 from apps.boxes import models
 from apps.boxes.models import BoxProvider
@@ -20,6 +21,19 @@ class UserFactory(factory.DjangoModelFactory):
     # User. This will call UserProfileFactory(user=our_new_user),
     # thus skipping the SubFactory.
     profile = factory.RelatedFactory('apps.factories.UserProfileFactory', 'user')
+
+    @classmethod
+    def _generate(cls, create, attrs):
+        """Override the default _generate() to disable the post-save signal."""
+        from apps.users.signals import create_user_profile
+
+        # Note: If the signal was defined with a dispatch_uid, include that in both calls.
+        post_save.disconnect(dispatch_uid='create_user_profile', sender=User)
+        user = super(UserFactory, cls)._generate(create, attrs)
+        post_save.connect(receiver=create_user_profile,
+                          dispatch_uid='create_user_profile',
+                          sender=User)
+        return user
 
 
 class UserProfileFactory(factory.DjangoModelFactory):

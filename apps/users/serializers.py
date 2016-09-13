@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.serializers import raise_errors_on_nested_writes, reverse
 
-from apps.boxes.fields import MultiLookupHyperlinkedRelatedField
 from apps.boxes.models import Box
 from apps.users.models import UserProfile
 
@@ -44,6 +43,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
 
+        # Profile was created on 'post_save' signal
+        profile_serializer.instance = user.profile
         profile_serializer.save(user=user)
         return user
 
