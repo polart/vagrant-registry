@@ -4,5 +4,3 @@ pytz
 djangorestframework==3.4.6
 django-rest-swagger==2.0.5
 django-sendfile==0.3.10
-factory-boy==2.7.0
-coverage==4.2
