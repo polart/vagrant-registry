@@ -116,7 +116,7 @@ urlpatterns = [
     url(r'^downloads/boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/'
         r'(?P<version>\d+\.\d+\.\d+)/'
         r'(?P<provider>[\w.@+-]+).box',
-        DownloadBoxView.as_view(), name='downloads-box'),
+        DownloadBoxView.as_view({'get': 'get'}), name='downloads-box'),
     url(r'^(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         BoxMetadataView.as_view(), name='box-metadata'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
