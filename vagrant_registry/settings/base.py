@@ -133,6 +133,9 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
 
+PROTECTED_MEDIA_URL = '/protected_media/'
+PROTECTED_MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'protected_media')
+
 
 REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',

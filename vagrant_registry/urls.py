@@ -114,8 +114,8 @@ urlpatterns = [
         users_api_views.IsTokenAuthenticated.as_view()),
 
     url(r'^downloads/boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/'
-        r'version/(?P<version>\d+\.\d+\.\d+)/'
-        r'provider/(?P<provider>[\w.@+-]+)/$',
+        r'(?P<version>\d+\.\d+\.\d+)/'
+        r'(?P<provider>[\w.@+-]+).box',
         DownloadBoxView.as_view(), name='downloads-box'),
     url(r'^(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         BoxMetadataView.as_view(), name='box-metadata'),

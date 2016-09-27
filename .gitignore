@@ -1,5 +1,6 @@
 /vagrant_registry/settings/local.py
 /media/
+/protected_media/
 
 ### Python template
 # Byte-compiled / optimized / DLL files

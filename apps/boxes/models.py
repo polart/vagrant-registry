@@ -1,6 +1,7 @@
 import uuid
 from datetime import timedelta
 
+from django.core.files.storage import FileSystemStorage
 from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.db import models
@@ -9,6 +10,12 @@ from django.utils import timezone
 from django.conf import settings
 
 from apps.boxes.utils import get_file_hash
+
+
+protected_storage = FileSystemStorage(
+    location=settings.PROTECTED_MEDIA_ROOT,
+    base_url=settings.PROTECTED_MEDIA_URL
+)
 
 
 class BoxQuerySet(models.QuerySet):
@@ -187,11 +194,10 @@ class BoxVersion(models.Model):
 
 def user_box_upload_path(instance, filename):
     return (
-        'boxes/{owner}/{box_name}/{version}/'
-        '{box_name}_{version}_{provider}.box'.format(
+        'boxes/{owner}/{box_name}/{version}/{provider}.box'.format(
             owner=instance.version.box.owner,
             box_name=instance.version.box.name,
-            version=instance.version.version.replace('.', ''),
+            version=instance.version.version,
             provider=instance.provider)
     )
 
@@ -213,7 +219,8 @@ class BoxProvider(models.Model):
     provider = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    file = models.FileField(upload_to=user_box_upload_path)
+    file = models.FileField(upload_to=user_box_upload_path,
+                            storage=protected_storage)
     file_size = models.BigIntegerField(default=0)
     checksum_type = models.CharField(
         max_length=10,
