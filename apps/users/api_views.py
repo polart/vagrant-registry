@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -30,3 +32,17 @@ class IsTokenAuthenticated(APIView):
             **{'key': kwargs['token']}
         )
         return Response({'username': token.user.username})
+
+
+class ObtainExpiringAuthToken(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        if not created:
+            # Update the created time of the token to keep it valid
+            token.created = timezone.now()
+            token.save()
+        return Response({'token': token.key})

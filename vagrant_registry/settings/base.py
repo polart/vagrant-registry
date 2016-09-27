@@ -140,7 +140,7 @@ PROTECTED_MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'protected_media'
 REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+        'apps.users.authentication.ExpiringTokenAuthentication',
         'apps.users.authentication.QueryStringBasedTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -154,6 +154,8 @@ REST_FRAMEWORK = {
 SENDFILE_BACKEND = 'sendfile.backends.development'
 
 BOX_UPLOAD_EXPIRE_AFTER = 24    # hours
+
+TOKEN_EXPIRE_AFTER = 24     # hours
 
 LOGIN_URL = '/admin/login/'
 LOGOUT_URL = '/admin/logout/'

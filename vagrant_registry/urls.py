@@ -109,7 +109,7 @@ urlpatterns = [
     url(r'^api/', include(api_urlpatterns, namespace='api')),
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls')),
-    url(r'^api-token-auth/$', rf_views.obtain_auth_token),
+    url(r'^api-token-auth/$', users_api_views.ObtainExpiringAuthToken.as_view()),
     url(r'^api-token-auth/(?P<token>\w+)/',
         users_api_views.IsTokenAuthenticated.as_view()),
 
