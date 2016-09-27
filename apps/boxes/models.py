@@ -227,6 +227,7 @@ class BoxProvider(models.Model):
         choices=CHECKSUM_TYPE_CHOICES,
         default=SHA256)
     checksum = models.CharField(max_length=128)
+    pulls = models.PositiveIntegerField(default=0)
 
     class Meta:
         unique_together = ('version', 'provider')

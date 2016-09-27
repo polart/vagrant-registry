@@ -41,7 +41,7 @@ class BoxProviderSerializer(serializers.ModelSerializer):
         model = BoxProvider
         fields = ('url', 'provider', 'date_created', 'date_modified',
                   'checksum_type', 'checksum',
-                  'download_url', 'file_size',)
+                  'download_url', 'file_size', 'pulls')
 
     def get_download_url(self, obj):
         return self.context.get('request').build_absolute_uri(obj.download_url)
