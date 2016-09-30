@@ -22,7 +22,7 @@ RUN pip3 install -r requirements/production.txt
 
 ADD . /code
 
-RUN mkdir -p /logs/nginx /logs/supervisord /logs/gunicorn/
+RUN mkdir -p /logs/nginx /logs/supervisord /logs/gunicorn /logs/django
 
 RUN cp conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

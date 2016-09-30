@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import timedelta
 
@@ -11,6 +12,8 @@ from django.conf import settings
 
 from apps.boxes.utils import get_file_hash
 
+
+logger = logging.getLogger(__name__)
 
 protected_storage = FileSystemStorage(
     location=settings.PROTECTED_MEDIA_ROOT,
@@ -384,7 +387,10 @@ class BoxUpload(models.Model):
         self.date_completed = timezone.now()
 
     def _create_box_version(self):
-        return self.box.versions.get_or_create(version=self.version)[0]
+        version, created = self.box.versions.get_or_create(version=self.version)
+        if created:
+            logger.info('New version created: {}'.format(version))
+        return version
 
     def _create_box_provider(self, box_version):
         assert not self._is_version_provider_exists(), \
@@ -399,6 +405,7 @@ class BoxUpload(models.Model):
         )
         box_provider.file.save(name=str(self.file), content=self.file)
         box_provider.save()
+        logger.info('New box uploaded: {}'.format(box_provider))
 
     def _is_version_provider_exists(self):
         try:

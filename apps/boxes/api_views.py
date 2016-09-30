@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 
 import re
@@ -22,6 +23,9 @@ from apps.boxes.permissions import (
 from apps.boxes.serializers import (
     BoxSerializer, BoxUploadSerializer, BoxMetadataSerializer,
     BoxVersionSerializer, BoxProviderSerializer, BoxMemberSerializer)
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserBoxMixin:
@@ -93,7 +97,8 @@ class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.get_user_object()
         try:
-            serializer.save(owner=user)
+            box = serializer.save(owner=user)
+            logger.info('New box created: {}'.format(box))
         except IntegrityError:
             raise ValidationError("User {} already has box with the name '{}'"
                                   .format(user, serializer.initial_data['name']))
@@ -117,8 +122,11 @@ class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
             user = User.objects.get(username=self.kwargs['member_username'])
         except User.DoesNotExist:
             raise Http404
+
+        box = self.get_box_object()
         try:
-            serializer.save(box=self.get_box_object(), user=user)
+            serializer.save(box=box, user=user)
+            logger.info('Box {} shared with user {}'.format(box, user))
         except IntegrityError:
             raise ValidationError("User '{}' already added to the box"
                                   .format(user))
@@ -135,7 +143,9 @@ class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
         return self.get_box_object().versions.all()
 
     def perform_create(self, serializer):
-        serializer.save(box=self.get_box_object())
+        box = self.get_box_object()
+        version = serializer.save(box=box)
+        logger.info('New version created: {}'.format(version))
 
 
 class UserBoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
@@ -180,7 +190,8 @@ class UserBoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
                 .format(provider, version)
             )
         except (BoxVersion.DoesNotExist, BoxProvider.DoesNotExist):
-            serializer.save(box=box)
+            upload = serializer.save(box=box)
+            logger.info('New upload initiated: {}'.format(upload))
 
 
 class BoxUploadParser(FileUploadParser):

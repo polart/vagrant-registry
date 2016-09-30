@@ -1,9 +1,14 @@
+import logging
+
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.serializers import raise_errors_on_nested_writes, reverse
 
 from apps.boxes.models import Box
 from apps.users.models import UserProfile
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,6 +47,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
+
+        logger.info('New user created: {}'.format(user))
 
         # Profile was created on 'post_save' signal
         profile_serializer.instance = user.profile
