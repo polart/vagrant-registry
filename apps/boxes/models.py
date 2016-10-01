@@ -72,9 +72,9 @@ class Box(models.Model):
         max_length=30,
         validators=[
             RegexValidator(
-                r'^[\w]+$',
-                'Enter a valid name. This value may contain only '
-                'letters and numbers.'
+                r'^[\w.@+-]+$',
+                'Enter a valid name. Name may contain '
+                'letters, digits and @/./+/- only.'
             ),
         ],
     )
