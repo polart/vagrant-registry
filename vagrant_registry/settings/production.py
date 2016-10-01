@@ -27,3 +27,12 @@ X_FRAME_OPTIONS = 'DENY'
 SENDFILE_BACKEND = 'sendfile.backends.nginx'
 SENDFILE_ROOT = PROTECTED_MEDIA_ROOT
 SENDFILE_URL = PROTECTED_MEDIA_URL
+
+if os.environ.get('BEHIND_HTTPS_PROXY', False) == 'true':
+    # WARNING! This should be used only behind HTTPS proxy,
+    # other than from the Docker image! Docker image Nginx server
+    # handles only HTTP requests. In order to serve the site on HTTPS
+    # another proxy server can be used to handle all the HTTPS stuff.
+    # And this setting should be turned on to tell Django, that
+    # traffic on HTTP is secure.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
