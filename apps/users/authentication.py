@@ -1,15 +1,12 @@
-from datetime import timedelta
-
-from django.conf import settings
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
+
+from apps.users.models import MyToken
 
 
 class ExpiringTokenAuthentication(TokenAuthentication):
-    model = Token
+    model = MyToken
 
     def authenticate_credentials(self, key):
         try:
@@ -20,8 +17,7 @@ class ExpiringTokenAuthentication(TokenAuthentication):
         if not token.user.is_active:
             raise AuthenticationFailed(_('User inactive or deleted.'))
 
-        limit = timezone.now() - timedelta(hours=settings.TOKEN_EXPIRE_AFTER)
-        if token.created < limit:
+        if token.is_expired:
             raise AuthenticationFailed(_('Token has expired.'))
 
         return token.user, token

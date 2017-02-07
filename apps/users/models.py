@@ -1,4 +1,9 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.db import models
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 
 class UserProfile(models.Model):
@@ -26,3 +31,22 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return str(self.user)
+
+
+class MyToken(Token):
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Token'
+
+    @property
+    def expires(self):
+        return self.created + timedelta(hours=settings.TOKEN_EXPIRE_AFTER)
+
+    @property
+    def is_expired(self):
+        return self.expires < timezone.now()
+
+    @property
+    def is_valid(self):
+        return not self.is_expired
