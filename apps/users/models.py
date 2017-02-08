@@ -7,13 +7,11 @@ from rest_framework.authtoken.models import Token
 
 
 class UserProfile(models.Model):
-    BOXES_NONE = ''
     BOXES_PERM_R = 'R'
     BOXES_PERM_RW = 'RW'
     BOXES_PERMS_CHOICES = (
-        (BOXES_NONE, 'No permissions'),
-        (BOXES_PERM_R, 'View/pull boxes'),
-        (BOXES_PERM_RW, 'View/pull/push boxes')
+        (BOXES_PERM_R, 'Pull'),
+        (BOXES_PERM_RW, 'Pull/Push')
     )
 
     user = models.OneToOneField(
@@ -26,7 +24,6 @@ class UserProfile(models.Model):
         max_length=2,
         choices=BOXES_PERMS_CHOICES,
         default=BOXES_PERM_RW,
-        blank=True,
     )
 
     def __str__(self):

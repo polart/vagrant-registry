@@ -10,6 +10,10 @@ from apps.boxes import api_views as boxes_api_views
 from apps.boxes.views import DownloadBoxView, BoxMetadataView
 from apps.views import schema_view
 
+admin.site.site_header = 'Vagrant Registry Administration'
+admin.site.site_title = 'Vagrant Registry Administration'
+
+
 router = DefaultRouter()
 router.register(r'users', users_api_views.UserViewSet)
 
