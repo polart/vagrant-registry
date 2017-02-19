@@ -1,0 +1,46 @@
+.form-row.field-box {
+  float: none;
+}
+
+#id_file {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+#id_file + label {
+  color: white;
+  display: inline-block;
+  cursor: pointer;
+  width: 160px;
+  padding: 5px 15px;
+  border-radius: 4px;
+  background: #79aec8;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+#id_file[disabled] + label {
+  opacity: 0.4;
+  cursor: initial;
+}
+
+#id_file:focus + label,
+#id_file + label:hover {
+  background-color: #609ab6;
+}
+
+#id_file:focus + label {
+	outline: 1px dotted #000;
+	outline: -webkit-focus-ring-color auto 5px;
+}
+
+#upload_progress {
+  display: inline-block;
+  margin: 7px;
+}

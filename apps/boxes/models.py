@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
+from humanize import naturalsize
 
 from django.core.files.storage import FileSystemStorage
 from django.urls import reverse
@@ -65,7 +66,7 @@ class Box(models.Model):
     owner = models.ForeignKey(
         'auth.User', related_name='boxes', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
+    date_modified = models.DateTimeField('Last modified', auto_now=True)
     visibility = models.CharField(
         max_length=2, choices=VISIBILITY_CHOICES, default=PRIVATE)
     name = models.CharField(
@@ -84,6 +85,7 @@ class Box(models.Model):
 
     class Meta:
         unique_together = ('owner', 'name')
+        verbose_name_plural = 'Boxes'
 
     def __str__(self):
         return self.tag
@@ -172,13 +174,14 @@ class BoxVersion(models.Model):
     box = models.ForeignKey(
         'boxes.Box', related_name='versions', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
+    date_modified = models.DateTimeField('Last modified', auto_now=True)
     version = models.CharField(
         max_length=40, validators=[VERSION_VALIDATOR])
     changes = models.TextField(blank=True)
 
     class Meta:
         unique_together = ('box', 'version')
+        verbose_name_plural = 'Box versions'
 
     def __str__(self):
         return '{} v{}'.format(self.box, self.version)
@@ -221,7 +224,7 @@ class BoxProvider(models.Model):
         'boxes.BoxVersion', related_name='providers', on_delete=models.CASCADE)
     provider = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
+    date_modified = models.DateTimeField('Last modified', auto_now=True)
     file = models.FileField(upload_to=user_box_upload_path,
                             storage=protected_storage)
     file_size = models.BigIntegerField(default=0)
@@ -257,6 +260,10 @@ class BoxProvider(models.Model):
     @property
     def visibility(self):
         return self.version.box.visibility
+
+    @property
+    def human_file_size(self):
+        return naturalsize(self.file_size)
 
     def user_has_perms(self, perms, user):
         return self.version.box.user_has_perms(perms, user)
@@ -303,7 +310,7 @@ class BoxUpload(models.Model):
     box = models.ForeignKey(
         'Box', related_name='uploads', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
+    date_modified = models.DateTimeField('Last modified', auto_now=True)
     date_completed = models.DateTimeField(null=True, blank=True)
     file = models.FileField(
         max_length=255, upload_to=chunked_upload_path,
@@ -325,7 +332,7 @@ class BoxUpload(models.Model):
 
     def __str__(self):
         return (
-            '({self.id}) {self.box.tag} v{self.version} '
+            '{self.box.tag} v{self.version} '
             '{self.provider}: {status}'
             .format(self=self, status=self.get_status_display())
         )
@@ -345,6 +352,21 @@ class BoxUpload(models.Model):
     @property
     def expired(self):
         return self.expires < timezone.now()
+
+    @property
+    def human_file_size(self):
+        return naturalsize(self.file_size)
+
+    @property
+    def progress_size(self):
+        return naturalsize(self.offset)
+
+    @property
+    def progress_percent(self):
+        try:
+            return self.offset / self.file_size * 100
+        except ZeroDivisionError:
+            return 0
 
     def user_has_perms(self, perms, user):
         return self.box.user_has_perms(perms, user)

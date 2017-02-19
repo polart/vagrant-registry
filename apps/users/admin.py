@@ -23,8 +23,6 @@ class MyTokenAdmin(TokenAdmin):
 class UserProfileAdminInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
-    # verbose_name = 'Permission'
-    # verbose_name_plural = 'Permissions'
 
 
 class MyUserAdmin(UserAdmin):

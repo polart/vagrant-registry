@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from django.http import Http404
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, ParseError
 from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import (
     RetrieveModelMixin, DestroyModelMixin, ListModelMixin)
@@ -185,7 +185,7 @@ class UserBoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
             (box
              .versions.get(version=version)
              .providers.get(provider=provider))
-            raise ValidationError(
+            raise ParseError(
                 'Provider "{}" already exists for version "{}"'
                 .format(provider, version)
             )
@@ -262,7 +262,7 @@ class UserBoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
                 'Last byte position ({}) is greater than complete '
                 'length ({}).'
                 .format(crange.end, crange.total))
-        if new_chunk.size != crange.end - crange.start:
+        if new_chunk.size != crange.end - crange.start + 1:
             return self._get_range_not_satisfiable_response(
                 "Uploaded content length ({}) doesn't much content "
                 "range ({}) specified in the header."
