@@ -48,19 +48,14 @@ box_version_list = boxes_api_views.UserBoxVersionViewSet.as_view({
 })
 box_version_detail = boxes_api_views.UserBoxVersionViewSet.as_view({
     'get': 'retrieve',
-    # 'put': 'update',
-    # 'patch': 'partial_update',
     'delete': 'destroy'
 })
 
 box_provider_list = boxes_api_views.UserBoxProviderViewSet.as_view({
     'get': 'list',
-    # 'post': 'create'
 })
 box_provider_detail = boxes_api_views.UserBoxProviderViewSet.as_view({
     'get': 'retrieve',
-    # 'put': 'update',
-    # 'patch': 'partial_update',
     'delete': 'destroy'
 })
 
@@ -77,7 +72,7 @@ box_metadata_detail = boxes_api_views.UserBoxMetadataViewSet.as_view({
     'get': 'retrieve',
 })
 
-api_urlpatterns = [
+api_v1_urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^boxes/$', all_box_list, name='boxall-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/$', box_list, name='box-list'),
@@ -109,7 +104,13 @@ api_urlpatterns = [
     url(r'^tokens/$', users_api_views.ObtainExpiringAuthToken.as_view()),
     url(r'^tokens/(?P<token>\w+)/',
         users_api_views.IsTokenAuthenticated.as_view()),
-    url(r'^docs/', schema_view),
+    url(r'^docs/', schema_view, name='schema-view'),
+]
+
+api_urlpatterns = [
+    url(r'^v1/', include(api_v1_urlpatterns, namespace='v1')),
+    # Latest API without explicit version
+    url(r'^', include(api_v1_urlpatterns, namespace='v1')),
 ]
 
 urlpatterns = [

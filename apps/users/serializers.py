@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(
-        view_name="api:user-detail", lookup_field='username')
+        view_name="api:v1:user-detail", lookup_field='username')
     boxes = serializers.SerializerMethodField()
 
     class Meta:
@@ -27,7 +27,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
         return [
             request.build_absolute_uri(
-                reverse('api:box-detail',
+                reverse('api:v1:box-detail',
                         kwargs={
                             'username': obj.username,
                             'box_name': box.name

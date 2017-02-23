@@ -8,7 +8,7 @@ from apps.boxes.models import (
 
 class BoxMemberSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
-        view_name="api:boxmember-detail",
+        view_name="api:v1:boxmember-detail",
         multi_lookup_map={
             'box.owner.username': 'username',
             'box.name': 'box_name',
@@ -27,7 +27,7 @@ class BoxMemberSerializer(serializers.ModelSerializer):
 
 class BoxProviderSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
-        view_name="api:boxprovider-detail",
+        view_name="api:v1:boxprovider-detail",
         multi_lookup_map={
             'owner.username': 'username',
             'version.box.name': 'box_name',
@@ -49,7 +49,7 @@ class BoxProviderSerializer(serializers.ModelSerializer):
 
 class BoxVersionSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
-        view_name="api:boxversion-detail",
+        view_name="api:v1:boxversion-detail",
         multi_lookup_map={
             'owner.username': 'username',
             'box.name': 'box_name',
@@ -71,7 +71,7 @@ class BoxSerializer(serializers.ModelSerializer):
     }
 
     url = MultiLookupHyperlinkedIdentityField(
-        view_name="api:box-detail",
+        view_name="api:v1:box-detail",
         multi_lookup_map={
             'owner.username': 'username',
             'name': 'box_name'
@@ -136,7 +136,7 @@ class BoxMetadataSerializer(serializers.ModelSerializer):
 
 class BoxUploadSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
-        view_name="api:boxupload-detail",
+        view_name="api:v1:boxupload-detail",
         multi_lookup_map={
             'box.owner.username': 'username',
             'box.name': 'box_name',
