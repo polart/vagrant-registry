@@ -2,12 +2,11 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
-from rest_framework.authtoken import views as rf_views
 from rest_framework.routers import DefaultRouter
 
 from apps.users import api_views as users_api_views
 from apps.boxes import api_views as boxes_api_views
-from apps.boxes.views import DownloadBoxView, BoxMetadataView
+from apps.boxes.views import DownloadBoxView
 from apps.views import schema_view
 
 admin.site.site_header = 'Vagrant Registry Administration'
@@ -106,21 +105,20 @@ api_urlpatterns = [
         box_upload_list, name='boxupload-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',
         box_upload_detail, name='boxupload-detail'),
+    url(r'^auth/', include('rest_framework.urls')),
+    url(r'^tokens/$', users_api_views.ObtainExpiringAuthToken.as_view()),
+    url(r'^tokens/(?P<token>\w+)/',
+        users_api_views.IsTokenAuthenticated.as_view()),
     url(r'^docs/', schema_view),
 ]
 
 urlpatterns = [
     url(r'^api/', include(api_urlpatterns, namespace='api')),
     url(r'^admin/', admin.site.urls),
-    url(r'^api-auth/', include('rest_framework.urls')),
-    url(r'^api-token-auth/$', users_api_views.ObtainExpiringAuthToken.as_view()),
-    url(r'^api-token-auth/(?P<token>\w+)/',
-        users_api_views.IsTokenAuthenticated.as_view()),
-
     url(r'^downloads/boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/'
         r'(?P<version>\d+\.\d+\.\d+)/'
         r'(?P<provider>[\w.@+-]+).box',
         DownloadBoxView.as_view({'get': 'get'}), name='downloads-box'),
-    url(r'^(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
-        BoxMetadataView.as_view(), name='box-metadata'),
+    url(r'^box-metadata/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
+        box_metadata_detail, name='box-metadata'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
