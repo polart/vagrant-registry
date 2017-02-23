@@ -472,7 +472,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # User staff user, so there is no need to assign permissions
+        # Use staff user, so there is no need to assign permissions
         cls.user = StaffFactory()
 
     def setUp(self):
@@ -551,7 +551,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         bu_factory = BoxUploadFactory(box__owner=self.user,
                                       file_content=file_data)
 
-        request = self.get_request(file_data, (0, file_len, file_len + 10))
+        request = self.get_request(file_data, (0, file_len - 1, file_len + 10))
         response = self.get_response(request, bu_factory)
 
         self.assertEqual(response.status_code,
@@ -574,7 +574,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
                                       box__owner=self.user,
                                       file_content=file_data)
 
-        request = self.get_request(file_data, (2, file_len, file_len))
+        request = self.get_request(file_data, (2, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
 
         self.assertEqual(response.status_code,
@@ -585,7 +585,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         bu_factory = BoxUploadFactory(box__owner=self.user,
                                       file_content=file_data)
 
-        request = self.get_request('poop', (0, file_len, file_len))
+        request = self.get_request('poop', (0, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -598,7 +598,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
                                       version=bp_factory.version.version,
                                       provider=bp_factory.provider)
 
-        request = self.get_request(file_data, (0, file_len, file_len))
+        request = self.get_request(file_data, (0, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -608,7 +608,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         bu_factory = BoxUploadFactory(box__owner=self.user,
                                       file_content=file_data)
 
-        request = self.get_request(file_data, (0, file_len, file_len))
+        request = self.get_request(file_data, (0, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -618,7 +618,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         bu_factory = BoxUploadFactory(box__owner=self.user,
                                       file_content=file_data)
 
-        request = self.get_request(file_data, (0, file_len, file_len))
+        request = self.get_request(file_data, (0, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
 
         self.assertEqual(response.status_code,
@@ -645,7 +645,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
         for i in range(chunks_num):
             request = self.get_request(
-                chunk, (chunk_len * i, chunk_len * (i + 1), file_len))
+                chunk, (chunk_len * i, chunk_len * (i + 1) - 1, file_len))
             response = self.get_response(request, bu_factory)
 
             if i == chunks_num - 1:
