@@ -2,7 +2,8 @@ import logging
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from rest_framework.serializers import raise_errors_on_nested_writes, reverse
+from rest_framework.reverse import reverse
+from rest_framework.serializers import raise_errors_on_nested_writes
 
 from apps.boxes.models import Box
 from apps.users.models import UserProfile
