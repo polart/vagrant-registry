@@ -27,9 +27,6 @@ class BoxQuerySet(models.QuerySet):
     def private(self):
         return self.filter(visibility=Box.PRIVATE)
 
-    def with_users(self):
-        return self.filter(visibility=Box.USERS)
-
     def public(self):
         return self.filter(visibility=Box.PUBLIC)
 
@@ -43,7 +40,7 @@ class BoxQuerySet(models.QuerySet):
         return (self
                 .filter(
                     Q(shared_with=user) |
-                    Q(visibility__in=[Box.PUBLIC, Box.USERS]) |
+                    Q(visibility=Box.PUBLIC) |
                     Q(owner=user))
                 .distinct())
 
@@ -53,11 +50,9 @@ class BoxQuerySet(models.QuerySet):
 
 class Box(models.Model):
     PRIVATE = 'PT'
-    USERS = 'AU'
     PUBLIC = 'PC'
     VISIBILITY_CHOICES = (
         (PRIVATE, 'Private'),
-        (USERS, 'All users'),
         (PUBLIC, 'Public'),
     )
 
@@ -109,7 +104,6 @@ class Box(models.Model):
             except BoxMember.DoesNotExist:
                 visibility_perms = {
                     self.PUBLIC: BoxMember.PERM_R,
-                    self.USERS: BoxMember.PERM_R,
                     self.PRIVATE: BoxMember.PERM_NONE,
                 }
                 return visibility_perms[self.visibility]
@@ -117,7 +111,6 @@ class Box(models.Model):
         else:
             visibility_perms = {
                 self.PUBLIC: BoxMember.PERM_R,
-                self.USERS: BoxMember.PERM_NONE,
                 self.PRIVATE: BoxMember.PERM_NONE,
             }
             return visibility_perms[self.visibility]
@@ -139,7 +132,7 @@ class Box(models.Model):
 class BoxMember(models.Model):
     PERM_R = 'R'
     PERM_RW = 'RW'
-    PERM_OWNER_OR_STAFF = 'FULL'
+    PERM_OWNER_OR_STAFF = '*'
     PERM_NONE = ''
     PERMS_CHOICES = (
         (PERM_R, 'View/pull box'),

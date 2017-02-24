@@ -41,7 +41,7 @@ class PermissionsTestCase(APITestCase):
                             share_with=None, share_perm=None):
         if box_owner is None:
             box_owner = UserFactory()
-        for visibility in [Box.PRIVATE, Box.USERS, Box.PUBLIC]:
+        for visibility in [Box.PRIVATE, Box.PUBLIC]:
             box = BoxFactory(visibility=visibility, owner=box_owner)
             if share_with:
                 box.share_with(share_with, share_perm)
@@ -84,17 +84,6 @@ class BoxPermissionsTestCase(PermissionsTestCase):
             'DELETE': Http404,
         }
         box = BoxFactory(visibility=Box.PRIVATE)
-        self.check_obj_perms(checks, user, box)
-
-    def test_anonymous_users_box_object_perms(self):
-        user = AnonymousUser()
-        checks = {
-            'GET': Http404,
-            'PATCH': Http404,
-            'POST': Http404,
-            'DELETE': Http404,
-        }
-        box = BoxFactory(visibility=Box.USERS)
         self.check_obj_perms(checks, user, box)
 
     def test_anonymous_public_box_object_perms(self):
@@ -170,17 +159,6 @@ class BoxPermissionsTestCase(PermissionsTestCase):
         }
         box = BoxFactory(visibility=Box.PRIVATE)
         box.share_with(user, BoxMember.PERM_RW)
-        self.check_obj_perms(checks, user, box)
-
-    def test_authenticated_users_box_object_permissions(self):
-        user = UserFactory()
-        checks = {
-            'GET': True,
-            'PATCH': False,
-            'POST': False,
-            'DELETE': False,
-        }
-        box = BoxFactory(visibility=Box.USERS)
         self.check_obj_perms(checks, user, box)
 
 

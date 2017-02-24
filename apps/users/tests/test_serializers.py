@@ -47,13 +47,14 @@ class UserSerializerTestCase(APITestCase):
     def test_get_boxes(self):
         user1 = UserFactory()
         user2 = UserFactory()
-        BoxFactory(owner=user1, visibility=Box.PRIVATE)
-        BoxFactory(owner=user1, visibility=Box.USERS)
-        BoxFactory(owner=user1, visibility=Box.PUBLIC)
+        b1 = BoxFactory(owner=user1, visibility=Box.PRIVATE)
+        b2 = BoxFactory(owner=user1, visibility=Box.PUBLIC)
 
         request = APIRequestFactory().get('/url/')
         request.user = user2
         self.serializer.context['request'] = request
         boxes = self.serializer.get_boxes(user1)
-        self.assertEqual(len(boxes), 2, msg="Private box shouldn't be shown")
+
+        self.assertEqual(len(boxes), 1, msg="Private box shouldn't be shown")
+        self.assertIn(b2.name, boxes[0])
         self.assertIn('http://', boxes[0], msg="Should be absolute URL")

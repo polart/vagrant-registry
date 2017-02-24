@@ -32,9 +32,6 @@ class BoxModelTestCase(TestCase):
         box = BoxFactory(visibility=Box.PRIVATE)
         self.check_perms(user, box, '')
 
-        box = BoxFactory(visibility=Box.USERS)
-        self.check_perms(user, box, '')
-
         box = BoxFactory(visibility=Box.PUBLIC)
         self.check_perms(user, box, BoxMember.PERM_R)
 
@@ -43,9 +40,6 @@ class BoxModelTestCase(TestCase):
 
         box = BoxFactory(visibility=Box.PRIVATE)
         self.check_perms(user, box, '')
-
-        box = BoxFactory(visibility=Box.USERS)
-        self.check_perms(user, box, BoxMember.PERM_R)
 
         box = BoxFactory(visibility=Box.PUBLIC)
         self.check_perms(user, box, BoxMember.PERM_R)
@@ -57,10 +51,6 @@ class BoxModelTestCase(TestCase):
         box.share_with(user, BoxMember.PERM_R)
         self.check_perms(user, box, BoxMember.PERM_R)
 
-        box = BoxFactory(visibility=Box.USERS)
-        box.share_with(user, BoxMember.PERM_R)
-        self.check_perms(user, box, BoxMember.PERM_R)
-
         box = BoxFactory(visibility=Box.PUBLIC)
         box.share_with(user, BoxMember.PERM_R)
         self.check_perms(user, box, BoxMember.PERM_R)
@@ -69,10 +59,6 @@ class BoxModelTestCase(TestCase):
         user = UserFactory()
 
         box = BoxFactory(visibility=Box.PRIVATE)
-        box.share_with(user, BoxMember.PERM_RW)
-        self.check_perms(user, box, BoxMember.PERM_RW)
-
-        box = BoxFactory(visibility=Box.USERS)
         box.share_with(user, BoxMember.PERM_RW)
         self.check_perms(user, box, BoxMember.PERM_RW)
 
@@ -103,19 +89,17 @@ class BoxModelTestCase(TestCase):
         user = StaffFactory()
 
         b1 = BoxFactory(visibility=Box.PRIVATE)
-        b2 = BoxFactory(visibility=Box.USERS)
-        b3 = BoxFactory(visibility=Box.PUBLIC)
+        b2 = BoxFactory(visibility=Box.PUBLIC)
 
-        self.assertCountEqual(list(Box.objects.for_user(user)), [b1, b2, b3])
+        self.assertCountEqual(list(Box.objects.for_user(user)), [b1, b2])
 
     def test_get_boxes_for_anonymous(self):
         user = AnonymousUser()
 
         b1 = BoxFactory(visibility=Box.PRIVATE)
-        b2 = BoxFactory(visibility=Box.USERS)
-        b3 = BoxFactory(visibility=Box.PUBLIC)
+        b2 = BoxFactory(visibility=Box.PUBLIC)
 
-        self.assertCountEqual(list(Box.objects.for_user(user)), [b3])
+        self.assertCountEqual(list(Box.objects.for_user(user)), [b2])
 
     def test_get_boxes_for_authenticated(self):
         user = UserFactory()
@@ -126,8 +110,9 @@ class BoxModelTestCase(TestCase):
         b3.share_with(user, BoxMember.PERM_RW)
         b4 = BoxFactory(visibility=Box.PRIVATE)
         b4.share_with(user, BoxMember.PERM_R)
-        b5 = BoxFactory(visibility=Box.USERS)
-        b6 = BoxFactory(visibility=Box.PUBLIC)
+        b5 = BoxFactory(visibility=Box.PUBLIC)
 
-        self.assertCountEqual(list(Box.objects.for_user(user)),
-                              [b2, b3, b4, b5, b6])
+        self.assertCountEqual(
+            list(Box.objects.for_user(user)),
+            [b2, b3, b4, b5]
+        )

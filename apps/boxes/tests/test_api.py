@@ -21,15 +21,14 @@ class BoxViewSetTestCase(APITestCase):
         b1 = BoxFactory(visibility=Box.PRIVATE)
         b2 = BoxFactory(visibility=Box.PRIVATE)
         b2.share_with(user, BoxMember.PERM_R)
-        b3 = BoxFactory(visibility=Box.USERS)
 
         request = self.factory.get('/url/')
         force_authenticate(request, user=user)
         response = self.view(request)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # b3 and b2; b1 not shared with user
-        self.assertEqual(len(response.data), 2)
+        # only b2; b1 not shared with user
+        self.assertEqual(len(response.data), 1)
 
 
 class UserBoxViewSetTestCase(APITestCase):
@@ -45,16 +44,14 @@ class UserBoxViewSetTestCase(APITestCase):
         b1 = BoxFactory(visibility=Box.PRIVATE, owner=user1)
         b2 = BoxFactory(visibility=Box.PRIVATE, owner=user1)
         b2.share_with(user, BoxMember.PERM_R)
-        b3 = BoxFactory(visibility=Box.USERS, owner=user1)
-        b4 = BoxFactory(visibility=Box.USERS)
 
         request = self.factory.get('/url/')
         force_authenticate(request, user=user)
         response = self.view_list(request, username=user1.username)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # b3 and b2; b1 not shared with user; b4 different owner
-        self.assertEqual(len(response.data), 2)
+        # only b2; b1 not shared with user; b4 different owner
+        self.assertEqual(len(response.data), 1)
 
     def test_user_creates_own_box(self):
         user = UserFactory()

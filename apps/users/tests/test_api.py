@@ -15,8 +15,7 @@ class UserViewSetTestCase(APITestCase):
         cls.user1 = UserFactory()
 
         cls.box1 = BoxFactory(owner=cls.user1, visibility=Box.PRIVATE)
-        cls.box2 = BoxFactory(owner=cls.user1, visibility=Box.USERS)
-        cls.box3 = BoxFactory(owner=cls.user1, visibility=Box.PUBLIC)
+        cls.box2 = BoxFactory(owner=cls.user1, visibility=Box.PUBLIC)
 
     def setUp(self):
         self.factory = APIRequestFactory()
