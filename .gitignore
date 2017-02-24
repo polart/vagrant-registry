@@ -1,6 +1,6 @@
-/vagrant_registry/settings/local.py
-/media/
-/protected_media/
+/api/vagrant_registry/settings/local.py
+/api/media/
+/api/protected_media/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -56,7 +56,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-local_settings.py
 
 # Flask stuff:
 instance/
