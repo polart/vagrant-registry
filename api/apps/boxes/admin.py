@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from apps.boxes.models import Box, BoxVersion, BoxProvider, BoxUpload
 
@@ -88,9 +89,9 @@ class BoxVersionAdmin(admin.ModelAdmin):
 class BoxProviderAdmin(admin.ModelAdmin):
     model = BoxProvider
 
-    fields = ('version', 'provider', 'file', 'human_file_size',
+    fields = ('version', 'provider', 'file_link', 'human_file_size',
               'date_created', 'date_modified', 'pulls', )
-    readonly_fields = ('file', 'human_file_size', 'date_created',
+    readonly_fields = ('file_link', 'human_file_size', 'date_created',
                        'date_modified', 'pulls',)
     list_filter = ('version__box__visibility', 'provider', )
     list_display = ('__str__', 'owner', 'name', 'version_name', 'provider',
@@ -132,6 +133,13 @@ class BoxProviderAdmin(admin.ModelAdmin):
         return obj.version.box.get_visibility_display()
     visibility.admin_order_field = 'version__box__visibility'
 
+    def file_link(self, obj):
+        return mark_safe('<a href="{}">{}.box</a>'.format(
+            obj.download_url,
+            obj.provider,
+        ))
+    file_link.short_description = 'File'
+
 
 class BoxUploadForm(forms.ModelForm):
     api_upload_url = forms.CharField(widget=forms.HiddenInput,)
@@ -147,9 +155,10 @@ class BoxUploadForm(forms.ModelForm):
         self.fields['file'].widget = forms.FileInput()
 
         if self.instance.box_id:
-            self.fields['file'].help_text = 'To continue upload select original file and submit the form'
+            self.fields['file'].help_text = \
+                'To continue upload select original file and submit the form'
             self.fields['api_upload_url'].initial = reverse(
-                'api:boxupload-detail',
+                'api:v1:boxupload-detail',
                 kwargs={
                     'username': self.instance.owner.username,
                     'box_name': self.instance.box.name,
