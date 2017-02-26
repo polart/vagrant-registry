@@ -1,6 +1,7 @@
 /api/vagrant_registry/settings/local.py
 /api/media/
 /api/protected_media/
+/api/db.sqlite3
 
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -91,3 +92,20 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+
+### NodeJS
+# dependencies
+/client/node_modules
+
+# testing
+/client/coverage
+
+# production
+/client/build
+
+# misc
+.DS_Store
+/client/npm-debug.log*
+/client/yarn-debug.log*
+/client/yarn-error.log*
