@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets
@@ -9,6 +9,9 @@ from rest_framework.views import APIView
 
 from apps.users.permissions import UserPermissions
 from apps.users.serializers import UserSerializer, ForStaffUserSerializer
+
+
+User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):

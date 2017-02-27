@@ -1,9 +1,50 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
+
+
+# Usage of these usernames is restricted because they would interfere
+# with site specific URLs when used in boxes short URLs:
+# https://example.com/<username>/<box_name>/
+RESTRICTED_USERNAMES = [
+    'static',
+    'media',
+    'admin',
+    'box-metadata',
+    'downloads',
+    'api',
+]
+
+
+def restrict_username_validator(value):
+    if value in RESTRICTED_USERNAMES:
+        raise ValidationError('Username "{}" not allowed.'.format(value))
+
+
+class User(AbstractUser):
+
+    username = models.CharField(
+        _('username'),
+        max_length=150,
+        unique=True,
+        help_text=_(
+            'Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'
+        ),
+        validators=[
+            UnicodeUsernameValidator(),
+            restrict_username_validator,
+        ],
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        },
+    )
 
 
 class UserProfile(models.Model):
@@ -15,7 +56,7 @@ class UserProfile(models.Model):
     )
 
     user = models.OneToOneField(
-        'auth.User',
+        settings.AUTH_USER_MODEL,
         related_name='profile',
         on_delete=models.CASCADE,
         primary_key=True,

@@ -2,7 +2,8 @@ import logging
 from collections import namedtuple
 
 import re
-from django.contrib.auth.models import User
+
+from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.http import Http404
 from rest_framework import status
@@ -26,6 +27,8 @@ from apps.boxes.serializers import (
 
 
 logger = logging.getLogger(__name__)
+
+User = get_user_model()
 
 
 class UserBoxMixin:

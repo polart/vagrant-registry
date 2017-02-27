@@ -59,7 +59,10 @@ class Box(models.Model):
     objects = BoxQuerySet.as_manager()
 
     owner = models.ForeignKey(
-        'auth.User', related_name='boxes', on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL,
+        related_name='boxes',
+        on_delete=models.CASCADE
+    )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField('Last modified', auto_now=True)
     visibility = models.CharField(
@@ -76,7 +79,10 @@ class Box(models.Model):
     )
     short_description = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
-    shared_with = models.ManyToManyField('auth.User', through='boxes.BoxMember')
+    shared_with = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='boxes.BoxMember'
+    )
 
     class Meta:
         unique_together = ('owner', 'name')
@@ -139,7 +145,10 @@ class BoxMember(models.Model):
         (PERM_RW, 'View/pull/push box')
     )
 
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
     box = models.ForeignKey('boxes.Box', on_delete=models.CASCADE)
     permissions = models.CharField(
         max_length=2,
@@ -306,8 +315,12 @@ class BoxUpload(models.Model):
     date_modified = models.DateTimeField('Last modified', auto_now=True)
     date_completed = models.DateTimeField(null=True, blank=True)
     file = models.FileField(
-        max_length=255, upload_to=chunked_upload_path,
-        null=True, blank=True)
+        max_length=255,
+        upload_to=chunked_upload_path,
+        storage=protected_storage,
+        null=True,
+        blank=True,
+    )
     filename = models.CharField(max_length=255)
     file_size = models.BigIntegerField(default=0)
     offset = models.BigIntegerField(default=0)

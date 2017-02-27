@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 from rest_framework.authtoken.admin import TokenAdmin
 
 from rest_framework.authtoken.models import Token
 
-from apps.users.models import MyToken, UserProfile
+from apps.users.models import UserProfile, User, MyToken
 
 
 class MyTokenAdmin(TokenAdmin):
@@ -48,7 +48,6 @@ class MyUserAdmin(UserAdmin):
 
 
 admin.site.unregister(Token)
-admin.site.unregister(User)
 admin.site.unregister(Group)
 
 admin.site.register(MyToken, MyTokenAdmin)

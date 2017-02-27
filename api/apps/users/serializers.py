@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from rest_framework.serializers import raise_errors_on_nested_writes
@@ -10,6 +10,8 @@ from apps.users.models import UserProfile
 
 
 logger = logging.getLogger(__name__)
+
+User = get_user_model()
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

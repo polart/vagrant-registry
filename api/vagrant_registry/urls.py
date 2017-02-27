@@ -12,8 +12,6 @@ from apps.views import schema_view
 admin.site.site_header = 'Vagrant Registry Administration'
 admin.site.site_title = 'Vagrant Registry Administration'
 
-# TODO: don't allow to create users admin / box-metadata / downloads / api
-
 
 router = DefaultRouter()
 router.register(r'users', users_api_views.UserViewSet)

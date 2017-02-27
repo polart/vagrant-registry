@@ -1,11 +1,15 @@
 import factory
 import hashlib
-from django.contrib.auth.models import User
+
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 
 from apps.boxes import models
 from apps.boxes.models import BoxProvider
 from apps.users.models import UserProfile
+
+
+User = get_user_model()
 
 
 class UserFactory(factory.DjangoModelFactory):

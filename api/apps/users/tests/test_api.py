@@ -1,7 +1,6 @@
-from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIRequestFactory, force_authenticate
 from rest_framework import status
-from apps.boxes.models import Box, BoxMember
+from apps.boxes.models import Box
 from apps.factories import StaffFactory, UserFactory, BoxFactory
 from apps.users.api_views import UserViewSet
 from apps.users.models import UserProfile
