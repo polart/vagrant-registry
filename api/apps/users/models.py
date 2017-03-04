@@ -15,6 +15,7 @@ from rest_framework.authtoken.models import Token
 # https://example.com/<username>/<box_name>/
 RESTRICTED_USERNAMES = [
     'static',
+    'static-api',
     'media',
     'admin',
     'box-metadata',

@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /code
 # Run it before adding /code dir in order to cache pip installs
-ADD ./requirements /code/requirements
-RUN pip3 install -r requirements/production.txt
+ADD ./api/requirements /code/api/requirements
+RUN pip3 install -r api/requirements/production.txt
 
 ADD . /code
 
