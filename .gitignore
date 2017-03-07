@@ -1,6 +1,8 @@
 /api/vagrant_registry/settings/local.py
 /api/media/
+/api/media_test/
 /api/protected_media/
+/api/protected_media_test/
 /api/db.sqlite3
 
 ### Python template

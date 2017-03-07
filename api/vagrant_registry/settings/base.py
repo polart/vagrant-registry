@@ -237,3 +237,5 @@ LOGGING = {
 
 if 'test' in sys.argv:
     logging.disable(logging.CRITICAL)
+    MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media_test')
+    PROTECTED_MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'protected_media_test')
