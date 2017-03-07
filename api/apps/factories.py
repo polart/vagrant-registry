@@ -1,3 +1,5 @@
+import random
+
 import factory
 import hashlib
 
@@ -12,13 +14,36 @@ from apps.users.models import UserProfile
 User = get_user_model()
 
 
+PROVIDERS = [
+    'virtualbox',
+    'vmware',
+    'docker',
+    'google',
+    'aws',
+    'digitalocean',
+]
+
+
+def get_random_provider():
+    return random.choice(PROVIDERS)
+
+
+def get_random_version():
+    return '{}.{}.{}'.format(
+        random.randint(0, 10),
+        random.randint(0, 15),
+        random.randint(0, 20),
+    )
+
+
 class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
 
-    username = factory.Sequence(lambda n: 'username{0}'.format(n))
-    first_name = 'John'
-    last_name = factory.Sequence(lambda n: 'User{0}'.format(n))
+    username = factory.Faker('user_name')
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('email')
     is_staff = False
     is_superuser = False
     # We pass in 'user' to link the generated Profile to our just-generated
@@ -51,13 +76,11 @@ class UserProfileFactory(factory.DjangoModelFactory):
 
 
 class AdminFactory(UserFactory):
-    first_name = 'Admin'
     is_staff = True
     is_superuser = True
 
 
 class StaffFactory(UserFactory):
-    first_name = 'Staff'
     is_staff = True
     is_superuser = False
 
@@ -67,8 +90,9 @@ class BoxFactory(factory.DjangoModelFactory):
         model = models.Box
 
     owner = factory.SubFactory(UserFactory)
-    name = factory.Sequence(lambda n: 'box{0}'.format(n))
+    name = factory.Faker('domain_word')
     visibility = models.Box.PRIVATE
+    short_description = factory.Faker('text', max_nb_chars=100)
 
 
 class BoxVersionFactory(factory.DjangoModelFactory):
@@ -76,10 +100,18 @@ class BoxVersionFactory(factory.DjangoModelFactory):
         model = models.BoxVersion
 
     box = factory.SubFactory(BoxFactory)
-    version = '0.0.1'
+    version = factory.LazyFunction(get_random_version)
 
 
 FILE_CONTENT = b'test'
+
+
+def object_file_content(o):
+    if o.file:
+        o.file.seek(0)
+        return o.file.read()
+    else:
+        return b''
 
 
 class BoxProviderFactory(factory.DjangoModelFactory):
@@ -87,11 +119,15 @@ class BoxProviderFactory(factory.DjangoModelFactory):
         model = models.BoxProvider
 
     version = factory.SubFactory(BoxVersionFactory)
-    provider = 'virtualbox'
+    provider = factory.LazyFunction(get_random_provider)
     file = factory.django.FileField(data=FILE_CONTENT)
+    file_size = factory.LazyAttribute(
+        lambda o: len(object_file_content(o))
+    )
     checksum = factory.LazyAttribute(
-        lambda o: hashlib.sha256(FILE_CONTENT).hexdigest())
+        lambda o: hashlib.sha256(object_file_content(o)).hexdigest())
     checksum_type = BoxProvider.SHA256
+    pulls = factory.Faker('random_int', min=0, max=100)
 
 
 class BoxUploadFactory(factory.DjangoModelFactory):
@@ -102,8 +138,8 @@ class BoxUploadFactory(factory.DjangoModelFactory):
         file_content = b'test'
 
     box = factory.SubFactory(BoxFactory)
-    version = '1.0.0'
-    provider = 'virtualbox'
+    version = factory.LazyFunction(get_random_version)
+    provider = factory.LazyFunction(get_random_provider)
     file_size = factory.LazyAttribute(lambda o: len(o.file_content))
     checksum = factory.LazyAttribute(
         lambda o: hashlib.sha256(o.file_content).hexdigest())
