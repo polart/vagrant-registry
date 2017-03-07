@@ -21,6 +21,7 @@ RESTRICTED_USERNAMES = [
     'box-metadata',
     'downloads',
     'api',
+    'me',
 ]
 
 
