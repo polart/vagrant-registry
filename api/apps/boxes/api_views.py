@@ -110,7 +110,7 @@ class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
                                   .format(user, serializer.initial_data['name']))
 
 
-class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
+class BoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (IsStaffOrRequestedUserPermissions, BoxMemberPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxMemberSerializer
@@ -138,7 +138,7 @@ class UserBoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
                                   .format(user))
 
 
-class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
+class BoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxVersionPermissions, )
     queryset = BoxVersion.objects.none()
     serializer_class = BoxVersionSerializer
@@ -154,7 +154,7 @@ class UserBoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
         logger.info('New version created: {}'.format(version))
 
 
-class UserBoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
+class BoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxProviderPermissions, )
     queryset = BoxProvider.objects.none()
     serializer_class = BoxProviderSerializer
@@ -171,11 +171,11 @@ class UserBoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
         return self.get_box_version_object().providers.all()
 
 
-class UserBoxMetadataViewSet(UserBoxViewSet):
+class BoxMetadataViewSet(UserBoxViewSet):
     serializer_class = BoxMetadataSerializer
 
 
-class UserBoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
+class BoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxUploadPermissions, )
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
@@ -207,8 +207,8 @@ class BoxUploadParser(FileUploadParser):
         return 'vagrant.box'
 
 
-class UserBoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
-                                  DestroyModelMixin, GenericViewSet):
+class BoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
+                              DestroyModelMixin, GenericViewSet):
     permission_classes = (BoxUploadPermissions, )
     serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)

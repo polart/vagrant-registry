@@ -15,66 +15,62 @@ admin.site.site_title = 'Vagrant Registry Administration'
 
 router = DefaultRouter()
 router.register(r'users', users_api_views.UserViewSet)
-
-all_box_list = boxes_api_views.BoxViewSet.as_view({
-    'get': 'list',
-})
+router.register(r'boxes', boxes_api_views.BoxViewSet)
 
 box_list = boxes_api_views.UserBoxViewSet.as_view({
     'get': 'list',
     'post': 'create'
-})
+}, **{'suffix': 'List'})
 box_detail = boxes_api_views.UserBoxViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
-})
+}, **{'suffix': 'Instance'})
 
-box_member_list = boxes_api_views.UserBoxMemberViewSet.as_view({
+box_member_list = boxes_api_views.BoxMemberViewSet.as_view({
     'get': 'list',
-})
-box_member_detail = boxes_api_views.UserBoxMemberViewSet.as_view({
+}, **{'suffix': 'List'})
+box_member_detail = boxes_api_views.BoxMemberViewSet.as_view({
     'get': 'retrieve',
     'post': 'create',
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
-})
+}, **{'suffix': 'Instance'})
 
-box_version_list = boxes_api_views.UserBoxVersionViewSet.as_view({
+box_version_list = boxes_api_views.BoxVersionViewSet.as_view({
     'get': 'list',
     'post': 'create'
-})
-box_version_detail = boxes_api_views.UserBoxVersionViewSet.as_view({
+}, **{'suffix': 'List'})
+box_version_detail = boxes_api_views.BoxVersionViewSet.as_view({
     'get': 'retrieve',
     'delete': 'destroy'
-})
+}, **{'suffix': 'Instance'})
 
-box_provider_list = boxes_api_views.UserBoxProviderViewSet.as_view({
+box_provider_list = boxes_api_views.BoxProviderViewSet.as_view({
     'get': 'list',
-})
-box_provider_detail = boxes_api_views.UserBoxProviderViewSet.as_view({
+}, **{'suffix': 'List'})
+box_provider_detail = boxes_api_views.BoxProviderViewSet.as_view({
     'get': 'retrieve',
     'delete': 'destroy'
-})
+}, **{'suffix': 'Instance'})
 
-box_upload_list = boxes_api_views.UserBoxUploadViewSet.as_view({
+box_upload_list = boxes_api_views.BoxUploadViewSet.as_view({
     'get': 'list',
     'post': 'create'
-})
-box_upload_detail = boxes_api_views.UserBoxUploadHandlerViewSet.as_view({
+}, **{'suffix': 'List'})
+box_upload_detail = boxes_api_views.BoxUploadHandlerViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'delete': 'destroy'
-})
-box_metadata_detail = boxes_api_views.UserBoxMetadataViewSet.as_view({
+}, **{'suffix': 'Instance'})
+box_metadata_detail = boxes_api_views.BoxMetadataViewSet.as_view({
     'get': 'retrieve',
-})
+}, **{'suffix': 'Instance'})
 
 api_v1_urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^boxes/$', all_box_list, name='boxall-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/$', box_list, name='box-list'),
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/$',
         box_detail, name='box-detail'),

@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import (
     APITestCase, APIRequestFactory, force_authenticate)
 
+from apps.boxes.api_views import BoxViewSet
 from apps.boxes.models import BoxUpload, Box, BoxMember, BoxProvider
 from apps.factories import (
     BoxUploadFactory, BoxProviderFactory, StaffFactory, UserFactory,
@@ -14,7 +15,9 @@ class BoxViewSetTestCase(APITestCase):
 
     def setUp(self):
         self.factory = APIRequestFactory()
-        self.view = urls.all_box_list
+        self.view = BoxViewSet.as_view({
+            'get': 'list',
+        })
 
     def test_list_boxes(self):
         user = UserFactory()

@@ -1,9 +1,9 @@
 from sendfile import sendfile
 
-from apps.boxes.api_views import UserBoxProviderViewSet
+from apps.boxes.api_views import BoxProviderViewSet
 
 
-class DownloadBoxView(UserBoxProviderViewSet):
+class DownloadBoxView(BoxProviderViewSet):
 
     def get(self, request, *args, **kwargs):
         box = self.get_object()
