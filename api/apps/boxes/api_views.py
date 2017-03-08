@@ -72,9 +72,12 @@ class UserBoxMixin:
         return obj
 
     def get_box_queryset(self):
-        return (Box.objects
-                .by_owner(self.get_user_object())
-                .for_user(self.request.user))
+        return (
+            Box.objects
+            .by_owner(self.get_user_object())
+            .for_user(self.request.user)
+            .select_related('owner')
+        )
 
 
 class BoxViewSet(ListModelMixin, GenericViewSet):

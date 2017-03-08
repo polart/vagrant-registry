@@ -28,7 +28,8 @@ class BoxViewSetTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # only b2; b1 not shared with user
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['name'], b2.name)
 
 
 class UserBoxViewSetTestCase(APITestCase):
@@ -51,7 +52,8 @@ class UserBoxViewSetTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # only b2; b1 not shared with user; b4 different owner
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['name'], b2.name)
 
     def test_user_creates_own_box(self):
         user = UserFactory()
@@ -190,7 +192,7 @@ class UserBoxMemberViewSetTestCase(APITestCase):
             box_name=box.name)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
     def test_user_with_permissions_cannot_add_box_member(self):
         user = UserFactory()
@@ -225,7 +227,7 @@ class UserBoxMemberViewSetTestCase(APITestCase):
             box_name=box.name)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data['count'], 0)
         self.assertListEqual(list(box.shared_with.all()), [user])
 
 
@@ -288,7 +290,7 @@ class UserBoxVersionViewSetTestCase(APITestCase):
             box_name=box.name)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
 
 class UserBoxProviderViewSetTestCase(APITestCase):
@@ -315,7 +317,7 @@ class UserBoxProviderViewSetTestCase(APITestCase):
             version=version.version)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
     def test_user_with_permissions_cannot_delete_provider(self):
         user = UserFactory()
@@ -440,7 +442,7 @@ class UserBoxUploadViewSetTestCase(APITestCase):
             box_name=box.name)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data['count'], 2)
 
     def test_upload_cannot_be_initiated_for_existing_provider(self):
         user = UserFactory()

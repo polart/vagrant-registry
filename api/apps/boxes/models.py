@@ -86,7 +86,8 @@ class Box(models.Model):
 
     class Meta:
         unique_together = ('owner', 'name')
-        verbose_name_plural = 'Boxes'
+        verbose_name_plural = 'boxes'
+        ordering = ['-date_modified']
 
     def __str__(self):
         return self.tag
@@ -159,6 +160,7 @@ class BoxMember(models.Model):
 
     class Meta:
         unique_together = ('user', 'box',)
+        ordering = ['user__username']
 
     def user_has_perms(self, perms, user):
         return self.box.user_has_perms(perms, user)
@@ -183,7 +185,8 @@ class BoxVersion(models.Model):
 
     class Meta:
         unique_together = ('box', 'version')
-        verbose_name_plural = 'Box versions'
+        verbose_name_plural = 'box versions'
+        ordering = ['-date_modified']
 
     def __str__(self):
         return '{} v{}'.format(self.box, self.version)
@@ -239,6 +242,7 @@ class BoxProvider(models.Model):
 
     class Meta:
         unique_together = ('version', 'provider')
+        ordering = ['-date_modified']
 
     def __str__(self):
         return '{} {}'.format(self.version, self.provider)
@@ -335,6 +339,9 @@ class BoxUpload(models.Model):
         validators=[BoxVersion.VERSION_VALIDATOR]
     )
     provider = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ['-date_modified']
 
     def __str__(self):
         return (

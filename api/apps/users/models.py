@@ -48,6 +48,11 @@ class User(AbstractUser):
         },
     )
 
+    class Meta:
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+        ordering = ['username']
+
 
 class UserProfile(models.Model):
     BOXES_PERM_R = 'R'

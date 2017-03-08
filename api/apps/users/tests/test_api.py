@@ -42,8 +42,8 @@ class UserViewSetTestCase(APITestCase):
 
         data = response.data
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data), 2)
-        self.assertNotIn('boxes_permissions', data[0])
+        self.assertEqual(data['count'], 2)
+        self.assertNotIn('boxes_permissions', data['results'][0])
 
     def test_list_users_for_staff(self):
         request = self.factory.get('/url/')
@@ -52,8 +52,8 @@ class UserViewSetTestCase(APITestCase):
 
         data = response.data
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data), 2)
-        self.assertIn('boxes_permissions', data[0])
+        self.assertEqual(data['count'], 2)
+        self.assertIn('boxes_permissions', data['results'][0])
 
     def test_create_new_user(self):
         data = {
