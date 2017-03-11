@@ -15,7 +15,7 @@ class BoxVersionAdminInline(admin.TabularInline):
 class BoxAdmin(admin.ModelAdmin):
     model = Box
 
-    readonly_fields = ('date_created', 'date_modified', )
+    readonly_fields = ('date_created', 'date_modified', 'date_updated', )
     list_filter = ('visibility', )
     list_display = ('__str__', 'owner', 'name', 'visibility', )
     search_fields = ['owner__username', 'name']

@@ -40,7 +40,7 @@ class BoxProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoxProvider
         fields = ('url', 'provider', 'date_created', 'date_modified',
-                  'checksum_type', 'checksum',
+                  'date_updated', 'checksum_type', 'checksum',
                   'download_url', 'file_size', 'pulls')
 
     def get_download_url(self, obj):
@@ -60,8 +60,8 @@ class BoxVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxVersion
-        fields = ('url', 'date_created', 'date_modified', 'version',
-                  'changes', 'providers',)
+        fields = ('url', 'date_created', 'date_modified', 'date_updated',
+                  'version', 'changes', 'providers',)
 
 
 class BoxSerializer(serializers.ModelSerializer):
@@ -81,12 +81,15 @@ class BoxSerializer(serializers.ModelSerializer):
     versions = BoxVersionSerializer(many=True, read_only=True)
     members = serializers.SerializerMethodField()
     user_permissions = serializers.SerializerMethodField()
+    pulls = serializers.ReadOnlyField()
 
     class Meta:
         model = Box
-        fields = ('url', 'owner', 'date_created', 'date_modified', 'visibility',
-                  'name', 'short_description', 'description', 'members',
-                  'user_permissions', 'versions',)
+        fields = (
+            'url', 'owner', 'date_created', 'date_modified', 'date_updated',
+            'visibility', 'name', 'short_description', 'description', 'pulls',
+            'members', 'user_permissions', 'versions',
+        )
 
     def get_members(self, obj):
         user = self.context.get('request').user

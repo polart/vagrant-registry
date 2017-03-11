@@ -84,15 +84,28 @@ class BoxViewSet(ListModelMixin, GenericViewSet):
     permission_classes = (BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
+    ordering_fields = ('pulls', 'date_updated')
+    search_fields = ('name', 'short_description',
+                     '=versions__providers__provider', )
 
     def get_queryset(self):
-        return Box.objects.for_user(self.request.user)
+        return Box.objects.for_user(self.request.user)\
+            .annotate_pulls().order_by('-pulls')
 
 
 class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (IsStaffOrRequestedUserPermissions, BoxPermissions, )
     queryset = Box.objects.all()
     serializer_class = BoxSerializer
+    ordering_fields = ('pulls', 'date_updated')
+    search_fields = ('name', 'short_description',
+                     '=versions__providers__provider', )
+
+    def get_box_queryset(self):
+        # Annotating in `get_box_queryset`, so 'detail' API
+        # for a single object will also be annotated
+        return super(UserBoxViewSet, self).get_box_queryset()\
+            .annotate_pulls().order_by('-pulls')
 
     def get_queryset(self):
         return self.get_box_queryset()
@@ -116,11 +129,13 @@ class BoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
     serializer_class = BoxMemberSerializer
     lookup_field = 'user__username'
     lookup_url_kwarg = 'member_username'
+    ordering_fields = ('user__username', )
+    search_fields = ('user__username', )
 
     def get_queryset(self):
         box = self.get_box_object()
         if self.request.user.is_staff or self.request.user == box.owner:
-            return box.boxmember_set.all()
+            return box.boxmember_set.all().order_by('user__username')
         return box.boxmember_set.none()
 
     def perform_create(self, serializer):
@@ -144,9 +159,11 @@ class BoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
     serializer_class = BoxVersionSerializer
     lookup_field = 'version'
     lookup_url_kwarg = 'version'
+    ordering_fields = ('date_updated', )
+    search_fields = ('version', '=providers__provider', )
 
     def get_queryset(self):
-        return self.get_box_object().versions.all()
+        return self.get_box_object().versions.all().order_by('-date_updated')
 
     def perform_create(self, serializer):
         box = self.get_box_object()
@@ -160,6 +177,8 @@ class BoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
     serializer_class = BoxProviderSerializer
     lookup_field = 'provider'
     lookup_url_kwarg = 'provider'
+    ordering_fields = ('pulls', 'date_updated', )
+    search_fields = ('=provider', )
 
     def get_box_version_object(self):
         return get_object_or_404(
@@ -168,7 +187,8 @@ class BoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        return self.get_box_version_object().providers.all()
+        return self.get_box_version_object().providers.all()\
+            .order_by('-date_updated')
 
 
 class BoxMetadataViewSet(UserBoxViewSet):
@@ -179,9 +199,11 @@ class BoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
     permission_classes = (BoxUploadPermissions, )
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
+    ordering_fields = ('date_modified', )
+    search_fields = ('version', 'provider', )
 
     def get_queryset(self):
-        return self.get_box_object().uploads.all()
+        return self.get_box_object().uploads.all().order_by('-date_modified')
 
     def perform_create(self, serializer):
         box = self.get_box_object()
@@ -213,6 +235,7 @@ class BoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
     serializer_class = BoxUploadSerializer
     parser_classes = (BoxUploadParser,)
     queryset = BoxUpload.objects.none()
+    ordering_fields = ('date_modified', )
 
     content_range_pattern = re.compile(
         r'^bytes (?P<start>\d+)-(?P<end>\d+)/(?P<total>\d+)$'

@@ -1,13 +1,15 @@
 import logging
 import uuid
 from datetime import timedelta
+
+from django.db.models.functions import Coalesce
 from humanize import naturalsize
 
 from django.core.files.storage import FileSystemStorage
 from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django.conf import settings
 
@@ -47,6 +49,11 @@ class BoxQuerySet(models.QuerySet):
     def by_owner(self, user):
         return self.filter(owner=user)
 
+    def annotate_pulls(self):
+        return self.annotate(
+            pulls=Coalesce(Sum('versions__providers__pulls'), 0)
+        )
+
 
 class Box(models.Model):
     PRIVATE = 'PT'
@@ -65,6 +72,10 @@ class Box(models.Model):
     )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField('Last modified', auto_now=True)
+    date_updated = models.DateTimeField(
+        'Last updated',
+        default=timezone.now,
+    )
     visibility = models.CharField(
         max_length=2, choices=VISIBILITY_CHOICES, default=PRIVATE)
     name = models.CharField(
@@ -87,7 +98,7 @@ class Box(models.Model):
     class Meta:
         unique_together = ('owner', 'name')
         verbose_name_plural = 'boxes'
-        ordering = ['-date_modified']
+        ordering = ['-date_updated']
 
     def __str__(self):
         return self.tag
@@ -179,6 +190,10 @@ class BoxVersion(models.Model):
         'boxes.Box', related_name='versions', on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField('Last modified', auto_now=True)
+    date_updated = models.DateTimeField(
+        'Last updated',
+        default=timezone.now,
+    )
     version = models.CharField(
         max_length=40, validators=[VERSION_VALIDATOR])
     changes = models.TextField(blank=True)
@@ -186,7 +201,7 @@ class BoxVersion(models.Model):
     class Meta:
         unique_together = ('box', 'version')
         verbose_name_plural = 'box versions'
-        ordering = ['-date_modified']
+        ordering = ['-date_updated']
 
     def __str__(self):
         return '{} v{}'.format(self.box, self.version)
@@ -230,6 +245,10 @@ class BoxProvider(models.Model):
     provider = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField('Last modified', auto_now=True)
+    date_updated = models.DateTimeField(
+        'Last updated',
+        default=timezone.now,
+    )
     file = models.FileField(upload_to=user_box_upload_path,
                             storage=protected_storage)
     file_size = models.BigIntegerField(default=0)
@@ -242,7 +261,7 @@ class BoxProvider(models.Model):
 
     class Meta:
         unique_together = ('version', 'provider')
-        ordering = ['-date_modified']
+        ordering = ['-date_updated']
 
     def __str__(self):
         return '{} {}'.format(self.version, self.provider)
@@ -252,8 +271,8 @@ class BoxProvider(models.Model):
         return reverse(
             'downloads-box',
             kwargs={
-                'username': self.version.box.owner.username,
-                'box_name': self.version.box.name,
+                'username': self.owner.username,
+                'box_name': self.box.name,
                 'version': self.version.version,
                 'provider': self.provider
             }
@@ -261,7 +280,11 @@ class BoxProvider(models.Model):
 
     @property
     def owner(self):
-        return self.version.box.owner
+        return self.box.owner
+
+    @property
+    def box(self):
+        return self.version.box
 
     @property
     def visibility(self):

@@ -19,6 +19,8 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
+    ordering_fields = ('username', )
+    search_fields = ('username', )
 
     def get_serializer_class(self):
         if hasattr(self, 'request') and self.request.user.is_staff:
