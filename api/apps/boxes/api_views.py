@@ -8,7 +8,7 @@ from django.db.utils import IntegrityError
 from django.http import Http404
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.exceptions import ValidationError, ParseError
+from rest_framework.exceptions import ValidationError, ParseError, APIException
 from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import (
     RetrieveModelMixin, DestroyModelMixin, ListModelMixin)
@@ -16,6 +16,7 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from apps.api_exceptions import CustomApiException
 from apps.boxes.models import Box, BoxUpload, BoxVersion, BoxProvider
 from apps.boxes.permissions import (
     BoxPermissions, BaseBoxPermissions, BoxMemberPermissions,
@@ -70,6 +71,18 @@ class UserBoxMixin:
         self.check_box_object_permissions(self.request, obj)
 
         return obj
+
+    def get_box_version_object(self):
+        return get_object_or_404(
+            self.get_box_object().versions.all(),
+            **{'version': self.kwargs['version']}
+        )
+
+    def get_box_provider_object(self):
+        return get_object_or_404(
+            self.get_box_version_object().providers.all(),
+            **{'provider': self.kwargs['provider']}
+        )
 
     def get_box_queryset(self):
         return (
@@ -180,15 +193,14 @@ class BoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
     ordering_fields = ('pulls', 'date_updated', )
     search_fields = ('=provider', )
 
-    def get_box_version_object(self):
-        return get_object_or_404(
-            self.get_box_object().versions.all(),
-            **{'version': self.kwargs['version']}
-        )
-
     def get_queryset(self):
         return self.get_box_version_object().providers.all()\
             .order_by('-date_updated')
+
+    def perform_create(self, serializer):
+        version = self.get_box_version_object()
+        provider = serializer.save(version=version)
+        logger.info('New provider created: {}'.format(provider))
 
 
 class BoxMetadataViewSet(UserBoxViewSet):
@@ -200,26 +212,22 @@ class BoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
     queryset = BoxUpload.objects.all()
     serializer_class = BoxUploadSerializer
     ordering_fields = ('date_modified', )
-    search_fields = ('version', 'provider', )
+    search_fields = ()
 
     def get_queryset(self):
-        return self.get_box_object().uploads.all().order_by('-date_modified')
+        return self.get_box_provider_object().uploads.all()\
+            .order_by('-date_modified')
 
     def perform_create(self, serializer):
-        box = self.get_box_object()
-        version = serializer.validated_data['version']
-        provider = serializer.validated_data['provider']
-        try:
-            (box
-             .versions.get(version=version)
-             .providers.get(provider=provider))
-            raise ParseError(
-                'Provider "{}" already exists for version "{}"'
-                .format(provider, version)
+        provider = self.get_box_provider_object()
+
+        if provider.status == BoxProvider.FILLED_IN:
+            raise CustomApiException(
+                detail="Provider already has box file.",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-        except (BoxVersion.DoesNotExist, BoxProvider.DoesNotExist):
-            upload = serializer.save(box=box)
-            logger.info('New upload initiated: {}'.format(upload))
+        upload = serializer.save(provider=provider)
+        logger.info('New upload initiated: {}'.format(upload))
 
 
 class BoxUploadParser(FileUploadParser):
@@ -263,7 +271,7 @@ class BoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
                   'file_size': box_upload.file_size})
 
     def get_queryset(self):
-        return self.get_box_object().uploads.all()
+        return self.get_box_provider_object().uploads.all()
 
     def update(self, request, **kwargs):
         box_upload = self.get_object()

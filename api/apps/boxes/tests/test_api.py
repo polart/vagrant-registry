@@ -7,7 +7,7 @@ from apps.boxes.api_views import BoxViewSet
 from apps.boxes.models import BoxUpload, Box, BoxMember, BoxProvider
 from apps.factories import (
     BoxUploadFactory, BoxProviderFactory, StaffFactory, UserFactory,
-    BoxFactory, BoxVersionFactory)
+    BoxFactory, BoxVersionFactory, EmptyBoxProviderFactory)
 from vagrant_registry import urls
 
 
@@ -390,64 +390,75 @@ class UserBoxUploadViewSetTestCase(APITestCase):
     def test_box_owner_can_initiate_upload(self):
         user = UserFactory()
         box = BoxFactory(owner=user)
+        box_version = BoxVersionFactory(box=box)
+        box_provider = EmptyBoxProviderFactory(version=box_version)
 
         data = {
             'file_size': 100,
             'checksum_type': BoxProvider.SHA256,
             'checksum': 'asdf',
-            'version': '1.1.1',
-            'provider': 'vmware',
         }
         request = self.factory.post('/url/', data=data)
         force_authenticate(request, user=user)
         response = self.view_list(
             request,
             username=box.owner.username,
-            box_name=box.name)
+            box_name=box.name,
+            version=box_version.version,
+            provider=box_provider.provider,
+        )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(box.uploads.filter(**data).exists())
+        self.assertTrue(box_provider.uploads.filter(**data).exists())
 
     def test_user_with_permissions_can_initiate_upload(self):
         user = UserFactory()
         box = BoxFactory()
         box.share_with(user, BoxMember.PERM_RW)
+        box_version = BoxVersionFactory(box=box)
+        box_provider = EmptyBoxProviderFactory(version=box_version)
 
         data = {
             'file_size': 100,
             'checksum_type': BoxProvider.SHA256,
             'checksum': 'asdf',
-            'version': '1.1.1',
-            'provider': 'vmware',
         }
         request = self.factory.post('/url/', data=data)
         force_authenticate(request, user=user)
         response = self.view_list(
             request,
             username=box.owner.username,
-            box_name=box.name)
+            box_name=box.name,
+            version=box_version.version,
+            provider=box_provider.provider,
+        )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(box.uploads.filter(**data).exists())
+        self.assertTrue(box_provider.uploads.filter(**data).exists())
 
     def test_user_with_permissions_can_view_uploads(self):
         user = UserFactory()
         box = BoxFactory()
         box.share_with(user, BoxMember.PERM_R)
-        BoxUploadFactory(box=box)
-        BoxUploadFactory(box=box)
+        version = BoxVersionFactory(box=box)
+        provider = BoxProviderFactory(version=version)
+        BoxUploadFactory(provider=provider)
+        BoxUploadFactory(provider=provider)
 
         request = self.factory.get('/url/')
         force_authenticate(request, user=user)
         response = self.view_list(
             request,
             username=box.owner.username,
-            box_name=box.name)
+            box_name=box.name,
+            version=version.version,
+            provider=provider.provider,
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 2)
 
-    def test_upload_cannot_be_initiated_for_existing_provider(self):
+    def test_upload_cannot_be_initiated_for_completed_provider(self):
         user = UserFactory()
         box = BoxFactory(owner=user)
         box_version = BoxVersionFactory(box=box)
@@ -457,15 +468,17 @@ class UserBoxUploadViewSetTestCase(APITestCase):
             'file_size': 100,
             'checksum_type': BoxProvider.SHA256,
             'checksum': 'asdf',
-            'version': box_version.version,
-            'provider': box_provider.provider,
         }
         request = self.factory.post('/url/', data=data)
         force_authenticate(request, user=user)
+
         response = self.view_list(
             request,
             username=box.owner.username,
-            box_name=box.name)
+            box_name=box.name,
+            version=box_version.version,
+            provider=box_provider.provider,
+        )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -502,11 +515,13 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
             request,
             username=bu_factory.box.owner.username,
             box_name=bu_factory.box.name,
+            version=bu_factory.version.version,
+            provider=bu_factory.provider.provider,
             pk=bu_factory.pk,
         )
 
     def test_unsupported_media_type(self):
-        bu_factory = BoxUploadFactory(box__owner=self.user)
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user)
 
         request = self.factory.put('/url/', data='data')
         response = self.get_response(request, bu_factory)
@@ -515,7 +530,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
                          status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_content_range_header_is_required(self):
-        bu_factory = BoxUploadFactory(box__owner=self.user)
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user)
 
         request = self.factory.put('/url/', 'test',
                                    content_type='application/octet-stream',)
@@ -527,7 +542,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         self.assertIn('Content-Range', str(response.content))
 
     def test_invalid_content_range_header_not_accepted(self):
-        bu_factory = BoxUploadFactory(box__owner=self.user)
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user)
 
         request = self.get_request('test', (1, 'a', None))
         response = self.get_response(request, bu_factory)
@@ -539,7 +554,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
     def test_invalid_offset_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(box__owner=self.user,
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user,
                                       file_content=file_data, offset=5)
 
         request = self.get_request(file_data, (2, 2 + file_len, file_len))
@@ -550,7 +565,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
     def test_invalid_complete_length_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(box__owner=self.user,
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user,
                                       file_content=file_data)
 
         request = self.get_request(file_data, (0, file_len - 1, file_len + 10))
@@ -561,7 +576,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
     def test_invalid_last_byte_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
-        bu_factory = BoxUploadFactory(box__owner=self.user,
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user,
                                       file_content=file_data)
 
         request = self.get_request(file_data, (0, file_len + 10, file_len))
@@ -573,7 +588,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
     def test_invalid_content_length_in_content_range_header_not_accepted(self):
         file_data, file_len = self.get_file_length('test content')
         bu_factory = BoxUploadFactory(offset=2,
-                                      box__owner=self.user,
+                                      provider__version__box__owner=self.user,
                                       file_content=file_data)
 
         request = self.get_request(file_data, (2, file_len - 1, file_len))
@@ -584,7 +599,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
     def test_invalid_content_not_accepted(self):
         file_data, file_len = self.get_file_length('test')
-        bu_factory = BoxUploadFactory(box__owner=self.user,
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user,
                                       file_content=file_data)
 
         request = self.get_request('poop', (0, file_len - 1, file_len))
@@ -592,23 +607,12 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_upload_not_accepted_when_provider_already_exists(self):
-        file_data, file_len = self.get_file_length('test')
-        bp_factory = BoxProviderFactory(version__box__owner=self.user)
-        bu_factory = BoxUploadFactory(box=bp_factory.version.box,
-                                      file_content=file_data,
-                                      version=bp_factory.version.version,
-                                      provider=bp_factory.provider)
-
-        request = self.get_request(file_data, (0, file_len - 1, file_len))
-        response = self.get_response(request, bu_factory)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_empty_file_data_not_allowed(self):
         file_data, file_len = self.get_file_length('')
-        bu_factory = BoxUploadFactory(box__owner=self.user,
-                                      file_content=file_data)
+        bu_factory = BoxUploadFactory(
+            provider__version__box__owner=self.user,
+            file_content=file_data,
+        )
 
         request = self.get_request(file_data, (0, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
@@ -617,8 +621,10 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
 
     def test_box_uploaded_successfully_at_once(self):
         file_data, file_len = self.get_file_length('Ї12\n345\t6789')
-        bu_factory = BoxUploadFactory(box__owner=self.user,
-                                      file_content=file_data)
+        bu_factory = BoxUploadFactory(
+            provider__version__box__owner=self.user,
+            file_content=file_data,
+        )
 
         request = self.get_request(file_data, (0, file_len - 1, file_len))
         response = self.get_response(request, bu_factory)
@@ -630,19 +636,15 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         self.assertEqual(box_upload.file.read(), file_data)
         self.assertEqual(box_upload.status, BoxUpload.COMPLETED)
         self.assertNotEqual(box_upload.date_completed, None)
-        self.assertNotEqual(box_upload.box_id, None)
 
-        box = (box_upload.box
-               .versions.get(version=bu_factory.version)
-               .providers.get(provider=bu_factory.provider))
-        self.assertEqual(box.file.read(), file_data)
+        self.assertEqual(box_upload.provider.file.read(), file_data)
 
     def test_box_uploaded_successfully_in_chunks(self):
         chunk = 'Ї12\n345\t6789\n'
         chunks_num = 5
         _, chunk_len = self.get_file_length(chunk)
         file_data, file_len = self.get_file_length(''.join([chunk]*chunks_num))
-        bu_factory = BoxUploadFactory(box__owner=self.user,
+        bu_factory = BoxUploadFactory(provider__version__box__owner=self.user,
                                       file_content=file_data)
 
         for i in range(chunks_num):
@@ -660,10 +662,6 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
         self.assertEqual(box_upload.file.read(), file_data)
         self.assertEqual(box_upload.status, BoxUpload.COMPLETED)
         self.assertNotEqual(box_upload.date_completed, None)
-        self.assertNotEqual(box_upload.box_id, None)
 
-        box = (box_upload.box
-               .versions.get(version=bu_factory.version)
-               .providers.get(provider=bu_factory.provider))
-        self.assertEqual(box.file.read(), file_data)
+        self.assertEqual(box_upload.provider.file.read(), file_data)
 

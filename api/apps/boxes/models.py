@@ -228,6 +228,15 @@ def user_box_upload_path(instance, filename):
     )
 
 
+class BoxProviderQuerySet(models.QuerySet):
+
+    def empty(self):
+        return self.filter(status=BoxProvider.EMPTY)
+
+    def filled_in(self):
+        return self.filter(status=BoxProvider.FILLED_IN)
+
+
 class BoxProvider(models.Model):
     # Vagrant currently only supports these types
     # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
@@ -240,6 +249,15 @@ class BoxProvider(models.Model):
         (SHA256, 'sha256'),
     )
 
+    EMPTY = 'EM'
+    FILLED_IN = 'FI'
+    STATUS_CHOICES = (
+        (EMPTY, 'Empty'),
+        (FILLED_IN, 'Filled in'),
+    )
+
+    objects = BoxProviderQuerySet.as_manager()
+
     version = models.ForeignKey(
         'boxes.BoxVersion', related_name='providers', on_delete=models.CASCADE)
     provider = models.CharField(max_length=100)
@@ -249,15 +267,25 @@ class BoxProvider(models.Model):
         'Last updated',
         default=timezone.now,
     )
-    file = models.FileField(upload_to=user_box_upload_path,
-                            storage=protected_storage)
+    file = models.FileField(
+        upload_to=user_box_upload_path,
+        storage=protected_storage,
+        null=True,
+        blank=True,
+    )
     file_size = models.BigIntegerField(default=0)
     checksum_type = models.CharField(
         max_length=10,
         choices=CHECKSUM_TYPE_CHOICES,
-        default=SHA256)
+        default=SHA256,
+    )
     checksum = models.CharField(max_length=128)
     pulls = models.PositiveIntegerField(default=0)
+    status = models.CharField(
+        max_length=2,
+        choices=STATUS_CHOICES,
+        default=EMPTY,
+    )
 
     class Meta:
         unique_together = ('version', 'provider')
@@ -336,8 +364,11 @@ class BoxUpload(models.Model):
 
     id = models.UUIDField(unique=True, default=uuid.uuid4,
                           editable=False, primary_key=True)
-    box = models.ForeignKey(
-        'Box', related_name='uploads', on_delete=models.CASCADE)
+    provider = models.ForeignKey(
+        'BoxProvider',
+        related_name='uploads',
+        on_delete=models.CASCADE,
+    )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField('Last modified', auto_now=True)
     date_completed = models.DateTimeField(null=True, blank=True)
@@ -357,25 +388,28 @@ class BoxUpload(models.Model):
         max_length=10,
         choices=BoxProvider.CHECKSUM_TYPE_CHOICES)
     checksum = models.CharField(max_length=128)
-    version = models.CharField(
-        max_length=40,
-        validators=[BoxVersion.VERSION_VALIDATOR]
-    )
-    provider = models.CharField(max_length=100)
 
     class Meta:
         ordering = ['-date_modified']
 
     def __str__(self):
         return (
-            '{self.box.tag} v{self.version} '
-            '{self.provider}: {status}'
+            '{self.box.tag} v{self.version.version} '
+            '{self.provider.provider}: {status}'
             .format(self=self, status=self.get_status_display())
         )
 
     @property
+    def box(self):
+        return self.version.box
+
+    @property
     def owner(self):
         return self.box.owner
+
+    @property
+    def version(self):
+        return self.provider.version
 
     @property
     def visibility(self):
@@ -439,37 +473,23 @@ class BoxUpload(models.Model):
             .format(file_hash, self.checksum,
                     self.get_checksum_type_display())
 
-        box_version = self._create_box_version()
-        self._create_box_provider(box_version)
+        self._fill_in_box_provider()
         self.status = self.COMPLETED
         self.date_completed = timezone.now()
 
-    def _create_box_version(self):
-        version, created = self.box.versions.get_or_create(version=self.version)
-        if created:
-            logger.info('New version created: {}'.format(version))
-        return version
+    def _fill_in_box_provider(self):
+        self.provider.checksum_type = self.checksum_type
+        self.provider.checksum = self.checksum
+        self.provider.file_size = self.file_size
+        self.provider.file.save(name=str(self.file), content=self.file)
+        self.provider.status = BoxProvider.FILLED_IN
+        self.provider.date_updated = timezone.now()
+        self.provider.save()
+        logger.info('New box uploaded: {}'.format(self.provider))
 
-    def _create_box_provider(self, box_version):
-        assert not self._is_version_provider_exists(), \
-            'Provider "{}" already exists for version "{}"'\
-            .format(self.provider, self.version)
-        box_provider = BoxProvider(
-            version=box_version,
-            provider=self.provider,
-            checksum_type=self.checksum_type,
-            checksum=self.checksum,
-            file_size=self.file_size,
+        BoxVersion.objects.filter(pk=self.provider.version_id).update(
+            date_updated=self.provider.date_updated
         )
-        box_provider.file.save(name=str(self.file), content=self.file)
-        box_provider.save()
-        logger.info('New box uploaded: {}'.format(box_provider))
-
-    def _is_version_provider_exists(self):
-        try:
-            (self.box
-             .versions.get(version=self.version)
-             .providers.get(provider=self.provider))
-            return True
-        except (BoxVersion.DoesNotExist, BoxProvider.DoesNotExist):
-            return False
+        Box.objects.filter(pk=self.provider.version.box_id).update(
+            date_updated=self.provider.date_updated
+        )

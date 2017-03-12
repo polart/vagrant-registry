@@ -20,6 +20,7 @@ class Command(BaseCommand):
         for i in range(random.choice(BOXES_COUNT_WEIGHTED)):
             box = BoxFactory(
                 owner=owner,
+                name=fake.domain_word(),
                 visibility=random.choice(BOXES_VISIBILITY_WEIGHTED),
             )
             for j in range(random.choice(BOXES_COUNT_WEIGHTED)):
@@ -36,11 +37,16 @@ class Command(BaseCommand):
                     )
 
     def handle(self, *args, **options):
+        fake = faker.Faker()
         for i in range(STANDARD_USERS_COUNT):
-            self._create_boxes(UserFactory())
+            self._create_boxes(UserFactory(
+                username=fake.user_name(),
+            ))
 
         for i in range(STAFF_USERS_COUNT):
-            self._create_boxes(StaffFactory())
+            self._create_boxes(StaffFactory(
+                username=fake.user_name(),
+            ))
 
         self.stdout.write(
             self.style.SUCCESS(

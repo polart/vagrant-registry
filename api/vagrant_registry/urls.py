@@ -92,9 +92,13 @@ api_v1_urlpatterns = [
     url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/'
         r'(?P<version>\d+\.\d+\.\d+)/providers/(?P<provider>[\w.@+-]+)/$',
         box_provider_detail, name='boxprovider-detail'),
-    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/$',
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/'
+        r'(?P<version>\d+\.\d+\.\d+)/providers/(?P<provider>[\w.@+-]+)/'
+        r'uploads/$',
         box_upload_list, name='boxupload-list'),
-    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/uploads/(?P<pk>.+)/$',
+    url(r'^boxes/(?P<username>[\w.@+-]+)/(?P<box_name>[\w.@+-]+)/versions/'
+        r'(?P<version>\d+\.\d+\.\d+)/providers/(?P<provider>[\w.@+-]+)/'
+        r'uploads/(?P<pk>.+)/$',
         box_upload_detail, name='boxupload-detail'),
     url(r'^auth/', include('rest_framework.urls')),
     url(r'^tokens/$', users_api_views.ObtainExpiringAuthToken.as_view()),

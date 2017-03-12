@@ -40,9 +40,9 @@ class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
 
-    username = factory.Faker('user_name')
+    username = factory.Sequence(lambda n: 'username{0}'.format(n))
     first_name = factory.Faker('first_name')
-    last_name = factory.Faker('last_name')
+    last_name = 'User'
     email = factory.Faker('email')
     is_staff = False
     is_superuser = False
@@ -78,11 +78,13 @@ class UserProfileFactory(factory.DjangoModelFactory):
 class AdminFactory(UserFactory):
     is_staff = True
     is_superuser = True
+    last_name = 'Admin'
 
 
 class StaffFactory(UserFactory):
     is_staff = True
     is_superuser = False
+    last_name = 'Staff'
 
 
 class BoxFactory(factory.DjangoModelFactory):
@@ -90,7 +92,7 @@ class BoxFactory(factory.DjangoModelFactory):
         model = models.Box
 
     owner = factory.SubFactory(UserFactory)
-    name = factory.Faker('domain_word')
+    name = factory.Sequence(lambda n: 'box{0}'.format(n))
     visibility = models.Box.PRIVATE
     short_description = factory.Faker('text', max_nb_chars=100)
 
@@ -101,6 +103,16 @@ class BoxVersionFactory(factory.DjangoModelFactory):
 
     box = factory.SubFactory(BoxFactory)
     version = factory.LazyFunction(get_random_version)
+
+
+class EmptyBoxProviderFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.BoxProvider
+
+    version = factory.SubFactory(BoxVersionFactory)
+    provider = factory.LazyFunction(get_random_provider)
+    pulls = factory.Faker('random_int', min=0, max=100)
+    status = models.BoxProvider.EMPTY
 
 
 FILE_CONTENT = b'test'
@@ -114,12 +126,7 @@ def object_file_content(o):
         return b''
 
 
-class BoxProviderFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = models.BoxProvider
-
-    version = factory.SubFactory(BoxVersionFactory)
-    provider = factory.LazyFunction(get_random_provider)
+class BoxProviderFactory(EmptyBoxProviderFactory):
     file = factory.django.FileField(data=FILE_CONTENT)
     file_size = factory.LazyAttribute(
         lambda o: len(object_file_content(o))
@@ -127,7 +134,7 @@ class BoxProviderFactory(factory.DjangoModelFactory):
     checksum = factory.LazyAttribute(
         lambda o: hashlib.sha256(object_file_content(o)).hexdigest())
     checksum_type = BoxProvider.SHA256
-    pulls = factory.Faker('random_int', min=0, max=100)
+    status = models.BoxProvider.FILLED_IN
 
 
 class BoxUploadFactory(factory.DjangoModelFactory):
@@ -135,11 +142,9 @@ class BoxUploadFactory(factory.DjangoModelFactory):
         model = models.BoxUpload
 
     class Params:
-        file_content = b'test'
+        file_content = FILE_CONTENT
 
-    box = factory.SubFactory(BoxFactory)
-    version = factory.LazyFunction(get_random_version)
-    provider = factory.LazyFunction(get_random_provider)
+    provider = factory.SubFactory(EmptyBoxProviderFactory)
     file_size = factory.LazyAttribute(lambda o: len(o.file_content))
     checksum = factory.LazyAttribute(
         lambda o: hashlib.sha256(o.file_content).hexdigest())

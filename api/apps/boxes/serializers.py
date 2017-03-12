@@ -141,14 +141,15 @@ class BoxUploadSerializer(serializers.ModelSerializer):
     url = MultiLookupHyperlinkedIdentityField(
         view_name="api:v1:boxupload-detail",
         multi_lookup_map={
-            'box.owner.username': 'username',
+            'owner.username': 'username',
             'box.name': 'box_name',
-            'pk': 'pk'
+            'version.version': 'version',
+            'provider.provider': 'provider',
+            'pk': 'pk',
         }
     )
-    user = serializers.ReadOnlyField(source='box.user.username')
+    user = serializers.ReadOnlyField(source='owner.username')
     tag = serializers.ReadOnlyField(source='box.tag')
-    status = serializers.SerializerMethodField()
     date_completed = serializers.ReadOnlyField()
     date_expires = serializers.ReadOnlyField(source='expires')
     file_size = serializers.IntegerField(required=True)
@@ -158,8 +159,4 @@ class BoxUploadSerializer(serializers.ModelSerializer):
         model = BoxUpload
         fields = ('url', 'id', 'user', 'date_created', 'date_modified',
                   'date_completed', 'date_expires', 'file_size', 'offset',
-                  'status', 'tag', 'checksum_type', 'checksum', 'version',
-                  'provider',)
-
-    def get_status(self, obj):
-        return obj.get_status_display()
+                  'status', 'tag', 'checksum_type', 'checksum', )

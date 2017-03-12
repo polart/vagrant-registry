@@ -1,10 +1,14 @@
+from io import StringIO
 from unittest.mock import patch
+from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
+from django.utils import timezone
 
-from apps.boxes.models import Box, BoxMember
-from apps.factories import StaffFactory, BoxFactory, UserFactory
+from apps.boxes.models import Box, BoxMember, BoxUpload, BoxProvider
+from apps.factories import StaffFactory, BoxFactory, UserFactory, BoxProviderFactory, BoxUploadFactory
 
 
 class BoxModelTestCase(TestCase):
@@ -115,4 +119,52 @@ class BoxModelTestCase(TestCase):
         self.assertCountEqual(
             list(Box.objects.for_user(user)),
             [b2, b3, b4, b5]
+        )
+
+
+class BoxUploadTestCase(TestCase):
+
+    def test_chunk_cannot_be_appended_to_completed_upload(self):
+        bu = BoxUploadFactory(status=BoxUpload.COMPLETED)
+        with self.assertRaises(AssertionError):
+            bu.append_chunk('chunk')
+
+    def test_chunk_cannot_be_appended_to_expired_upload(self):
+        date_created = timezone.now() - timedelta(
+            hours=settings.BOX_UPLOAD_EXPIRE_AFTER + 1
+        )
+        bu = BoxUploadFactory(status=BoxUpload.STARTED)
+        bu.date_created = date_created
+        with self.assertRaises(AssertionError):
+            bu.append_chunk('chunk')
+
+    def test_box_provider_detail_filled_in_on_upload_completion(self):
+        content = b'test'
+        bu = BoxUploadFactory(file_content=content)
+        f = StringIO(content.decode('utf8'))
+        f.size = 4
+        f.name = 'test.box'
+        old_date_updated = bu.provider.date_updated
+
+        self.assertEqual(bu.provider.status, BoxProvider.EMPTY)
+
+        bu.append_chunk(f)
+
+        self.assertEqual(bu.status, BoxUpload.COMPLETED)
+
+        bu.provider.refresh_from_db()
+        self.assertEqual(bu.provider.status, BoxProvider.FILLED_IN)
+        self.assertEqual(bu.provider.file.read(), content)
+        self.assertNotEqual(bu.provider.date_updated, old_date_updated)
+
+        bu.provider.version.refresh_from_db()
+        self.assertEqual(
+            bu.provider.version.date_updated,
+            bu.provider.date_updated
+        )
+
+        bu.provider.version.box.refresh_from_db()
+        self.assertEqual(
+            bu.provider.version.box.date_updated,
+            bu.provider.date_updated
         )

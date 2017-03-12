@@ -96,10 +96,7 @@ $(function () {
     }
 
     function submitForm(formData) {
-      var url = '/api/boxes/{fullBboxName}/uploads/'.replace(
-          '{fullBboxName}',
-          $box.find('option:selected').text()
-      );
+      var url = $provider.val();
       $.post(url, formData).statusCode({
         201: function (data) {
           uploadUrl = data.url;
@@ -122,17 +119,9 @@ $(function () {
 
     function newUploadFormSubmit() {
       var errors = {};
-      var box = $box.val();
-      var version = $version.val();
       var provider = $provider.val();
 
       var isUploadValid = validateFileUpload();
-      if (!box) {
-        errors.box = ['This field is required.'];
-      }
-      if (!version) {
-        errors.version = ['This field is required.'];
-      }
       if (!provider) {
         errors.provider = ['This field is required.'];
       }
@@ -142,8 +131,6 @@ $(function () {
       }
 
       var formData = {
-        version: version,
-        provider: provider,
         file_size: uploadData.files[0].size,
         checksum_type: 'md5'
       };
@@ -268,15 +255,13 @@ $(function () {
     // ==============================================================
 
     var $form = $('#boxupload_form');
-    var $box = $('#id_box');
-    var $version = $('#id_version');
     var $provider = $('#id_provider');
     var $file = $('#id_file');
 
     var csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
     var saveType = '_save';
     var baseUrl = '/admin/boxes/boxupload/';
-    var originalHash = $('.field-checksum').find('p').text();
+    var originalHash = $('.field-checksum').find('div.readonly').text();
     var fileHash = null;
     var uploadData = null;
     var uploadId = null;

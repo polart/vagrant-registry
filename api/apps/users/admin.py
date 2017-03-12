@@ -5,10 +5,13 @@ from rest_framework.authtoken.admin import TokenAdmin
 
 from rest_framework.authtoken.models import Token
 
+from apps.boxes.admin import BoxAdminInline
 from apps.users.models import UserProfile, User, MyToken
 
 
 class MyTokenAdmin(TokenAdmin):
+    model = MyToken
+
     list_display = ('key', 'user', 'created', 'expires', 'is_valid_nice')
     fields = ('user',)
     ordering = ('-created',)
@@ -40,6 +43,7 @@ class MyUserAdmin(UserAdmin):
 
     inlines = [
         UserProfileAdminInline,
+        BoxAdminInline,
     ]
 
     def boxes_permissions(self, obj):
