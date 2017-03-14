@@ -39,7 +39,7 @@ class BoxProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxProvider
-        fields = ('url', 'provider', 'date_created', 'date_modified',
+        fields = ('url', 'tag', 'provider', 'date_created', 'date_modified',
                   'date_updated', 'checksum_type', 'checksum',
                   'download_url', 'file_size', 'pulls')
 
@@ -60,8 +60,23 @@ class BoxVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoxVersion
-        fields = ('url', 'date_created', 'date_modified', 'date_updated',
+        fields = ('url', 'tag', 'date_created', 'date_modified', 'date_updated',
                   'version', 'changes', 'providers',)
+
+
+class BoxVersionSimpleSerializer(serializers.ModelSerializer):
+    url = MultiLookupHyperlinkedIdentityField(
+        view_name="api:v1:boxversion-detail",
+        multi_lookup_map={
+            'owner.username': 'username',
+            'box.name': 'box_name',
+            'version': 'version'
+        }
+    )
+
+    class Meta:
+        model = BoxVersion
+        fields = ('url', 'tag', 'date_updated', 'version', )
 
 
 class BoxSerializer(serializers.ModelSerializer):
@@ -78,7 +93,7 @@ class BoxSerializer(serializers.ModelSerializer):
         }
     )
     owner = serializers.ReadOnlyField(source='owner.username')
-    versions = BoxVersionSerializer(many=True, read_only=True)
+    versions = BoxVersionSimpleSerializer(many=True, read_only=True)
     members = serializers.SerializerMethodField()
     user_permissions = serializers.SerializerMethodField()
     pulls = serializers.ReadOnlyField()
@@ -86,7 +101,7 @@ class BoxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Box
         fields = (
-            'url', 'owner', 'date_created', 'date_modified', 'date_updated',
+            'url', 'tag', 'owner', 'date_created', 'date_modified', 'date_updated',
             'visibility', 'name', 'short_description', 'description', 'pulls',
             'members', 'user_permissions', 'versions',
         )

@@ -75,6 +75,7 @@ class Box(models.Model):
     date_updated = models.DateTimeField(
         'Last updated',
         default=timezone.now,
+        editable=False,
     )
     visibility = models.CharField(
         max_length=2, choices=VISIBILITY_CHOICES, default=PRIVATE)
@@ -193,6 +194,7 @@ class BoxVersion(models.Model):
     date_updated = models.DateTimeField(
         'Last updated',
         default=timezone.now,
+        editable=False,
     )
     version = models.CharField(
         max_length=40, validators=[VERSION_VALIDATOR])
@@ -204,6 +206,10 @@ class BoxVersion(models.Model):
         ordering = ['-date_updated']
 
     def __str__(self):
+        return self.tag
+
+    @property
+    def tag(self):
         return '{} v{}'.format(self.box, self.version)
 
     @property
@@ -266,6 +272,7 @@ class BoxProvider(models.Model):
     date_updated = models.DateTimeField(
         'Last updated',
         default=timezone.now,
+        editable=False,
     )
     file = models.FileField(
         upload_to=user_box_upload_path,
@@ -292,6 +299,10 @@ class BoxProvider(models.Model):
         ordering = ['-date_updated']
 
     def __str__(self):
+        return self.tag
+
+    @property
+    def tag(self):
         return '{} {}'.format(self.version, self.provider)
 
     @property
@@ -394,10 +405,13 @@ class BoxUpload(models.Model):
 
     def __str__(self):
         return (
-            '{self.box.tag} v{self.version.version} '
-            '{self.provider.provider}: {status}'
+            '{self.tag}: {status}'
             .format(self=self, status=self.get_status_display())
         )
+
+    @property
+    def tag(self):
+        return '{} {}'.format(self.version, self.provider)
 
     @property
     def box(self):

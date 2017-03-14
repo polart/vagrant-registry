@@ -140,7 +140,10 @@ class BoxUploadTestCase(TestCase):
 
     def test_box_provider_detail_filled_in_on_upload_completion(self):
         content = b'test'
-        bu = BoxUploadFactory(file_content=content)
+        bu = BoxUploadFactory(
+            file_content=content,
+            provider__date_updated=timezone.now() - timedelta(hours=1),
+        )
         f = StringIO(content.decode('utf8'))
         f.size = 4
         f.name = 'test.box'
