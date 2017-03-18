@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets
@@ -7,6 +8,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.users.models import MyToken
 from apps.users.permissions import UserPermissions
 from apps.users.serializers import UserSerializer, ForStaffUserSerializer
 
@@ -33,9 +35,11 @@ class IsTokenAuthenticated(APIView):
 
     def get(self, request, *args, **kwargs):
         token = get_object_or_404(
-            Token.objects.all(),
+            MyToken.objects.all(),
             **{'key': kwargs['token']}
         )
+        if token.is_expired:
+            raise Http404
         return Response({'username': token.user.username})
 
 
