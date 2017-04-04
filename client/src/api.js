@@ -134,9 +134,8 @@ const boxSchemaArray = new schema.Array(boxSchema);
 export const fetchUser = ({ username }) => getApi(`users/${username}/`, userSchema);
 export const fetchUsers = () => getApi('users/', userSchemaArray);
 
+export const fetchBox = ({ tag }) => getApi(`boxes/${tag}/`, boxSchema);
 export const fetchBoxes = ({ username, page }) => {
-  console.log('username -- ', username);
-  console.log('page -- ', page);
   let url = 'boxes/';
   if (username) {
     url = `boxes/${username}/`;

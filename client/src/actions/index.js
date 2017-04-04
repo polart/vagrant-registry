@@ -9,6 +9,7 @@ export const setMyUsername = (username) => action(types.SET_MY_USERNAME, { usern
 export const loadUser = (username) => action(types.LOAD_USER, { username });
 export const loadUsers = () => action(types.LOAD_USERS);
 
+export const loadBox = (tag = null) => action(types.LOAD_BOX, { tag });
 export const loadBoxes = (username = null, page = null) => action(types.LOAD_BOXES, { username, page });
 
 export const user = {

@@ -14,6 +14,15 @@ class BoxList extends Component {
     this.props.router.push(`/boxes/?page=${page}`);
   };
 
+  onBoxClick = (e) => {
+    e.preventDefault();
+    this.props.router.push(
+        // Relative url
+        e.currentTarget.getAttribute("href")
+    );
+    return false;
+  };
+
   renderBoxesList = () => {
     const boxesTags = this.props.boxesPages.pages[this.activePage];
     if (!boxesTags) {
@@ -23,7 +32,11 @@ class BoxList extends Component {
     return boxesTags.map(tag => {
       const box = this.props.boxes[tag];
       return (
-          <ListGroupItem key={tag} href={`/boxes/${tag}/`}>
+          <ListGroupItem
+              key={tag}
+              href={`/boxes/${tag}`}
+              onClick={this.onBoxClick}
+          >
             <div>
               <h4>{tag}</h4>
               <p>{box.short_description}</p>

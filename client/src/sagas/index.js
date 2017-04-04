@@ -31,6 +31,7 @@ function* callRequest(entity, apiFn, data = null) {
 
 const fetchUser = callRequest.bind(null, actions.user.fetch, api.fetchUser);
 const fetchUsers = callRequest.bind(null, actions.user.fetch, api.fetchUsers);
+const fetchBox = callRequest.bind(null, actions.box.fetch, api.fetchBox);
 const fetchBoxes = callRequest.bind(null, actions.box.fetch, api.fetchBoxes);
 
 //*********************************************************
@@ -45,6 +46,10 @@ export function* watchFetchUsers() {
   yield* takeLatest(actionTypes.LOAD_USERS, fetchUsers)
 }
 
+export function* watchFetchBox() {
+  yield* takeLatest(actionTypes.LOAD_BOX, fetchBox)
+}
+
 export function* watchFetchBoxes() {
   yield* takeLatest(actionTypes.LOAD_BOXES, fetchBoxes)
 }
@@ -54,6 +59,7 @@ export default function* rootSaga() {
   yield [
       watchFetchUser(),
       watchFetchUsers(),
+      watchFetchBox(),
       watchFetchBoxes(),
   ]
 }

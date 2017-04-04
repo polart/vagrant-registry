@@ -13,6 +13,7 @@ import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas";
 import {loadState, saveState} from "./localStorage";
 import {throttle} from "lodash";
+import BoxDetail from "./components/BoxDetail";
 
 
 const persistedSate = loadState();
@@ -50,6 +51,7 @@ ReactDOM.render(
         <Route path="/login" component={Login} onEnter={requireAnon} />
         <Route path="/" component={App}>
           <Route path="/boxes(/:username)" component={BoxList} />
+          <Route path="/boxes/:username/:boxName" component={BoxDetail} />
           <Route path="*" component={NotFound} />
         </Route>
       </Router>

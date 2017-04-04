@@ -14,6 +14,7 @@ export const USER = {
 };
 
 
+export const LOAD_BOX = 'LOAD_BOX';
 export const LOAD_BOXES = 'LOAD_BOXES';
 
 export const BOX = {
