@@ -18,7 +18,9 @@ class Login extends Component {
     auth.login(values.username, values.password, (loginData) => {
       if (loginData.authenticated) {
         this.props.setMyUsername(values.username);
-        this.props.router.push('/');
+        this.props.router.push(
+            this.props.router.location.query.next || '/'
+        );
       } else {
         const errors = loginData.data;
         if (errors.non_field_errors) {

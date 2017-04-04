@@ -29,7 +29,6 @@ const store = createStore(
 store.subscribe(throttle(() => {
   const state = store.getState();
   saveState({
-    entities: state.entities,
     myUsername: state.myUsername,
   });
 }, 1000));
@@ -45,28 +44,11 @@ function requireAnon(nextState, replace) {
   }
 }
 
-function indexRedirect(nextState, replace) {
-  if (nextState.location.pathname !== '/') {
-    return;
-  }
-
-  if (auth.loggedIn()) {
-    replace({
-      pathname: '/boxes/me/',
-    })
-  } else {
-    replace({
-      pathname: '/login/',
-    })
-  }
-}
-
-
 ReactDOM.render(
     <Provider store={store}>
       <Router history={browserHistory}>
         <Route path="/login" component={Login} onEnter={requireAnon} />
-        <Route path="/" component={App} onEnter={indexRedirect} >
+        <Route path="/" component={App}>
           <Route path="/boxes(/:username)" component={BoxList} />
           <Route path="*" component={NotFound} />
         </Route>

@@ -26,6 +26,29 @@ export function loggedIn() {
   return !!localStorage.token;
 }
 
+export function tokenValid() {
+  const token = localStorage.token;
+  if (!token) {
+    return Promise.reject();
+  }
+
+  return fetch(`/api/v1/tokens/${token}/`, {
+    method: 'get',
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    },
+  })
+      .then(function (responseObj) {
+        return responseObj.json().then((data) => {
+          if (responseObj.status === 200) {
+            return data;
+          }
+          logout();
+          throw Error('Token not valid.')
+        });
+      });
+}
+
 export function getToken(username, password, cb) {
   const data = {
     username: username,
