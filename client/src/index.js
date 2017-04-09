@@ -53,6 +53,7 @@ ReactDOM.render(
         <Route path="/" component={App}>
           <Route path="/boxes(/:username)" component={BoxList} />
           <Route path="/boxes/:username/:boxName" component={BoxDetail} />
+          <Route path="/boxes/:username/:boxName/versions" component={BoxDetail} />
           <Route path="/boxes/:username/:boxName/versions/:version" component={BoxVersionDetail} />
           <Route path="*" component={NotFound} />
         </Route>

@@ -5,6 +5,7 @@ import Moment from 'moment';
 import {isEmpty} from 'lodash';
 import * as actions from "../actions";
 import BoxProviderList from "./BoxProviderList";
+import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxVersionDetail extends Component {
@@ -36,6 +37,7 @@ class BoxVersionDetail extends Component {
     return (
         <div>
           <PageHeader>{this.props.versionTag}</PageHeader>
+          <MyBreadcrumbs router={this.props.router} />
           {this.renderDetails()}
           <BoxProviderList providers={this.props.boxProviders} />
         </div>

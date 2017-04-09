@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import {PageHeader, Panel, Badge, Well, Tabs, Tab} from 'react-bootstrap';
 import * as actions from "../actions";
 import BoxVersionList from "./BoxVersionList";
+import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxDetail extends Component {
@@ -43,6 +44,7 @@ class BoxDetail extends Component {
     return (
         <div>
           <PageHeader>{this.props.boxTag}</PageHeader>
+          <MyBreadcrumbs router={this.props.router} />
           <Tabs id="box-tabs">
             <Tab eventKey={1} title="Box Info">
               {this.renderBoxDetails()}

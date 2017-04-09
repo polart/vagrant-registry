@@ -1,7 +1,7 @@
 import React, {Component} from "react";
-import {ListGroupItem, Glyphicon, Button} from 'react-bootstrap';
-import Moment from 'moment';
-import Filesize from 'filesize';
+import {ListGroupItem} from "react-bootstrap";
+import Moment from "moment";
+import Filesize from "filesize";
 
 
 export default class BoxProviderList extends Component {

@@ -1,7 +1,8 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
-import { Pagination, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Pagination, ListGroup, ListGroupItem, PageHeader } from 'react-bootstrap';
 import * as actions from "../actions";
+import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxList extends Component {
@@ -77,7 +78,8 @@ class BoxList extends Component {
 
     return (
         <div>
-          <h3>All Boxes</h3>
+          <PageHeader>All Boxes</PageHeader>
+          <MyBreadcrumbs router={this.props.router} />
           <div>
             <ListGroup>
               {this.renderBoxesList()}
