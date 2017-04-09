@@ -110,19 +110,30 @@ const userSchema = new schema.Entity(
 );
 const userSchemaArray = new schema.Array(userSchema);
 
-const versionSchema = new schema.Entity(
-    'versions',
+const boxProviderSchema = new schema.Entity(
+    'boxProviders',
     {},
     {
       idAttribute: 'tag',
     },
 );
-const versionSchemaArray = new schema.Array(versionSchema);
+const boxProviderSchemaArray = new schema.Array(boxProviderSchema);
+
+const boxVersionSchema = new schema.Entity(
+    'boxVersions',
+    {
+      providers: boxProviderSchemaArray,
+    },
+    {
+      idAttribute: 'tag',
+    },
+);
+const boxVersionSchemaArray = new schema.Array(boxVersionSchema);
 
 const boxSchema = new schema.Entity(
     'boxes',
     {
-      versions: versionSchemaArray,
+      versions: boxVersionSchemaArray,
     },
     {
       idAttribute: 'tag',
@@ -142,4 +153,9 @@ export const fetchBoxes = ({ username, page }) => {
   }
 
   return getApi(url, boxSchemaArray, {page: page || 1});
+};
+
+export const fetchBoxVersion = ({ tag }) => getApi(`boxes/${tag}/`, boxSchema);
+export const fetchBoxVersions = ({ tag, page }) => {
+  return getApi(`boxes/${tag}/versions/`, boxVersionSchemaArray, {page: page || 1});
 };

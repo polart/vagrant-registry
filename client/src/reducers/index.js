@@ -7,6 +7,8 @@ import * as actionTypes from '../actions/types';
 const initialStateEntities = {
   users: {},
   boxes: {},
+  boxVersions: {},
+  boxProviders: {},
 };
 
 function entities(state = initialStateEntities, action) {
@@ -25,14 +27,20 @@ const initialStatePagination = {
       pages: {},
     }
   },
+  boxVersions: {},
 };
 
 function pagination(state = initialStatePagination, action) {
-  if (action.response && action.response.entities && action.response.pagination) {
+  if (action.response
+      && action.response.entities
+      && action.response.pagination
+      && action.response.pagination.page
+  ) {
     console.log('response -- ', action);
+    let pages;
     switch (action.type) {
       case actionTypes.BOX.FETCH.SUCCESS:
-        const pages = {};
+        pages = {};
         pages[action.response.pagination.page] = action.response.result;
 
         return merge(
@@ -44,6 +52,17 @@ function pagination(state = initialStatePagination, action) {
                 pages,
               }
             }}
+        );
+      case actionTypes.BOX_VERSION.FETCH.SUCCESS:
+        const boxVersions = {};
+        boxVersions[action.tag] = action.response.pagination;
+        boxVersions[action.tag].pages = {};
+        boxVersions[action.tag].pages[action.response.pagination.page] = action.response.result;
+
+        return merge(
+            {},
+            state,
+            { boxVersions }
         );
       default:
         return state

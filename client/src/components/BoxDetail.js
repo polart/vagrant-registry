@@ -1,12 +1,12 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
-import {PageHeader, Panel, Badge, Well} from 'react-bootstrap';
+import {PageHeader, Panel, Badge, Well, Tabs, Tab} from 'react-bootstrap';
 import * as actions from "../actions";
+import BoxVersionList from "./BoxVersionList";
 
 
 class BoxDetail extends Component {
   componentWillMount() {
-    console.log('mounint -- ', this.props.boxTag);
     this.props.fetchBox(this.props.boxTag);
   }
 
@@ -43,7 +43,14 @@ class BoxDetail extends Component {
     return (
         <div>
           <PageHeader>{this.props.boxTag}</PageHeader>
-          {this.renderBoxDetails()}
+          <Tabs id="box-tabs">
+            <Tab eventKey={1} title="Box Info">
+              {this.renderBoxDetails()}
+            </Tab>
+            <Tab eventKey={2} title="Versions">
+              <BoxVersionList boxTag={this.props.boxTag} />
+            </Tab>
+          </Tabs>
         </div>
     );
   }
