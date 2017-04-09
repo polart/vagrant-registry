@@ -16,6 +16,7 @@ export const USER = {
 
 export const LOAD_BOX = 'LOAD_BOX';
 export const LOAD_BOXES = 'LOAD_BOXES';
+export const LOAD_BOX_VERSION = 'LOAD_BOX_VERSION';
 export const LOAD_BOX_VERSIONS = 'LOAD_BOX_VERSIONS';
 
 export const BOX = {

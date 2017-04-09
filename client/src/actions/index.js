@@ -12,6 +12,7 @@ export const loadUsers = () => action(types.LOAD_USERS);
 export const loadBox = (tag = null) => action(types.LOAD_BOX, { tag });
 export const loadBoxes = (username = null, page = null) => action(types.LOAD_BOXES, { username, page });
 
+export const loadBoxVersion = (tag = null, version = null) => action(types.LOAD_BOX_VERSION, { tag, version });
 export const loadBoxVersions = (tag = null, page = null) => action(types.LOAD_BOX_VERSIONS, { tag, page });
 
 export const user = {

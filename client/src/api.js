@@ -155,7 +155,14 @@ export const fetchBoxes = ({ username, page }) => {
   return getApi(url, boxSchemaArray, {page: page || 1});
 };
 
-export const fetchBoxVersion = ({ tag }) => getApi(`boxes/${tag}/`, boxSchema);
+export const fetchBoxVersion = ({ tag, version }) => getApi(
+    `boxes/${tag}/versions/${version}/`,
+    boxVersionSchema
+);
 export const fetchBoxVersions = ({ tag, page }) => {
-  return getApi(`boxes/${tag}/versions/`, boxVersionSchemaArray, {page: page || 1});
+  return getApi(
+      `boxes/${tag}/versions/`,
+      boxVersionSchemaArray,
+      {page: page || 1}
+  );
 };

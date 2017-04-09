@@ -14,6 +14,7 @@ import rootSaga from "./sagas";
 import {loadState, saveState} from "./localStorage";
 import {throttle} from "lodash";
 import BoxDetail from "./components/BoxDetail";
+import BoxVersionDetail from "./components/BoxVersionDetail";
 
 
 const persistedSate = loadState();
@@ -52,6 +53,7 @@ ReactDOM.render(
         <Route path="/" component={App}>
           <Route path="/boxes(/:username)" component={BoxList} />
           <Route path="/boxes/:username/:boxName" component={BoxDetail} />
+          <Route path="/boxes/:username/:boxName/versions/:version" component={BoxVersionDetail} />
           <Route path="*" component={NotFound} />
         </Route>
       </Router>

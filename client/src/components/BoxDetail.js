@@ -48,7 +48,7 @@ class BoxDetail extends Component {
               {this.renderBoxDetails()}
             </Tab>
             <Tab eventKey={2} title="Versions">
-              <BoxVersionList boxTag={this.props.boxTag} />
+              <BoxVersionList boxTag={this.props.boxTag} router={this.props.router} />
             </Tab>
           </Tabs>
         </div>

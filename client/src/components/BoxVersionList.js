@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
-import {PageHeader, Panel, Badge, Well, Pagination, ListGroup, ListGroupItem, Label} from 'react-bootstrap';
+import {Pagination, ListGroup, ListGroupItem, Label} from 'react-bootstrap';
 import Moment from 'moment';
 import * as actions from "../actions";
 
@@ -17,6 +17,15 @@ class BoxVersionList extends Component {
   onPageChange = (page) => {
     this.props.fetchBoxVersions(this.props.boxTag, page);
     this.setState({page});
+  };
+
+  onBoxVersionClick = (e) => {
+    e.preventDefault();
+    this.props.router.push(
+        // Relative url
+        e.currentTarget.getAttribute("href")
+    );
+    return false;
   };
 
   renderPagination = () => {
@@ -74,6 +83,8 @@ class BoxVersionList extends Component {
       return (
           <ListGroupItem
               key={version.version}
+              href={`/boxes/${this.props.boxTag}/versions/${version.version}/`}
+              onClick={this.onBoxVersionClick}
           >
             <h4 className="list-group-item-heading">
               v{version.version} |&nbsp;
