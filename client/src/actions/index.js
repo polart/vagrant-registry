@@ -10,7 +10,9 @@ export const loadUser = (username) => action(types.LOAD_USER, { username });
 export const loadUsers = () => action(types.LOAD_USERS);
 
 export const loadBox = (tag = null) => action(types.LOAD_BOX, { tag });
-export const loadBoxes = (username = null, page = null, ordering = null) => action(types.LOAD_BOXES, { username, page, ordering });
+export const loadBoxes = (username = null, page = null, ordering = null, search = null) => {
+  return action(types.LOAD_BOXES, { username, page, ordering, search });
+};
 
 export const loadBoxVersion = (tag = null, version = null) => action(types.LOAD_BOX_VERSION, { tag, version });
 export const loadBoxVersions = (tag = null, page = null) => action(types.LOAD_BOX_VERSIONS, { tag, page });
@@ -25,9 +27,9 @@ export const user = {
 
 export const box = {
   fetch: {
-    request: ({ username}) => action(types.BOX.FETCH.REQUEST, {username}),
-    success: ({ username}, response) => action(types.BOX.FETCH.SUCCESS, {response, username}),
-    failure: ({ username}, error) => action(types.BOX.FETCH.FAILURE, {error, username}),
+    request: ({ username, search }) => action(types.BOX.FETCH.REQUEST, {username, search }),
+    success: ({ username, search }, response) => action(types.BOX.FETCH.SUCCESS, {response, username, search }),
+    failure: ({ username, search }, error) => action(types.BOX.FETCH.FAILURE, {error, username, search }),
   },
 };
 

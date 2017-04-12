@@ -51,6 +51,7 @@ ReactDOM.render(
       <Router history={browserHistory}>
         <Route path="/login" component={Login} onEnter={requireAnon} />
         <Route path="/" component={App}>
+          <Route path="/boxes/search" component={BoxList} />
           <Route path="/boxes(/:username)" component={BoxList} />
           <Route path="/boxes/:username/:boxName" component={BoxDetail} />
           <Route path="/boxes/:username/:boxName/versions" component={BoxDetail} />

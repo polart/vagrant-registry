@@ -146,19 +146,24 @@ export const fetchUser = ({ username }) => getApi(`users/${username}/`, userSche
 export const fetchUsers = () => getApi('users/', userSchemaArray);
 
 export const fetchBox = ({ tag }) => getApi(`boxes/${tag}/`, boxSchema);
-export const fetchBoxes = ({ username, page, ordering }) => {
+export const fetchBoxes = ({ username, page, ordering, search }) => {
   let url = 'boxes/';
   if (username) {
     url = `boxes/${username}/`;
   }
 
+  const query = {
+    page: page || 1,
+    ordering: ordering || '-pulls',
+  };
+  if (search) {
+    query.search = search;
+  }
+
   return getApi(
       url,
       boxSchemaArray,
-      {
-        page: page || 1,
-        ordering: ordering || '-pulls',
-      }
+      query,
   );
 };
 

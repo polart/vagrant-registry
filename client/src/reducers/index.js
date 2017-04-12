@@ -21,7 +21,7 @@ function entities(state = initialStateEntities, action) {
 const initialStatePagination = {
   users: {},
   boxes: {
-    __all: {
+    __all__: {
       count: 0,
       activePage: 1,
       pages: {},
@@ -38,7 +38,7 @@ function pagination(state = initialStatePagination, action) {
   ) {
     switch (action.type) {
       case actionTypes.BOX.FETCH.SUCCESS:
-        const username = action.username || '__all';
+        const username = action.username || (action.search && '__search__') || '__all__';
         const boxes = {};
         boxes[username] = action.response.pagination;
         boxes[username].pages = {};

@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
-import { Navbar, Nav, NavItem } from 'react-bootstrap';
+import {Navbar, Nav, NavItem, FormGroup, FormControl, Button, InputGroup, Glyphicon} from 'react-bootstrap';
 import { Link } from 'react-router';
 import * as auth from "../auth";
 
 
 class App extends Component {
+  state = {
+    searchValue: this.props.location.query.q || '',
+  };
+
   componentWillMount() {
     this.checkLogin();
   }
@@ -37,6 +41,26 @@ class App extends Component {
     }
   };
 
+  onSearch = () => {
+    const location = this.props.router.createLocation({
+      pathname: '/boxes/search/',
+      query: {
+        q: this.state.searchValue,
+      }
+    });
+    this.props.router.push(location);
+  };
+
+  onSearchChange = (e) => {
+    this.setState({searchValue: e.target.value});
+  };
+
+  onSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      this.onSearch();
+    }
+  };
+
   render() {
     return (
         <div>
@@ -51,6 +75,23 @@ class App extends Component {
               <Nav onSelect={this.onNavSelect}>
                 <NavItem eventKey="boxes" href="/boxes/" >Boxes</NavItem>
               </Nav>
+
+              <Navbar.Form pullLeft>
+                <FormGroup>
+                  <InputGroup>
+                    <FormControl
+                        type="text"
+                        placeholder="Search"
+                        value={this.state.searchValue}
+                        onChange={this.onSearchChange}
+                        onKeyPress={this.onSearchKeyPress}
+                    />
+                    <InputGroup.Button>
+                      <Button onClick={this.onSearch}><Glyphicon glyph="search" /></Button>
+                    </InputGroup.Button>
+                  </InputGroup>
+                </FormGroup>
+              </Navbar.Form>
             </Navbar.Collapse>
           </Navbar>
 

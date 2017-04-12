@@ -39,6 +39,7 @@ class BoxList extends Component {
       query: {
         order: this.props.location.query.order,
         page,
+        q: this.props.location.query.q,
       }
     });
     this.props.router.push(location);
@@ -59,6 +60,7 @@ class BoxList extends Component {
       query: {
         order: e.target.value,
         page: this.props.location.query.page,
+        q: this.props.location.query.q,
       }
     });
     this.props.router.push(location);
@@ -68,7 +70,8 @@ class BoxList extends Component {
     this.props.fetchBoxes(
         this.props.params.username,
         this.props.location.query.page || 1,
-        ORDERING[this.props.location.query.order] || DEFAULT_ORDERING
+        ORDERING[this.props.location.query.order] || DEFAULT_ORDERING,
+        this.props.location.query.q
     );
   };
 
@@ -160,11 +163,15 @@ class BoxList extends Component {
   };
 
   render() {
-    console.warn('rendering');
     this.activePage = parseInt(this.props.location.query.page || 1, 10);
     this.username = this.props.params.username;
 
-    const pageTitle = this.username ? `${this.username}'s boxes` : 'All boxes';
+    let pageTitle = 'All boxes';
+    if (this.username) {
+      pageTitle = `${this.username}'s boxes`
+    } else if (this.props.location.query.q) {
+      pageTitle = 'Search results'
+    }
     return (
         <div>
           <PageHeader>{pageTitle}</PageHeader>
@@ -187,7 +194,9 @@ class BoxList extends Component {
 function mapStateToProps(state, props) {
   return {
     boxes: state.entities.boxes,
-    boxesPages: state.pagination.boxes[props.params.username || '__all'],
+    boxesPages: state.pagination.boxes[
+        props.params.username || (props.location.query.q && '__search__') || '__all__'
+    ],
   }
 }
 
