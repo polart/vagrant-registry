@@ -36,22 +36,18 @@ function pagination(state = initialStatePagination, action) {
       && action.response.pagination
       && action.response.pagination.page
   ) {
-    console.log('response -- ', action);
-    let pages;
     switch (action.type) {
       case actionTypes.BOX.FETCH.SUCCESS:
-        pages = {};
-        pages[action.response.pagination.page] = action.response.result;
+        const username = action.username || '__all';
+        const boxes = {};
+        boxes[username] = action.response.pagination;
+        boxes[username].pages = {};
+        boxes[username].pages[action.response.pagination.page] = action.response.result;
 
         return merge(
             {},
             state,
-            {boxes: {
-              __all: {
-                count: action.response.pagination.count,
-                pages,
-              }
-            }}
+            { boxes }
         );
       case actionTypes.BOX_VERSION.FETCH.SUCCESS:
         const boxVersions = {};

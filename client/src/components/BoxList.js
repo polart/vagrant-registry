@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import { connect } from 'react-redux';
 import {Pagination, ListGroup, ListGroupItem, PageHeader, FormGroup, Radio} from 'react-bootstrap';
 import Moment from "moment";
+import { isEqual } from 'lodash';
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 
@@ -15,16 +16,32 @@ const DEFAULT_ORDERING = ORDERING.pulls;
 
 class BoxList extends Component {
   componentDidMount() {
-    this.props.fetchBoxes(
-        null,
-        this.props.location.query.page || 1,
-        ORDERING[this.props.location.query.orderBy] || DEFAULT_ORDERING
-    );
+    this.fetchBoxes();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!isEqual(prevProps.location.query, this.props.location.query)) {
+      // For a case, when changing page or ordering.
+      this.fetchBoxes();
+      return;
+    }
+
+    if (prevProps.params.username !== this.props.params.username) {
+      // For a case, when navigating by breadcrumb,
+      // or back and forth in browser.
+      this.fetchBoxes();
+    }
   }
 
   onPageChange = (page) => {
-    this.props.fetchBoxes(null, page);
-    this.props.router.push(`/boxes/?page=${page}`);
+    const location = this.props.router.createLocation({
+      pathname: this.props.location.pathname,
+      query: {
+        order: this.props.location.query.order,
+        page,
+      }
+    });
+    this.props.router.push(location);
   };
 
   onBoxClick = (e) => {
@@ -37,23 +54,31 @@ class BoxList extends Component {
   };
 
   onBoxOrderChange = (e) => {
-    this.props.fetchBoxes(
-        null,
-        this.props.location.query.page,
-        ORDERING[e.target.value]
-    );
-
     const location = this.props.router.createLocation({
-      pathname: this.props.router.location.pathname,
+      pathname: this.props.location.pathname,
       query: {
-        orderBy: e.target.value,
+        order: e.target.value,
         page: this.props.location.query.page,
       }
     });
     this.props.router.push(location);
   };
 
+  fetchBoxes = () => {
+    this.props.fetchBoxes(
+        this.props.params.username,
+        this.props.location.query.page || 1,
+        ORDERING[this.props.location.query.order] || DEFAULT_ORDERING
+    );
+  };
+
   renderBoxesList = () => {
+    if (!this.props.boxesPages) {
+      return;
+    }
+    if (this.props.boxesPages.count === 0) {
+      return <p>No boxes</p>
+    }
     const boxesTags = this.props.boxesPages.pages[this.activePage];
     if (!boxesTags) {
       return;
@@ -84,7 +109,10 @@ class BoxList extends Component {
   };
 
   renderPagination = () => {
-    if (this.props.boxesPages.count === 0) {
+    if (!this.props.boxesPages) {
+      return;
+    }
+    if (this.props.boxesPages.count <= 10) {
       return;
     }
 
@@ -106,13 +134,13 @@ class BoxList extends Component {
   };
 
   renderOrderControls = () => {
-    const orderBy = this.props.location.query.orderBy || 'pulls';
+    const order = this.props.location.query.order || 'pulls';
     return (
         <FormGroup>
           <label>Order by:</label>{' '}
           <Radio name="boxOrder"
                  value="pulls"
-                 checked={orderBy === 'pulls'}
+                 checked={order === 'pulls'}
                  inline
                  onChange={this.onBoxOrderChange}
           >
@@ -121,7 +149,7 @@ class BoxList extends Component {
           {' '}
           <Radio name="boxOrder"
                  value="updated"
-                 checked={orderBy === 'updated'}
+                 checked={order === 'updated'}
                  inline
                  onChange={this.onBoxOrderChange}
           >
@@ -132,11 +160,14 @@ class BoxList extends Component {
   };
 
   render() {
+    console.warn('rendering');
     this.activePage = parseInt(this.props.location.query.page || 1, 10);
+    this.username = this.props.params.username;
 
+    const pageTitle = this.username ? `${this.username}'s boxes` : 'All boxes';
     return (
         <div>
-          <PageHeader>All Boxes</PageHeader>
+          <PageHeader>{pageTitle}</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
           {this.renderOrderControls()}
           <div>
@@ -153,10 +184,10 @@ class BoxList extends Component {
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
   return {
     boxes: state.entities.boxes,
-    boxesPages: state.pagination.boxes.__all,
+    boxesPages: state.pagination.boxes[props.params.username || '__all'],
   }
 }
 

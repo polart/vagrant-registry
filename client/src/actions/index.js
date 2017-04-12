@@ -26,8 +26,8 @@ export const user = {
 export const box = {
   fetch: {
     request: ({ username}) => action(types.BOX.FETCH.REQUEST, {username}),
-    success: (_, response) => action(types.BOX.FETCH.SUCCESS, {response}),
-    failure: (_, error) => action(types.BOX.FETCH.FAILURE, {error}),
+    success: ({ username}, response) => action(types.BOX.FETCH.SUCCESS, {response, username}),
+    failure: ({ username}, error) => action(types.BOX.FETCH.FAILURE, {error, username}),
   },
 };
 
