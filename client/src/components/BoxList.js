@@ -1,13 +1,25 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
-import { Pagination, ListGroup, ListGroupItem, PageHeader } from 'react-bootstrap';
+import {Pagination, ListGroup, ListGroupItem, PageHeader, FormGroup, Radio} from 'react-bootstrap';
+import Moment from "moment";
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
+const ORDERING = {
+  pulls: '-pulls',
+  updated: '-date_updated',
+};
+const DEFAULT_ORDERING = ORDERING.pulls;
+
+
 class BoxList extends Component {
-  componentWillMount() {
-    this.props.fetchBoxes(null, this.props.location.query.page || 1);
+  componentDidMount() {
+    this.props.fetchBoxes(
+        null,
+        this.props.location.query.page || 1,
+        ORDERING[this.props.location.query.orderBy] || DEFAULT_ORDERING
+    );
   }
 
   onPageChange = (page) => {
@@ -22,6 +34,23 @@ class BoxList extends Component {
         e.currentTarget.getAttribute("href")
     );
     return false;
+  };
+
+  onBoxOrderChange = (e) => {
+    this.props.fetchBoxes(
+        null,
+        this.props.location.query.page,
+        ORDERING[e.target.value]
+    );
+
+    const location = this.props.router.createLocation({
+      pathname: this.props.router.location.pathname,
+      query: {
+        orderBy: e.target.value,
+        page: this.props.location.query.page,
+      }
+    });
+    this.props.router.push(location);
   };
 
   renderBoxesList = () => {
@@ -45,6 +74,9 @@ class BoxList extends Component {
             <div>
               {box.pulls} pulls
             </div>
+            <small title={Moment(box.date_updated).format('LLL')}>
+              Last updated: {Moment(box.date_updated).fromNow()}
+            </small>
             <div className="clearfix"></div>
           </ListGroupItem>
       );
@@ -73,6 +105,32 @@ class BoxList extends Component {
     );
   };
 
+  renderOrderControls = () => {
+    const orderBy = this.props.location.query.orderBy || 'pulls';
+    return (
+        <FormGroup>
+          <label>Order by:</label>{' '}
+          <Radio name="boxOrder"
+                 value="pulls"
+                 checked={orderBy === 'pulls'}
+                 inline
+                 onChange={this.onBoxOrderChange}
+          >
+            Downloads
+          </Radio>
+          {' '}
+          <Radio name="boxOrder"
+                 value="updated"
+                 checked={orderBy === 'updated'}
+                 inline
+                 onChange={this.onBoxOrderChange}
+          >
+            Last updated
+          </Radio>
+        </FormGroup>
+    )
+  };
+
   render() {
     this.activePage = parseInt(this.props.location.query.page || 1, 10);
 
@@ -80,6 +138,7 @@ class BoxList extends Component {
         <div>
           <PageHeader>All Boxes</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
+          {this.renderOrderControls()}
           <div>
             <ListGroup>
               {this.renderBoxesList()}

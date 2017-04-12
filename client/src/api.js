@@ -146,13 +146,20 @@ export const fetchUser = ({ username }) => getApi(`users/${username}/`, userSche
 export const fetchUsers = () => getApi('users/', userSchemaArray);
 
 export const fetchBox = ({ tag }) => getApi(`boxes/${tag}/`, boxSchema);
-export const fetchBoxes = ({ username, page }) => {
+export const fetchBoxes = ({ username, page, ordering }) => {
   let url = 'boxes/';
   if (username) {
     url = `boxes/${username}/`;
   }
 
-  return getApi(url, boxSchemaArray, {page: page || 1});
+  return getApi(
+      url,
+      boxSchemaArray,
+      {
+        page: page || 1,
+        ordering: ordering || '-pulls',
+      }
+  );
 };
 
 export const fetchBoxVersion = ({ tag, version }) => getApi(
