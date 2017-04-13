@@ -88,14 +88,17 @@ function getApi(endpoint, schema, getParams = null) {
   return callApi(endpoint, 'GET', schema, getParams);
 }
 
+// eslint-disable-next-line no-unused-vars
 function postApi(endpoint, schema, data) {
   return callApi(endpoint, 'POST', schema, null, data);
 }
 
+// eslint-disable-next-line no-unused-vars
 function putApi(endpoint, schema, data) {
   return callApi(endpoint, 'PUT', schema, null, data);
 }
 
+// eslint-disable-next-line no-unused-vars
 function deleteApi(endpoint) {
   return callApi(endpoint, 'DELETE');
 }

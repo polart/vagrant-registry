@@ -1,5 +1,4 @@
-import { takeLatest } from 'redux-saga';
-import { call, put } from 'redux-saga/effects'
+import { call, put, takeLatest } from 'redux-saga/effects'
 import * as api from '../api';
 import { browserHistory } from 'react-router';
 import * as actionTypes from '../actions/types';
@@ -39,27 +38,27 @@ const fetchBoxVersions = callRequest.bind(null, actions.boxVersion.fetch, api.fe
 //*********************************************************
 
 export function* watchFetchUser() {
-  yield* takeLatest(actionTypes.LOAD_USER, fetchUser)
+  yield takeLatest(actionTypes.LOAD_USER, fetchUser)
 }
 
 export function* watchFetchUsers() {
-  yield* takeLatest(actionTypes.LOAD_USERS, fetchUsers)
+  yield takeLatest(actionTypes.LOAD_USERS, fetchUsers)
 }
 
 export function* watchFetchBox() {
-  yield* takeLatest(actionTypes.LOAD_BOX, fetchBox)
+  yield takeLatest(actionTypes.LOAD_BOX, fetchBox)
 }
 
 export function* watchFetchBoxes() {
-  yield* takeLatest(actionTypes.LOAD_BOXES, fetchBoxes)
+  yield takeLatest(actionTypes.LOAD_BOXES, fetchBoxes)
 }
 
 export function* watchFetchBoxVersion() {
-  yield* takeLatest(actionTypes.LOAD_BOX_VERSION, fetchBoxVersion)
+  yield takeLatest(actionTypes.LOAD_BOX_VERSION, fetchBoxVersion)
 }
 
 export function* watchFetchBoxVersions() {
-  yield* takeLatest(actionTypes.LOAD_BOX_VERSIONS, fetchBoxVersions)
+  yield takeLatest(actionTypes.LOAD_BOX_VERSIONS, fetchBoxVersions)
 }
 
 
