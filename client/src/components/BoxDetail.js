@@ -7,7 +7,7 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxDetail extends Component {
-  componentWillMount() {
+  componentDidMount() {
     this.props.fetchBox(this.props.boxTag);
   }
 

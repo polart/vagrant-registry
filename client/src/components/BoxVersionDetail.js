@@ -9,7 +9,7 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxVersionDetail extends Component {
-  componentWillMount() {
+  componentDidMount() {
     this.props.fetchBox(this.props.boxTag);
     this.props.fetchBoxVersion(this.props.boxTag, this.props.params.version);
   }

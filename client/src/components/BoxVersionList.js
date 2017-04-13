@@ -10,7 +10,7 @@ class BoxVersionList extends Component {
     page: 1,
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.fetchBoxVersions(this.props.boxTag, this.state.page);
   }
 

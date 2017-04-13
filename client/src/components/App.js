@@ -9,7 +9,7 @@ class App extends Component {
     searchValue: this.props.location.query.q || '',
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.checkLogin();
   }
 
