@@ -22,9 +22,12 @@ function callApi(endpoint, method, schema = null, getParams = null, postData = n
   const fullUrl = addGetParams(API_ROOT + endpoint, getParams);
 
   const myHeaders = new Headers({
-    'Authorization': `Token ${localStorage.token}`,
     'Content-Type': 'application/json',
   });
+
+  if (localStorage.token) {
+    myHeaders.set('Authorization', `Token ${localStorage.token}`);
+  }
 
   const myInit = {
     method: method,

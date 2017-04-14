@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Router, Route, browserHistory } from "react-router";
+import {Router, Route, browserHistory, IndexRoute} from "react-router";
 import {Provider} from "react-redux";
 import {createStore, applyMiddleware, compose} from "redux";
 import App from "./components/App";
@@ -51,6 +51,7 @@ ReactDOM.render(
       <Router history={browserHistory}>
         <Route path="/login" component={Login} onEnter={requireAnon} />
         <Route path="/" component={App}>
+          <IndexRoute component={BoxList} />
           <Route path="/boxes/search" component={BoxList} />
           <Route path="/boxes(/:username)" component={BoxList} />
           <Route path="/boxes/:username/:boxName" component={BoxDetail} />
