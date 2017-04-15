@@ -1,6 +1,16 @@
 import { combineReducers } from 'redux';
-import { merge, isArray, set } from 'lodash';
+import { merge, mergeWith, isArray, set } from 'lodash';
 import * as actionTypes from '../actions/types';
+
+
+// Pagination and related objects represented by arrays.
+// On merge those arrays should be overridden, not merged,
+// in order to prevent unexpected results.
+function overrideArray(objValue, srcValue) {
+  if (isArray(srcValue)) {
+    return srcValue;
+  }
+}
 
 
 const initialStateEntities = {
@@ -12,7 +22,7 @@ const initialStateEntities = {
 
 function entities(state = initialStateEntities, action) {
   if (action.response && action.response.entities) {
-    return merge({}, state, action.response.entities)
+    return mergeWith({}, state, action.response.entities, overrideArray)
   }
   return state;
 }
@@ -42,27 +52,28 @@ function pagination(state = initialStatePagination, action) {
         boxes[username] = action.response.pagination;
         boxes[username].pages = {};
         boxes[username].pages[action.response.pagination.page] = action.response.result;
-
-        return merge(
+        return mergeWith(
             {},
             state,
-            { boxes }
+            { boxes },
+            overrideArray
         );
+
       case actionTypes.BOX_VERSION.FETCH.SUCCESS:
         const boxVersions = {};
         boxVersions[action.tag] = action.response.pagination;
         boxVersions[action.tag].pages = {};
         boxVersions[action.tag].pages[action.response.pagination.page] = action.response.result;
 
-        return merge(
+        return mergeWith(
             {},
             state,
-            { boxVersions }
+            { boxVersions },
+            overrideArray
         );
       default:
         return state
     }
-    // return merge({}, state, action.response.pagination)
   }
   return state;
 }

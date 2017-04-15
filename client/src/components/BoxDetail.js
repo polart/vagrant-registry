@@ -40,15 +40,42 @@ class BoxDetail extends Component {
     );
   };
 
+  renderEditOption = () => {
+    if (!this.props.box) {
+      return null;
+    }
+    if (this.props.box.user_permissions === '*') {
+      return <Link to={`/boxes/${this.props.boxTag}/edit/`}>Edit</Link>;
+    }
+    return null;
+  };
+
+  onBoxDelete = (e) => {
+    e.preventDefault();
+    // TODO: would be good to use custom Confirm dialog
+    if (window.confirm(`Are you sure you want to delete box ${this.props.boxTag}?`)) {
+      this.props.deleteBox(this.props.boxTag);
+    }
+  };
+
+  renderDeleteOption = () => {
+    if (!this.props.box) {
+      return null;
+    }
+    if (this.props.box.user_permissions === '*') {
+      return <a href="#" onClick={this.onBoxDelete}>Delete</a>;
+    }
+    return null;
+  };
+
   render() {
     return (
         <div>
           <PageHeader>{this.props.boxTag}</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
-          {
-            this.props.myUsername === this.props.params.username &&
-            <Link to={`/boxes/${this.props.boxTag}/edit/`}>Edit</Link>
-          }
+          {this.renderEditOption()}
+          {' '}
+          {this.renderDeleteOption()}
           <Tabs id="box-tabs">
             <Tab eventKey={1} title="Box Info">
               {this.renderBoxDetails()}
@@ -66,7 +93,6 @@ function mapStateToProps(state, props) {
   const {username, boxName} = props.params;
   const boxTag = `${username}/${boxName}`;
   return {
-    myUsername: state.myUsername,
     box: state.entities.boxes[boxTag],
     boxTag,
   }
@@ -74,4 +100,5 @@ function mapStateToProps(state, props) {
 
 export default connect(mapStateToProps, {
   fetchBox: actions.loadBox,
+  deleteBox: actions.deleteBox,
 })(BoxDetail)

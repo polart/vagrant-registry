@@ -17,6 +17,7 @@ export const loadBoxes = (username = null, page = null, ordering = null, search 
 };
 export const createBox = (username, data) => action(types.CREATE_BOX, { username, data });
 export const editBox = (tag, data) => action(types.EDIT_BOX, { tag, data });
+export const deleteBox = (tag) => action(types.DELETE_BOX, { tag });
 
 export const loadBoxVersion = (tag = null, version = null) => action(types.LOAD_BOX_VERSION, { tag, version });
 export const loadBoxVersions = (tag = null, page = null) => action(types.LOAD_BOX_VERSIONS, { tag, page });
@@ -44,6 +45,11 @@ export const box = {
     request: (data) => action(types.BOX.EDIT.REQUEST, data),
     success: (data, response) => action(types.BOX.EDIT.SUCCESS, { ...data, response }),
     failure: (data, error) => action(types.BOX.EDIT.FAILURE, { ...data, error }),
+  },
+  delete: {
+    request: (data) => action(types.BOX.DELETE.REQUEST, data),
+    success: (data, response) => action(types.BOX.DELETE.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX.DELETE.FAILURE, { ...data, error }),
   },
 };
 

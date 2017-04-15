@@ -32,6 +32,7 @@ const fetchBox = callRequest.bind(null, actions.box.fetch, api.fetchBox);
 const fetchBoxes = callRequest.bind(null, actions.box.fetch, api.fetchBoxes);
 const createBox = callRequest.bind(null, actions.box.create, api.createBox);
 const editBox = callRequest.bind(null, actions.box.edit, api.editBox);
+const deleteBox = callRequest.bind(null, actions.box.delete, api.deleteBox);
 const fetchBoxVersion = callRequest.bind(null, actions.boxVersion.fetch, api.fetchBoxVersion);
 const fetchBoxVersions = callRequest.bind(null, actions.boxVersion.fetch, api.fetchBoxVersions);
 
@@ -95,6 +96,21 @@ export function* watchEditBox() {
   });
 }
 
+export function* watchDeleteBox() {
+  yield takeLatest(actionTypes.DELETE_BOX, function* ({tag}) {
+    yield fork(deleteBox, {tag});
+
+    const { success } = yield race({
+      success: take(action => action.type === actionTypes.BOX.DELETE.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX.DELETE.FAILURE),
+    });
+
+    if (success) {
+      browserHistory.push(`/`);
+    }
+  });
+}
+
 export function* watchFetchBoxVersion() {
   yield takeLatest(actionTypes.LOAD_BOX_VERSION, fetchBoxVersion)
 }
@@ -112,6 +128,7 @@ export default function* rootSaga() {
       watchFetchBoxes(),
       watchCreateBox(),
       watchEditBox(),
+      watchDeleteBox(),
       watchFetchBoxVersion(),
       watchFetchBoxVersions(),
   ]
