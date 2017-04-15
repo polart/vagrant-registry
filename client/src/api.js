@@ -73,15 +73,7 @@ function callApi(endpoint, method, schema = null, getParams = null, postData = n
       .then(
           response => ({response}),
           ({error, response}) => {
-            let msg;
-            if (error.detail) {
-              msg = error.detail;
-            } else if (error.non_field_errors) {
-              msg = error.non_field_errors.join(' ');
-            } else {
-              msg = 'Something bad happened';
-            }
-            return {error: msg, status: response.status};
+            return {error, status: response.status};
           }
       )
 
@@ -172,6 +164,7 @@ export const fetchBoxes = ({ username, page, ordering, search }) => {
       query,
   );
 };
+export const createBox = ({data, username}) => postApi(`boxes/${username}/`, boxSchema, data);
 
 export const fetchBoxVersion = ({ tag, version }) => getApi(
     `boxes/${tag}/versions/${version}/`,

@@ -15,12 +15,14 @@ export const USER = {
 
 
 export const LOAD_BOX = 'LOAD_BOX';
+export const CREATE_BOX = 'CREATE_BOX';
 export const LOAD_BOXES = 'LOAD_BOXES';
 export const LOAD_BOX_VERSION = 'LOAD_BOX_VERSION';
 export const LOAD_BOX_VERSIONS = 'LOAD_BOX_VERSIONS';
 
 export const BOX = {
   FETCH: createRequestTypes('BOX_FETCH'),
+  CREATE: createRequestTypes('BOX_CREATE'),
 };
 
 export const BOX_VERSION = {
@@ -28,3 +30,11 @@ export const BOX_VERSION = {
 };
 
 export const SET_MY_USERNAME = 'SET_MY_USERNAME';
+
+export const FORM = {
+  SET_PENDING: 'FORM_SET_PENDING',
+  FIELD_CHANGE: 'FORM_FIELD_CHANGE',
+  SET_ERRORS: 'FORM_SET_ERRORS',
+  CLEAR_ERRORS: 'FORM_CLEAR_ERRORS',
+  RESET: 'FORM_RESET',
+};

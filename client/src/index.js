@@ -17,6 +17,7 @@ import BoxDetail from "./components/BoxDetail";
 import BoxVersionDetail from "./components/BoxVersionDetail";
 import BoxSearchPage from "./components/BoxSearchPage";
 import UserDashPage from "./components/UserDashPage";
+import BoxCreatePage from "./components/BoxCreatePage";
 
 
 const persistedSate = loadState();
@@ -55,6 +56,7 @@ ReactDOM.render(
         <Route path="/" component={App}>
           <IndexRoute component={UserDashPage} />
           <Route path="/boxes/search" component={BoxSearchPage} />
+          <Route path="/boxes/create" component={BoxCreatePage} />
           <Route path="/boxes(/:username)" component={BoxListPage} />
           <Route path="/boxes/:username/:boxName" component={BoxDetail} />
           <Route path="/boxes/:username/:boxName/versions" component={BoxDetail} />

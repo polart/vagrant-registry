@@ -5,6 +5,7 @@ import {isEqual} from "lodash";
 import * as actions from "../actions";
 import {BOX_ORDERING, DEFAULT_BOX_ORDERING} from "../constants";
 import BoxList from "./BoxList";
+import {Link} from "react-router";
 
 
 class UserDashPage extends Component {
@@ -32,6 +33,9 @@ class UserDashPage extends Component {
     return (
         <div>
           <PageHeader>My boxes</PageHeader>
+          <Link className='btn btn-success' to='/boxes/create/'>
+            New box
+          </Link>
           <BoxList
               router={this.props.router}
               boxes={this.props.boxes}
