@@ -165,6 +165,7 @@ export const fetchBoxes = ({ username, page, ordering, search }) => {
   );
 };
 export const createBox = ({data, username}) => postApi(`boxes/${username}/`, boxSchema, data);
+export const editBox = ({data, tag}) => putApi(`boxes/${tag}/`, boxSchema, data);
 
 export const fetchBoxVersion = ({ tag, version }) => getApi(
     `boxes/${tag}/versions/${version}/`,

@@ -4,18 +4,23 @@ import {Button, PageHeader} from "react-bootstrap";
 import * as actions from "../actions";
 import MyFormField from "./MyFormField";
 import MyFormError from "./MyFormError";
+import {Link} from "react-router";
 
 
-class BoxCreatePage extends Component {
+class BoxEditPage extends Component {
+  componentDidMount() {
+    this.props.setFormData('box', this.props.box);
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
-    this.props.createBox(this.props.myUsername, this.props.form.data);
+    this.props.editBox(this.props.tag, this.props.form.data);
   };
 
   render() {
     return (
         <div>
-          <PageHeader>Create new box</PageHeader>
+          <PageHeader>Edit box</PageHeader>
           <form
               onSubmit={this.onSubmit}
           >
@@ -55,21 +60,28 @@ class BoxCreatePage extends Component {
                 type="submit"
                 disabled={this.props.form.pending}
             >
-              Create
+              Edit
             </Button>
+            {' '}
+            <Link to={`/boxes/${this.props.tag}/`}>Cancel</Link>
           </form>
         </div>
     );
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, props) {
+  const {username, boxName} = props.router.params;
+  const tag = `${username}/${boxName}`;
+  const box = state.entities.boxes[tag];
   return {
-    myUsername: state.myUsername,
     form: state.forms.box,
+    tag,
+    box,
   }
 }
 
 export default connect(mapStateToProps, {
-  createBox: actions.createBox,
-})(BoxCreatePage)
+  editBox: actions.editBox,
+  setFormData: actions.form.setData,
+})(BoxEditPage)

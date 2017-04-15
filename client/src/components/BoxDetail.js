@@ -4,6 +4,7 @@ import {PageHeader, Panel, Badge, Well, Tabs, Tab} from 'react-bootstrap';
 import * as actions from "../actions";
 import BoxVersionList from "./BoxVersionList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import {Link} from "react-router";
 
 
 class BoxDetail extends Component {
@@ -40,11 +41,14 @@ class BoxDetail extends Component {
   };
 
   render() {
-    console.log(this.props.box);
     return (
         <div>
           <PageHeader>{this.props.boxTag}</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
+          {
+            this.props.myUsername === this.props.params.username &&
+            <Link to={`/boxes/${this.props.boxTag}/edit/`}>Edit</Link>
+          }
           <Tabs id="box-tabs">
             <Tab eventKey={1} title="Box Info">
               {this.renderBoxDetails()}
@@ -62,6 +66,7 @@ function mapStateToProps(state, props) {
   const {username, boxName} = props.params;
   const boxTag = `${username}/${boxName}`;
   return {
+    myUsername: state.myUsername,
     box: state.entities.boxes[boxTag],
     boxTag,
   }

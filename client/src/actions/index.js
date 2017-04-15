@@ -16,6 +16,7 @@ export const loadBoxes = (username = null, page = null, ordering = null, search 
   return action(types.LOAD_BOXES, { username, page, ordering, search });
 };
 export const createBox = (username, data) => action(types.CREATE_BOX, { username, data });
+export const editBox = (tag, data) => action(types.EDIT_BOX, { tag, data });
 
 export const loadBoxVersion = (tag = null, version = null) => action(types.LOAD_BOX_VERSION, { tag, version });
 export const loadBoxVersions = (tag = null, page = null) => action(types.LOAD_BOX_VERSIONS, { tag, page });
@@ -39,6 +40,11 @@ export const box = {
     success: (data, response) => action(types.BOX.CREATE.SUCCESS, { ...data, response }),
     failure: (data, error) => action(types.BOX.CREATE.FAILURE, { ...data, error }),
   },
+  edit: {
+    request: (data) => action(types.BOX.EDIT.REQUEST, data),
+    success: (data, response) => action(types.BOX.EDIT.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX.EDIT.FAILURE, { ...data, error }),
+  },
 };
 
 export const boxVersion = {
@@ -51,6 +57,7 @@ export const boxVersion = {
 
 export const form = {
   setPending: (model, pending) => action(types.FORM.SET_PENDING, {model, pending}),
+  setData: (model, data) => action(types.FORM.SET_DATA, {model, data}),
   fieldChange: (model, value) => action(types.FORM.FIELD_CHANGE, {model, value}),
   setErrors: (model, errors) => action(types.FORM.SET_ERRORS, {model, errors}),
   clearErrors: (model) => action(types.FORM.CLEAR_ERRORS, {model}),

@@ -31,6 +31,7 @@ const fetchUsers = callRequest.bind(null, actions.user.fetch, api.fetchUsers);
 const fetchBox = callRequest.bind(null, actions.box.fetch, api.fetchBox);
 const fetchBoxes = callRequest.bind(null, actions.box.fetch, api.fetchBoxes);
 const createBox = callRequest.bind(null, actions.box.create, api.createBox);
+const editBox = callRequest.bind(null, actions.box.edit, api.editBox);
 const fetchBoxVersion = callRequest.bind(null, actions.boxVersion.fetch, api.fetchBoxVersion);
 const fetchBoxVersions = callRequest.bind(null, actions.boxVersion.fetch, api.fetchBoxVersions);
 
@@ -74,6 +75,26 @@ export function* watchCreateBox() {
   });
 }
 
+export function* watchEditBox() {
+  yield takeLatest(actionTypes.EDIT_BOX, function* ({tag, data}) {
+    yield put(actions.form.setPending('box', true));
+    yield fork(editBox, {tag, data});
+
+    const { success, failure } = yield race({
+      success: take(action => action.type === actionTypes.BOX.EDIT.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX.EDIT.FAILURE),
+    });
+
+    if (failure) {
+      yield put(actions.form.setErrors('box', failure.error));
+      yield put(actions.form.setPending('box', false));
+    } else if (success) {
+      yield put(actions.form.reset('box'));
+      browserHistory.push(`/boxes/${data.owner}/${data.name}/`);
+    }
+  });
+}
+
 export function* watchFetchBoxVersion() {
   yield takeLatest(actionTypes.LOAD_BOX_VERSION, fetchBoxVersion)
 }
@@ -90,6 +111,7 @@ export default function* rootSaga() {
       watchFetchBox(),
       watchFetchBoxes(),
       watchCreateBox(),
+      watchEditBox(),
       watchFetchBoxVersion(),
       watchFetchBoxVersions(),
   ]
