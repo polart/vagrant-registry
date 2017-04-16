@@ -45,6 +45,8 @@ box_version_list = boxes_api_views.BoxVersionViewSet.as_view({
 }, **{'suffix': 'List'})
 box_version_detail = boxes_api_views.BoxVersionViewSet.as_view({
     'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 }, **{'suffix': 'Instance'})
 
