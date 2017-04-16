@@ -280,18 +280,29 @@ class BoxProvider(models.Model):
         null=True,
         blank=True,
     )
-    file_size = models.BigIntegerField(default=0)
+    file_size = models.BigIntegerField(
+        default=0,
+        editable=False,
+    )
     checksum_type = models.CharField(
         max_length=10,
         choices=CHECKSUM_TYPE_CHOICES,
         default=SHA256,
+        editable=False,
     )
-    checksum = models.CharField(max_length=128)
-    pulls = models.PositiveIntegerField(default=0)
+    checksum = models.CharField(
+        max_length=128,
+        editable=False,
+    )
+    pulls = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
     status = models.CharField(
         max_length=2,
         choices=STATUS_CHOICES,
         default=EMPTY,
+        editable=False,
     )
 
     class Meta:

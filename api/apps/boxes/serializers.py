@@ -41,10 +41,12 @@ class BoxProviderSerializer(serializers.ModelSerializer):
         model = BoxProvider
         fields = ('url', 'tag', 'provider', 'date_created', 'date_modified',
                   'date_updated', 'checksum_type', 'checksum',
-                  'download_url', 'file_size', 'pulls')
+                  'download_url', 'file_size', 'pulls', 'status')
 
     def get_download_url(self, obj):
-        return self.context.get('request').build_absolute_uri(obj.download_url)
+        if obj.status == BoxProvider.FILLED_IN:
+            return self.context.get('request').build_absolute_uri(obj.download_url)
+        return None
 
 
 class BoxVersionSerializer(serializers.ModelSerializer):

@@ -52,9 +52,12 @@ box_version_detail = boxes_api_views.BoxVersionViewSet.as_view({
 
 box_provider_list = boxes_api_views.BoxProviderViewSet.as_view({
     'get': 'list',
+    'post': 'create'
 }, **{'suffix': 'List'})
 box_provider_detail = boxes_api_views.BoxProviderViewSet.as_view({
     'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 }, **{'suffix': 'Instance'})
 
