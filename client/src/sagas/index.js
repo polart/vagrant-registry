@@ -28,13 +28,18 @@ function* callRequest(entity, apiFn, data = null) {
 
 const fetchUser = callRequest.bind(null, actions.user.fetch, api.fetchUser);
 const fetchUsers = callRequest.bind(null, actions.user.fetch, api.fetchUsers);
+
 const fetchBox = callRequest.bind(null, actions.box.fetch, api.fetchBox);
 const fetchBoxes = callRequest.bind(null, actions.box.fetch, api.fetchBoxes);
 const createBox = callRequest.bind(null, actions.box.create, api.createBox);
 const editBox = callRequest.bind(null, actions.box.edit, api.editBox);
 const deleteBox = callRequest.bind(null, actions.box.delete, api.deleteBox);
+
 const fetchBoxVersion = callRequest.bind(null, actions.boxVersion.fetch, api.fetchBoxVersion);
 const fetchBoxVersions = callRequest.bind(null, actions.boxVersion.fetch, api.fetchBoxVersions);
+const createBoxVersion = callRequest.bind(null, actions.boxVersion.create, api.createBoxVersion);
+const editBoxVersion = callRequest.bind(null, actions.boxVersion.edit, api.editBoxVersion);
+const deleteBoxVersion = callRequest.bind(null, actions.boxVersion.delete, api.deleteBoxVersion);
 
 //*********************************************************
 // Watchers
@@ -119,17 +124,77 @@ export function* watchFetchBoxVersions() {
   yield takeLatest(actionTypes.LOAD_BOX_VERSIONS, fetchBoxVersions)
 }
 
+export function* watchCreateBoxVersion() {
+  yield takeLatest(actionTypes.CREATE_BOX_VERSION, function* ({tag, data}) {
+    yield put(actions.form.setPending('boxVersion', true));
+    yield fork(createBoxVersion, {tag, data});
+
+    const { success, failure } = yield race({
+      success: take(action => action.type === actionTypes.BOX_VERSION.CREATE.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX_VERSION.CREATE.FAILURE),
+    });
+
+    if (failure) {
+      yield put(actions.form.setErrors('boxVersion', failure.error));
+      yield put(actions.form.setPending('boxVersion', false));
+    } else if (success) {
+      yield put(actions.form.reset('boxVersion'));
+      browserHistory.push(`/boxes/${tag}/versions/`);
+    }
+  });
+}
+
+export function* watchEditBoxVersion() {
+  yield takeLatest(actionTypes.EDIT_BOX_VERSION, function* ({tag, version, data}) {
+    yield put(actions.form.setPending('boxVersion', true));
+    yield fork(editBoxVersion, {tag, version, data});
+
+    const { success, failure } = yield race({
+      success: take(action => action.type === actionTypes.BOX_VERSION.EDIT.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX_VERSION.EDIT.FAILURE),
+    });
+
+    if (failure) {
+      yield put(actions.form.setErrors('boxVersion', failure.error));
+      yield put(actions.form.setPending('boxVersion', false));
+    } else if (success) {
+      yield put(actions.form.reset('boxVersion'));
+      browserHistory.push(`/boxes/${tag}/versions/${data.version}/`);
+    }
+  });
+}
+
+export function* watchDeleteBoxVersion() {
+  yield takeLatest(actionTypes.DELETE_BOX_VERSION, function* ({tag, version}) {
+    yield fork(deleteBoxVersion, {tag, version});
+
+    const { success } = yield race({
+      success: take(action => action.type === actionTypes.BOX_VERSION.DELETE.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX_VERSION.DELETE.FAILURE),
+    });
+
+    if (success) {
+      browserHistory.push(`/boxes/${tag}/versions/`);
+    }
+  });
+}
+
 
 export default function* rootSaga() {
   yield [
-      watchFetchUser(),
-      watchFetchUsers(),
-      watchFetchBox(),
-      watchFetchBoxes(),
-      watchCreateBox(),
-      watchEditBox(),
-      watchDeleteBox(),
-      watchFetchBoxVersion(),
-      watchFetchBoxVersions(),
+    watchFetchUser(),
+    watchFetchUsers(),
+
+    watchFetchBox(),
+    watchFetchBoxes(),
+    watchCreateBox(),
+    watchEditBox(),
+    watchDeleteBox(),
+
+    watchFetchBoxVersion(),
+    watchFetchBoxVersions(),
+    watchCreateBoxVersion(),
+    watchEditBoxVersion(),
+    watchDeleteBoxVersion(),
   ]
 }

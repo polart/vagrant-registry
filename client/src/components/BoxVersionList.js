@@ -92,7 +92,7 @@ class BoxVersionList extends Component {
                 Last updated: {Moment(version.date_updated).fromNow()}
               </small>
             </h4>
-            <p>Initial release</p>
+            <p>{version.changes}</p>
             {this.renderProviders(version)}
           </ListGroupItem>
       );

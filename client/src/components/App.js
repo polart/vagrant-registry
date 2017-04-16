@@ -2,9 +2,16 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import Login from "./Login";
 import MyNavbar from "./MyNavbar";
+import * as actions from '../actions';
 
 
 class App extends Component {
+  componentDidMount() {
+    if (this.props.myUsername) {
+      this.props.loadUser(this.props.myUsername);
+    }
+  }
+
   render() {
     if (this.props.location.pathname === '/' && !this.props.myUsername) {
       return <Login router={this.props.router} />;
@@ -28,4 +35,5 @@ function mapStateToProps(state, props) {
 }
 
 export default connect(mapStateToProps, {
+  loadUser: actions.loadUser,
 })(App)

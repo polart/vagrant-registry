@@ -21,6 +21,18 @@ export const deleteBox = (tag) => action(types.DELETE_BOX, { tag });
 
 export const loadBoxVersion = (tag = null, version = null) => action(types.LOAD_BOX_VERSION, { tag, version });
 export const loadBoxVersions = (tag = null, page = null) => action(types.LOAD_BOX_VERSIONS, { tag, page });
+export const createBoxVersion = (tag, data) => action(
+    types.CREATE_BOX_VERSION,
+    { tag, data }
+);
+export const editBoxVersion = (tag, version, data) => action(
+    types.EDIT_BOX_VERSION,
+    { tag, version, data }
+);
+export const deleteBoxVersion = (tag, version) => action(
+    types.DELETE_BOX_VERSION,
+    { tag, version }
+);
 
 export const user = {
   fetch: {
@@ -58,6 +70,21 @@ export const boxVersion = {
     request: ({ tag }) => action(types.BOX_VERSION.FETCH.REQUEST, {tag}),
     success: ({ tag }, response) => action(types.BOX_VERSION.FETCH.SUCCESS, {tag, response}),
     failure: ({ tag }, error) => action(types.BOX_VERSION.FETCH.FAILURE, {tag, error}),
+  },
+  create: {
+    request: (data) => action(types.BOX_VERSION.CREATE.REQUEST, data),
+    success: (data, response) => action(types.BOX_VERSION.CREATE.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX_VERSION.CREATE.FAILURE, { ...data, error }),
+  },
+  edit: {
+    request: (data) => action(types.BOX_VERSION.EDIT.REQUEST, data),
+    success: (data, response) => action(types.BOX_VERSION.EDIT.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX_VERSION.EDIT.FAILURE, { ...data, error }),
+  },
+  delete: {
+    request: (data) => action(types.BOX_VERSION.DELETE.REQUEST, data),
+    success: (data, response) => action(types.BOX_VERSION.DELETE.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX_VERSION.DELETE.FAILURE, { ...data, error }),
   },
 };
 

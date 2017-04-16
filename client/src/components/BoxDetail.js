@@ -5,6 +5,7 @@ import * as actions from "../actions";
 import BoxVersionList from "./BoxVersionList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import {Link} from "react-router";
+import {parsePerms} from "../utils";
 
 
 class BoxDetail extends Component {
@@ -44,7 +45,7 @@ class BoxDetail extends Component {
     if (!this.props.box) {
       return null;
     }
-    if (this.props.box.user_permissions === '*') {
+    if (parsePerms(this.props.box.user_permissions).canEdit) {
       return <Link to={`/boxes/${this.props.boxTag}/edit/`}>Edit</Link>;
     }
     return null;
@@ -62,8 +63,23 @@ class BoxDetail extends Component {
     if (!this.props.box) {
       return null;
     }
-    if (this.props.box.user_permissions === '*') {
+    if (parsePerms(this.props.box.user_permissions).canDelete) {
       return <a href="#" onClick={this.onBoxDelete}>Delete</a>;
+    }
+    return null;
+  };
+
+  renderNewVersionButton = () => {
+    if (!this.props.box) {
+      return null;
+    }
+    if (parsePerms(this.props.box.user_permissions).canPush) {
+      return (
+          <Link to={`/boxes/${this.props.boxTag}/versions/new/`}
+                className='btn btn-success'>
+          New version
+          </Link>
+      );
     }
     return null;
   };
@@ -81,6 +97,7 @@ class BoxDetail extends Component {
               {this.renderBoxDetails()}
             </Tab>
             <Tab eventKey={2} title="Versions">
+              {this.renderNewVersionButton()}
               <BoxVersionList boxTag={this.props.boxTag} router={this.props.router} />
             </Tab>
           </Tabs>

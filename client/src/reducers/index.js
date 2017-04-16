@@ -98,6 +98,14 @@ const initialForms = {
     },
     errors: {},
   },
+  boxVersion: {
+    pending: false,
+    data: {
+      version: '',
+      changes: '',
+    },
+    errors: {},
+  },
 };
 function forms(state = initialForms, action) {
   let newState;

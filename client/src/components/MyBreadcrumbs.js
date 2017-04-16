@@ -13,7 +13,7 @@ export default class MyBreadcrumbs extends Component {
   };
 
   cleanPathName = (path) => {
-    if (includes(['boxes', 'versions'], path)) {
+    if (includes(['boxes', 'versions', 'new', 'edit'], path)) {
       return capitalize(path);
     }
     return path;

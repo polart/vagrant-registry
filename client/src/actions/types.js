@@ -19,8 +19,12 @@ export const CREATE_BOX = 'CREATE_BOX';
 export const EDIT_BOX = 'EDIT_BOX';
 export const DELETE_BOX = 'DELETE_BOX';
 export const LOAD_BOXES = 'LOAD_BOXES';
+
 export const LOAD_BOX_VERSION = 'LOAD_BOX_VERSION';
 export const LOAD_BOX_VERSIONS = 'LOAD_BOX_VERSIONS';
+export const CREATE_BOX_VERSION = 'CREATE_BOX_VERSION';
+export const EDIT_BOX_VERSION = 'EDIT_BOX_VERSION';
+export const DELETE_BOX_VERSION = 'DELETE_BOX_VERSION';
 
 export const BOX = {
   FETCH: createRequestTypes('BOX_FETCH'),
@@ -31,6 +35,9 @@ export const BOX = {
 
 export const BOX_VERSION = {
   FETCH: createRequestTypes('BOX_VERSION_FETCH'),
+  CREATE: createRequestTypes('BOX_VERSION_CREATE'),
+  EDIT: createRequestTypes('BOX_VERSION_EDIT'),
+  DELETE: createRequestTypes('BOX_VERSION_DELETE'),
 };
 
 export const SET_MY_USERNAME = 'SET_MY_USERNAME';

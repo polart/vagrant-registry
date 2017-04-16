@@ -34,7 +34,7 @@ function callApi(endpoint, method, schema = null, getParams = null, postData = n
     headers: myHeaders,
   };
 
-  if (method === 'POST' || method === 'PUT') {
+  if (method === 'POST' || method === 'PATCH') {
     myInit['body'] = JSON.stringify(postData);
   }
 
@@ -89,8 +89,8 @@ function postApi(endpoint, schema, data) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function putApi(endpoint, schema, data) {
-  return callApi(endpoint, 'PUT', schema, null, data);
+function patchApi(endpoint, schema, data) {
+  return callApi(endpoint, 'PATCH', schema, null, data);
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -165,7 +165,7 @@ export const fetchBoxes = ({ username, page, ordering, search }) => {
   );
 };
 export const createBox = ({data, username}) => postApi(`boxes/${username}/`, boxSchema, data);
-export const editBox = ({data, tag}) => putApi(`boxes/${tag}/`, boxSchema, data);
+export const editBox = ({data, tag}) => patchApi(`boxes/${tag}/`, boxSchema, data);
 export const deleteBox = ({tag}) => deleteApi(`boxes/${tag}/`);
 
 export const fetchBoxVersion = ({ tag, version }) => getApi(
@@ -179,3 +179,16 @@ export const fetchBoxVersions = ({ tag, page }) => {
       {page: page || 1}
   );
 };
+export const createBoxVersion = ({data, tag}) => postApi(
+    `boxes/${tag}/versions/`,
+    boxVersionSchema,
+    data
+);
+export const editBoxVersion = ({data, tag, version}) => patchApi(
+    `boxes/${tag}/versions/${version}/`,
+    boxVersionSchema,
+    data
+);
+export const deleteBoxVersion = ({tag, version}) => deleteApi(
+    `boxes/${tag}/versions/${version}/`
+);

@@ -33,7 +33,7 @@ class UserDashPage extends Component {
     return (
         <div>
           <PageHeader>My boxes</PageHeader>
-          <Link className='btn btn-success' to='/boxes/create/'>
+          <Link className='btn btn-success' to='/boxes/new/'>
             New box
           </Link>
           <BoxList

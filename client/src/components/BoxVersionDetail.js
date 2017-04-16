@@ -6,6 +6,8 @@ import {isEmpty} from 'lodash';
 import * as actions from "../actions";
 import BoxProviderList from "./BoxProviderList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import {Link} from "react-router";
+import {parsePerms} from "../utils";
 
 
 class BoxVersionDetail extends Component {
@@ -14,6 +16,34 @@ class BoxVersionDetail extends Component {
     this.props.fetchBoxVersion(this.props.boxTag, this.props.params.version);
   }
 
+  renderEditOption = () => {
+    if (!this.props.box) {
+      return null;
+    }
+    if (parsePerms(this.props.box.user_permissions).canEdit) {
+      return <Link to={`/boxes/${this.props.boxTag}/versions/${this.props.version}/edit/`}>Edit</Link>;
+    }
+    return null;
+  };
+
+  onBoxVersionDelete = (e) => {
+    e.preventDefault();
+    // TODO: would be good to use custom Confirm dialog
+    if (window.confirm(`Are you sure you want to delete box version ${this.props.versionTag}?`)) {
+      this.props.deleteBoxVersion(this.props.boxTag, this.props.version);
+    }
+  };
+
+  renderDeleteOption = () => {
+    if (!this.props.box) {
+      return null;
+    }
+    if (parsePerms(this.props.box.user_permissions).canDelete) {
+      return <a href="#" onClick={this.onBoxVersionDelete}>Delete</a>;
+    }
+    return null;
+  };
+
   renderDetails = () => {
     if (!this.props.boxVersion) {
       return;
@@ -21,6 +51,9 @@ class BoxVersionDetail extends Component {
 
     return (
       <div>
+        {this.renderEditOption()}
+        {' '}
+        {this.renderDeleteOption()}
         <p title={Moment(this.props.boxVersion.date_updated).format('LLL')}>
           Last updated: {Moment(this.props.boxVersion.date_updated).fromNow()}
         </p>
@@ -61,10 +94,12 @@ function mapStateToProps(state, props) {
     boxProviders,
     boxTag,
     versionTag,
+    version,
   }
 }
 
 export default connect(mapStateToProps, {
   fetchBox: actions.loadBox,
   fetchBoxVersion: actions.loadBoxVersion,
+  deleteBoxVersion: actions.deleteBoxVersion
 })(BoxVersionDetail)
