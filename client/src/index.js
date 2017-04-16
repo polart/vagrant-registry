@@ -21,6 +21,8 @@ import BoxCreatePage from "./components/BoxCreatePage";
 import BoxEditPage from "./components/BoxEditPage";
 import BoxVersionCreatePage from "./components/BoxVersionCreatePage";
 import BoxVersionEditPage from "./components/BoxVersionEditPage";
+import BoxProviderCreatePage from "./components/BoxProviderCreatePage";
+import BoxProviderEditPage from "./components/BoxProviderEditPage";
 
 
 const persistedSate = loadState();
@@ -61,12 +63,16 @@ ReactDOM.render(
           <Route path="/boxes/search" component={BoxSearchPage} />
           <Route path="/boxes/new" component={BoxCreatePage} />
           <Route path="/boxes(/:username)" component={BoxListPage} />
-          <Route path="/boxes/:username/:boxName/edit" component={BoxEditPage} />
           <Route path="/boxes/:username/:boxName" component={BoxDetail} />
+          <Route path="/boxes/:username/:boxName/edit" component={BoxEditPage} />
           <Route path="/boxes/:username/:boxName/versions" component={BoxDetail} />
           <Route path="/boxes/:username/:boxName/versions/new" component={BoxVersionCreatePage} />
           <Route path="/boxes/:username/:boxName/versions/:version" component={BoxVersionDetail} />
           <Route path="/boxes/:username/:boxName/versions/:version/edit" component={BoxVersionEditPage} />
+          <Route path="/boxes/:username/:boxName/versions/:version/providers" component={BoxVersionDetail} />
+          <Route path="/boxes/:username/:boxName/versions/:version/providers/new" component={BoxProviderCreatePage} />
+          <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider" component={BoxVersionDetail} />
+          <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider/edit" component={BoxProviderEditPage} />
           <Route path="*" component={NotFound} />
         </Route>
       </Router>

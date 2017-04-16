@@ -26,6 +26,10 @@ export const CREATE_BOX_VERSION = 'CREATE_BOX_VERSION';
 export const EDIT_BOX_VERSION = 'EDIT_BOX_VERSION';
 export const DELETE_BOX_VERSION = 'DELETE_BOX_VERSION';
 
+export const CREATE_BOX_PROVIDER = 'CREATE_BOX_PROVIDER';
+export const EDIT_BOX_PROVIDER = 'EDIT_BOX_PROVIDER';
+export const DELETE_BOX_PROVIDER = 'DELETE_BOX_PROVIDER';
+
 export const BOX = {
   FETCH: createRequestTypes('BOX_FETCH'),
   CREATE: createRequestTypes('BOX_CREATE'),
@@ -38,6 +42,12 @@ export const BOX_VERSION = {
   CREATE: createRequestTypes('BOX_VERSION_CREATE'),
   EDIT: createRequestTypes('BOX_VERSION_EDIT'),
   DELETE: createRequestTypes('BOX_VERSION_DELETE'),
+};
+
+export const BOX_PROVIDER = {
+  CREATE: createRequestTypes('BOX_PROVIDER_CREATE'),
+  EDIT: createRequestTypes('BOX_PROVIDER_EDIT'),
+  DELETE: createRequestTypes('BOX_PROVIDER_DELETE'),
 };
 
 export const SET_MY_USERNAME = 'SET_MY_USERNAME';

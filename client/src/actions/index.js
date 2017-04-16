@@ -34,6 +34,19 @@ export const deleteBoxVersion = (tag, version) => action(
     { tag, version }
 );
 
+export const createBoxProvider = (tag, version, data) => action(
+    types.CREATE_BOX_PROVIDER,
+    { tag, version, data }
+);
+export const editBoxProvider = (tag, version, provider, data) => action(
+    types.EDIT_BOX_PROVIDER,
+    { tag, version, provider, data }
+);
+export const deleteBoxProvider = (tag, version, provider) => action(
+    types.DELETE_BOX_PROVIDER,
+    { tag, version, provider }
+);
+
 export const user = {
   fetch: {
     request: ({ username}) => action(types.USER.FETCH.REQUEST, {username}),
@@ -85,6 +98,24 @@ export const boxVersion = {
     request: (data) => action(types.BOX_VERSION.DELETE.REQUEST, data),
     success: (data, response) => action(types.BOX_VERSION.DELETE.SUCCESS, { ...data, response }),
     failure: (data, error) => action(types.BOX_VERSION.DELETE.FAILURE, { ...data, error }),
+  },
+};
+
+export const boxProvider = {
+  create: {
+    request: (data) => action(types.BOX_PROVIDER.CREATE.REQUEST, data),
+    success: (data, response) => action(types.BOX_PROVIDER.CREATE.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX_PROVIDER.CREATE.FAILURE, { ...data, error }),
+  },
+  edit: {
+    request: (data) => action(types.BOX_PROVIDER.EDIT.REQUEST, data),
+    success: (data, response) => action(types.BOX_PROVIDER.EDIT.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX_PROVIDER.EDIT.FAILURE, { ...data, error }),
+  },
+  delete: {
+    request: (data) => action(types.BOX_PROVIDER.DELETE.REQUEST, data),
+    success: (data, response) => action(types.BOX_PROVIDER.DELETE.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.BOX_PROVIDER.DELETE.FAILURE, { ...data, error }),
   },
 };
 

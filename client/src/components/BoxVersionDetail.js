@@ -44,6 +44,43 @@ class BoxVersionDetail extends Component {
     return null;
   };
 
+  onBoxProviderDelete = (provider, e) => {
+    e.preventDefault();
+    // TODO: would be good to use custom Confirm dialog
+    if (window.confirm(`Are you sure you want to delete box provider ${this.props.versionTag} ${provider}?`)) {
+      this.props.deleteBoxProvider(this.props.boxTag, this.props.version, provider);
+    }
+  };
+
+  canDeleteProvider = () => {
+    if (!this.props.box) {
+      return false;
+    }
+    return parsePerms(this.props.box.user_permissions).canDelete;
+  };
+
+  canEditProvider = () => {
+    if (!this.props.box) {
+      return false;
+    }
+    return parsePerms(this.props.box.user_permissions).canEdit;
+  };
+
+  renderNewProviderButton = () => {
+    if (!this.props.box) {
+      return null;
+    }
+    if (parsePerms(this.props.box.user_permissions).canPush) {
+      return (
+          <Link to={`/boxes/${this.props.boxTag}/versions/${this.props.version}/providers/new/`}
+                className='btn btn-success'>
+          New provider
+          </Link>
+      );
+    }
+    return null;
+  };
+
   renderDetails = () => {
     if (!this.props.boxVersion) {
       return;
@@ -62,6 +99,7 @@ class BoxVersionDetail extends Component {
             {this.props.boxVersion.changes}
           </Panel>
         }
+        {this.renderNewProviderButton()}
       </div>
     );
   };
@@ -72,7 +110,14 @@ class BoxVersionDetail extends Component {
           <PageHeader>{this.props.versionTag}</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
           {this.renderDetails()}
-          <BoxProviderList providers={this.props.boxProviders} />
+          <BoxProviderList
+              boxTag={this.props.boxTag}
+              version={this.props.version}
+              providers={this.props.boxProviders}
+              onDelete={this.onBoxProviderDelete}
+              canDelete={this.canDeleteProvider()}
+              canEdit={this.canEditProvider()}
+          />
         </div>
     );
   }
@@ -101,5 +146,6 @@ function mapStateToProps(state, props) {
 export default connect(mapStateToProps, {
   fetchBox: actions.loadBox,
   fetchBoxVersion: actions.loadBoxVersion,
-  deleteBoxVersion: actions.deleteBoxVersion
+  deleteBoxVersion: actions.deleteBoxVersion,
+  deleteBoxProvider: actions.deleteBoxProvider,
 })(BoxVersionDetail)

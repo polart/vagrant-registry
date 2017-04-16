@@ -106,6 +106,13 @@ const initialForms = {
     },
     errors: {},
   },
+  boxProvider: {
+    pending: false,
+    data: {
+      provider: '',
+    },
+    errors: {},
+  },
 };
 function forms(state = initialForms, action) {
   let newState;

@@ -41,6 +41,10 @@ const createBoxVersion = callRequest.bind(null, actions.boxVersion.create, api.c
 const editBoxVersion = callRequest.bind(null, actions.boxVersion.edit, api.editBoxVersion);
 const deleteBoxVersion = callRequest.bind(null, actions.boxVersion.delete, api.deleteBoxVersion);
 
+const createBoxProvider = callRequest.bind(null, actions.boxProvider.create, api.createBoxProvider);
+const editBoxProvider = callRequest.bind(null, actions.boxProvider.edit, api.editBoxProvider);
+const deleteBoxProvider = callRequest.bind(null, actions.boxProvider.delete, api.deleteBoxProvider);
+
 //*********************************************************
 // Watchers
 //*********************************************************
@@ -179,6 +183,62 @@ export function* watchDeleteBoxVersion() {
   });
 }
 
+export function* watchCreateBoxProvider() {
+  yield takeLatest(actionTypes.CREATE_BOX_PROVIDER, function* ({tag, version, data}) {
+    yield put(actions.form.setPending('boxProvider', true));
+    yield fork(createBoxProvider, {tag, version, data});
+
+    const { success, failure } = yield race({
+      success: take(action => action.type === actionTypes.BOX_PROVIDER.CREATE.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX_PROVIDER.CREATE.FAILURE),
+    });
+
+    if (failure) {
+      yield put(actions.form.setErrors('boxProvider', failure.error));
+      yield put(actions.form.setPending('boxProvider', false));
+    } else if (success) {
+      yield put(actions.form.reset('boxProvider'));
+      browserHistory.push(`/boxes/${tag}/versions/${version}/`);
+    }
+  });
+}
+
+export function* watchEditBoxProvider() {
+  yield takeLatest(actionTypes.EDIT_BOX_PROVIDER, function* ({tag, version, provider, data}) {
+    yield put(actions.form.setPending('boxProvider', true));
+    yield fork(editBoxProvider, {tag, version, provider, data});
+
+    const { success, failure } = yield race({
+      success: take(action => action.type === actionTypes.BOX_PROVIDER.EDIT.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX_PROVIDER.EDIT.FAILURE),
+    });
+
+    if (failure) {
+      yield put(actions.form.setErrors('boxProvider', failure.error));
+      yield put(actions.form.setPending('boxProvider', false));
+    } else if (success) {
+      yield put(actions.form.reset('boxProvider'));
+      browserHistory.push(`/boxes/${tag}/versions/${version}/`);
+    }
+  });
+}
+
+export function* watchDeleteBoxProvider() {
+  yield takeLatest(actionTypes.DELETE_BOX_PROVIDER, function* ({tag, version, provider}) {
+    yield fork(deleteBoxProvider, {tag, version, provider});
+
+    const { success } = yield race({
+      success: take(action => action.type === actionTypes.BOX_PROVIDER.DELETE.SUCCESS),
+      failure: take(action => action.type === actionTypes.BOX_PROVIDER.DELETE.FAILURE),
+    });
+
+    if (success) {
+      yield put(actions.loadBoxVersion(tag, version));
+      // browserHistory.push(`/boxes/${tag}/versions/${version}/`);
+    }
+  });
+}
+
 
 export default function* rootSaga() {
   yield [
@@ -196,5 +256,9 @@ export default function* rootSaga() {
     watchCreateBoxVersion(),
     watchEditBoxVersion(),
     watchDeleteBoxVersion(),
+
+    watchCreateBoxProvider(),
+    watchEditBoxProvider(),
+    watchDeleteBoxProvider(),
   ]
 }

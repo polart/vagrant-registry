@@ -192,3 +192,17 @@ export const editBoxVersion = ({data, tag, version}) => patchApi(
 export const deleteBoxVersion = ({tag, version}) => deleteApi(
     `boxes/${tag}/versions/${version}/`
 );
+
+export const createBoxProvider = ({data, tag, version}) => postApi(
+    `boxes/${tag}/versions/${version}/providers/`,
+    boxProviderSchema,
+    data
+);
+export const editBoxProvider = ({data, tag, version, provider}) => patchApi(
+    `boxes/${tag}/versions/${version}/providers/${provider}/`,
+    boxProviderSchema,
+    data
+);
+export const deleteBoxProvider = ({tag, version, provider}) => deleteApi(
+    `boxes/${tag}/versions/${version}/providers/${provider}/`
+);
