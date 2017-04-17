@@ -110,6 +110,8 @@ const initialForms = {
     pending: false,
     data: {
       provider: '',
+      uploadProgress: null,
+      uploadStatus: null,
     },
     errors: {},
   },
@@ -144,6 +146,11 @@ function forms(state = initialForms, action) {
     case actionTypes.FORM.SET_DATA:
       newState = merge({}, state);
       newState[action.model].data = merge({}, initialForms[action.model].data, action.data);
+      return newState;
+
+    case actionTypes.FORM.UPDATE_DATA:
+      newState = merge({}, state);
+      merge(newState[action.model].data, action.data);
       return newState;
 
     case actionTypes.FORM.SET_ERRORS:

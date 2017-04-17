@@ -1,13 +1,19 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Button, PageHeader} from "react-bootstrap";
+import {merge} from "lodash";
 import * as actions from "../actions";
 import MyFormField from "./MyFormField";
 import MyFormError from "./MyFormError";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import BoxFileFormField from "./BoxFileFormField";
 
 
 class BoxProviderEditPage extends Component {
+  state = {
+    file: null,
+  };
+
   componentDidMount() {
     this.props.setFormData('boxProvider', this.props.boxProvider);
   }
@@ -18,8 +24,12 @@ class BoxProviderEditPage extends Component {
         this.props.boxTag,
         this.props.version,
         this.props.provider,
-        this.props.form.data
+        merge({}, this.props.form.data, {file: this.state.file})
     );
+  };
+
+  onFileInputChange = (file) => {
+    this.setState({ file });
   };
 
   render() {
@@ -36,6 +46,12 @@ class BoxProviderEditPage extends Component {
                 model='boxProvider.provider'
                 type='text'
                 label='Provider *'
+            />
+
+            <BoxFileFormField
+                model='boxProvider.file'
+                label='Box file'
+                onChange={this.onFileInputChange}
             />
 
             <Button
@@ -60,8 +76,6 @@ function mapStateToProps(state, props) {
     form: state.forms.boxProvider,
     boxProvider,
     boxTag,
-    username,
-    boxName,
     version,
     provider,
   }

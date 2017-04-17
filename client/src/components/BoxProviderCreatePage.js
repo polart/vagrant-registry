@@ -1,20 +1,30 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Button, PageHeader} from "react-bootstrap";
+import {merge} from "lodash";
 import * as actions from "../actions";
 import MyFormField from "./MyFormField";
 import MyFormError from "./MyFormError";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import BoxFileFormField from "./BoxFileFormField";
 
 
 class BoxProviderCreatePage extends Component {
+  state = {
+    file: null,
+  };
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.createBoxProvider(
         this.props.boxTag,
         this.props.version,
-        this.props.form.data
+        merge({}, this.props.form.data, {file: this.state.file})
     );
+  };
+
+  onFileInputChange = (file) => {
+    this.setState({ file });
   };
 
   render() {
@@ -31,6 +41,12 @@ class BoxProviderCreatePage extends Component {
                 model='boxProvider.provider'
                 type='text'
                 label='Provider *'
+            />
+
+            <BoxFileFormField
+                model='boxProvider.file'
+                label='Box file'
+                onChange={this.onFileInputChange}
             />
 
             <Button

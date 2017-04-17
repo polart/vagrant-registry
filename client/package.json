@@ -18,7 +18,8 @@
     "react-redux-form": "^1.7.0",
     "react-router": "^3.0.2",
     "redux": "^3.6.0",
-    "redux-saga": "^0.14.3"
+    "redux-saga": "^0.14.3",
+    "spark-md5": "^3.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

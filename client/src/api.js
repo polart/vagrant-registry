@@ -18,12 +18,13 @@ const API_ROOT = '/api/v1/';
 
 // Fetches an API response and normalizes the result JSON according to schema.
 // This makes every API response have the same shape, regardless of how nested it was.
-function callApi(endpoint, method, schema = null, getParams = null, postData = null) {
+function callApi({ endpoint, method, schema, getParams, postData, contentType, headers }) {
   const fullUrl = addGetParams(API_ROOT + endpoint, getParams);
 
-  const myHeaders = new Headers({
-    'Content-Type': 'application/json',
-  });
+  contentType = contentType || 'application/json';
+  headers = headers || {};
+  headers['Content-Type'] = contentType;
+  const myHeaders = new Headers(headers);
 
   if (localStorage.token) {
     myHeaders.set('Authorization', `Token ${localStorage.token}`);
@@ -34,8 +35,12 @@ function callApi(endpoint, method, schema = null, getParams = null, postData = n
     headers: myHeaders,
   };
 
-  if (method === 'POST' || method === 'PATCH') {
-    myInit['body'] = JSON.stringify(postData);
+  if (method === 'POST' || method === 'PATCH' || method === 'PUT') {
+    if (contentType === 'application/json') {
+      myInit['body'] = JSON.stringify(postData);
+    } else {
+      myInit['body'] = postData;
+    }
   }
 
   return fetch(fullUrl, myInit)
@@ -60,42 +65,41 @@ function callApi(endpoint, method, schema = null, getParams = null, postData = n
               pagination.page = getParams.page;
             }
           }
-          console.log('response data -- ', json);
-          console.log('response pagination -- ', pagination);
-          return Object.assign(
+          const entities = Object.assign(
               {},
               normalize(data, schema),
               { pagination },
-          )
+          );
+          return {json: entities, response};
         }
-        return json;
+        return {json, response};
       })
       .then(
-          response => ({response}),
-          ({error, response}) => {
-            return {error, status: response.status};
-          }
-      )
+          ({json, response}) => ({status: response.status, response: json}),
+          ({error, response}) => ({error, status: response.status})
+      );
 
 }
 
 function getApi(endpoint, schema, getParams = null) {
-  return callApi(endpoint, 'GET', schema, getParams);
+  return callApi({endpoint, method: 'GET', schema, getParams});
+}
+
+function postApi(endpoint, schema, postData) {
+  return callApi({endpoint, method: 'POST', schema, postData});
+}
+
+function patchApi(endpoint, schema, postData) {
+  return callApi({endpoint, method: 'PATCH', schema, postData});
 }
 
 // eslint-disable-next-line no-unused-vars
-function postApi(endpoint, schema, data) {
-  return callApi(endpoint, 'POST', schema, null, data);
+function putApi(endpoint, schema, postData) {
+  return callApi({endpoint, method: 'PUT', schema, postData});
 }
 
-// eslint-disable-next-line no-unused-vars
-function patchApi(endpoint, schema, data) {
-  return callApi(endpoint, 'PATCH', schema, null, data);
-}
-
-// eslint-disable-next-line no-unused-vars
 function deleteApi(endpoint) {
-  return callApi(endpoint, 'DELETE');
+  return callApi({endpoint, method: 'DELETE'});
 }
 
 
@@ -206,3 +210,23 @@ export const editBoxProvider = ({data, tag, version, provider}) => patchApi(
 export const deleteBoxProvider = ({tag, version, provider}) => deleteApi(
     `boxes/${tag}/versions/${version}/providers/${provider}/`
 );
+
+export const fetchBoxUpload = ({ tag, version, provider, upload }) => getApi(
+    `boxes/${tag}/versions/${version}/providers/${provider}/uploads/${upload}/`
+);
+export const createBoxUpload = ({ tag, version, provider, data }) => postApi(
+    `boxes/${tag}/versions/${version}/providers/${provider}/uploads/`,
+    null,
+    data
+);
+export const uploadBoxChunk = ({ tag, version, provider, upload, data, range }) => {
+  return callApi({
+    endpoint: `boxes/${tag}/versions/${version}/providers/${provider}/uploads/${upload}/`,
+    method: 'PUT',
+    postData: data,
+    contentType: 'application/octet-stream',
+    headers: {
+      'Content-Range': `bytes ${range.start}-${range.end}/${range.total}`,
+    }
+  });
+};

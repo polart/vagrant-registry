@@ -122,6 +122,7 @@ export const boxProvider = {
 export const form = {
   setPending: (model, pending) => action(types.FORM.SET_PENDING, {model, pending}),
   setData: (model, data) => action(types.FORM.SET_DATA, {model, data}),
+  updateData: (model, data) => action(types.FORM.UPDATE_DATA, {model, data}),
   fieldChange: (model, value) => action(types.FORM.FIELD_CHANGE, {model, value}),
   setErrors: (model, errors) => action(types.FORM.SET_ERRORS, {model, errors}),
   clearErrors: (model) => action(types.FORM.CLEAR_ERRORS, {model}),
