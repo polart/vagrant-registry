@@ -21,7 +21,8 @@ function* callRequest(entity, apiFn, data = null) {
     if (status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('state');
-      browserHistory.push('/');
+      yield put(actions.setMyUsername(null));
+      browserHistory.push(`/login/?next=${location.pathname}`);
     }
   }
   return { response, error };
