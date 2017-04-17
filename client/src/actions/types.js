@@ -8,9 +8,12 @@ function createRequestTypes(base) {
 export const LOAD_USER = 'LOAD_USER';
 export const LOAD_USERS = 'LOAD_USERS';
 
+export const UPDATE_ACCOUNT = 'UPDATE_ACCOUNT';
+export const CHANGE_PASSWORD = 'CHANGE_PASSWORD';
 
 export const USER = {
   FETCH: createRequestTypes('USER_FETCH'),
+  EDIT: createRequestTypes('USER_EDIT'),
 };
 
 
@@ -56,6 +59,7 @@ export const LOGOUT = 'LOGOUT';
 export const FORM = {
   SET_PENDING: 'FORM_SET_PENDING',
   SET_DATA: 'FORM_SET_DATA',
+  SET_MESSAGE: 'FORM_SET_MESSAGE',
   UPDATE_DATA: 'FORM_UPDATE_DATA',
   FIELD_CHANGE: 'FORM_FIELD_CHANGE',
   SET_ERRORS: 'FORM_SET_ERRORS',

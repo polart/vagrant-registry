@@ -7,6 +7,9 @@ function action(type, payload = {}) {
   return {...payload, type}
 }
 
+export const updateAccount = (username, data) => action(types.UPDATE_ACCOUNT, { username, data });
+export const changePassword = (username, data) => action(types.CHANGE_PASSWORD, { username, data });
+
 export const logout = (nextUrl) => action(types.LOGOUT, {nextUrl});
 
 export const setMyUsername = (username) => action(types.SET_MY_USERNAME, { username });
@@ -54,6 +57,11 @@ export const user = {
     request: ({ username}) => action(types.USER.FETCH.REQUEST, {username}),
     success: (_, response) => action(types.USER.FETCH.SUCCESS, {response}),
     failure: (_, error) => action(types.USER.FETCH.FAILURE, {error}),
+  },
+  edit: {
+    request: (data) => action(types.USER.EDIT.REQUEST, data),
+    success: (data, response) => action(types.USER.EDIT.SUCCESS, { ...data, response }),
+    failure: (data, error) => action(types.USER.EDIT.FAILURE, { ...data, error }),
   },
 };
 
@@ -128,5 +136,6 @@ export const form = {
   fieldChange: (model, value) => action(types.FORM.FIELD_CHANGE, {model, value}),
   setErrors: (model, errors) => action(types.FORM.SET_ERRORS, {model, errors}),
   clearErrors: (model) => action(types.FORM.CLEAR_ERRORS, {model}),
+  setMessage: (model, message) => action(types.FORM.SET_MESSAGE, {model, message}),
   reset: (model) => action(types.FORM.RESET, {model}),
 };

@@ -23,6 +23,7 @@ import BoxVersionCreatePage from "./components/BoxVersionCreatePage";
 import BoxVersionEditPage from "./components/BoxVersionEditPage";
 import BoxProviderCreatePage from "./components/BoxProviderCreatePage";
 import BoxProviderEditPage from "./components/BoxProviderEditPage";
+import AccountPage from "./components/AccountPage";
 
 
 const persistedSate = loadState();
@@ -60,6 +61,7 @@ ReactDOM.render(
         <Route path="/login" component={Login} onEnter={requireAnon} />
         <Route path="/" component={App}>
           <IndexRoute component={UserDashPage} />
+          <Route path="/account" component={AccountPage} />
           <Route path="/boxes/search" component={BoxSearchPage} />
           <Route path="/boxes/new" component={BoxCreatePage} />
           <Route path="/boxes(/:username)" component={BoxListPage} />

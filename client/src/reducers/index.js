@@ -88,6 +88,23 @@ function myUsername(state = null, action) {
 }
 
 const initialForms = {
+  account: {
+    message: null,
+    pending: false,
+    data: {
+      username: '',
+    },
+    errors: {},
+  },
+  changePassword: {
+    message: null,
+    pending: false,
+    data: {
+      password: '',
+      password2: '',
+    },
+    errors: {},
+  },
   box: {
     pending: false,
     data: {
@@ -168,6 +185,11 @@ function forms(state = initialForms, action) {
     case actionTypes.FORM.CLEAR_ERRORS:
       newState = merge({}, state);
       newState[action.model].errors = {};
+      return newState;
+
+    case actionTypes.FORM.SET_MESSAGE:
+      newState = merge({}, state);
+      newState[action.model].message = action.message;
       return newState;
 
     case actionTypes.FORM.RESET:
