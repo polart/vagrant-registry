@@ -413,6 +413,7 @@ class BoxUpload(models.Model):
 
     class Meta:
         ordering = ['-date_modified']
+        unique_together = ('provider', 'checksum')
 
     def __str__(self):
         return (

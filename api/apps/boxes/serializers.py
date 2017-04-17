@@ -162,7 +162,7 @@ class BoxUploadSerializer(serializers.ModelSerializer):
             'box.name': 'box_name',
             'version.version': 'version',
             'provider.provider': 'provider',
-            'pk': 'pk',
+            'checksum': 'checksum',
         }
     )
     user = serializers.ReadOnlyField(source='owner.username')
@@ -177,3 +177,7 @@ class BoxUploadSerializer(serializers.ModelSerializer):
         fields = ('url', 'id', 'user', 'date_created', 'date_modified',
                   'date_completed', 'date_expires', 'file_size', 'offset',
                   'status', 'tag', 'checksum_type', 'checksum', )
+        lookup_field = 'checksum'
+        extra_kwargs = {
+            'url': {'lookup_field': 'checksum'}
+        }

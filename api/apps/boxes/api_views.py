@@ -132,8 +132,11 @@ class UserBoxViewSet(UserBoxMixin, viewsets.ModelViewSet):
             box = serializer.save(owner=user)
             logger.info('New box created: {}'.format(box))
         except IntegrityError:
-            raise ValidationError("User {} already has box with the name '{}'"
-                                  .format(user, serializer.initial_data['name']))
+            raise ValidationError({
+                'detail': 'Box {}/{} already exists'.format(
+                    user.username, serializer.initial_data['name']
+                )
+            })
 
 
 class BoxMemberViewSet(UserBoxMixin, viewsets.ModelViewSet):
@@ -226,7 +229,12 @@ class BoxUploadViewSet(UserBoxMixin, viewsets.ModelViewSet):
                 detail="Provider already has box file.",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
-        upload = serializer.save(provider=provider)
+        try:
+            upload = serializer.save(provider=provider)
+        except IntegrityError:
+            raise ValidationError({
+                'detail': 'Upload with such checksum already exists'
+            })
         logger.info('New upload initiated: {}'.format(upload))
 
 
@@ -244,6 +252,7 @@ class BoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
     parser_classes = (BoxUploadParser,)
     queryset = BoxUpload.objects.none()
     ordering_fields = ('date_modified', )
+    lookup_field = 'checksum'
 
     content_range_pattern = re.compile(
         r'^bytes (?P<start>\d+)-(?P<end>\d+)/(?P<total>\d+)$'
