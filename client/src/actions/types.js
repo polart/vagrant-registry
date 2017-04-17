@@ -51,6 +51,7 @@ export const BOX_PROVIDER = {
 };
 
 export const SET_MY_USERNAME = 'SET_MY_USERNAME';
+export const LOGOUT = 'LOGOUT';
 
 export const FORM = {
   SET_PENDING: 'FORM_SET_PENDING',

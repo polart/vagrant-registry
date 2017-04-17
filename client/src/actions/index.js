@@ -7,6 +7,8 @@ function action(type, payload = {}) {
   return {...payload, type}
 }
 
+export const logout = (nextUrl) => action(types.LOGOUT, {nextUrl});
+
 export const setMyUsername = (username) => action(types.SET_MY_USERNAME, { username });
 export const loadUser = (username) => action(types.LOAD_USER, { username });
 export const loadUsers = () => action(types.LOAD_USERS);

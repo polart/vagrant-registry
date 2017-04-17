@@ -19,10 +19,7 @@ function* callRequest(entity, apiFn, data = null) {
   else {
     yield put(entity.failure(data, error));
     if (status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('state');
-      yield put(actions.setMyUsername(null));
-      browserHistory.push(`/login/?next=${location.pathname}`);
+      yield put(actions.logout(location.pathname));
     }
   }
   return { response, error };
@@ -51,6 +48,19 @@ const deleteBoxProvider = callRequest.bind(null, actions.boxProvider.delete, api
 //*********************************************************
 // Watchers
 //*********************************************************
+
+export function* watchLogout() {
+  yield takeLatest(actionTypes.LOGOUT, function* ({nextUrl}) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('state');
+    yield put(actions.setMyUsername(null));
+    let url = `/login/`;
+    if (nextUrl) {
+      url = `/login/?next${nextUrl}`;
+    }
+    browserHistory.push(url);
+  });
+}
 
 export function* watchFetchUser() {
   yield takeLatest(actionTypes.LOAD_USER, fetchUser)
@@ -353,6 +363,7 @@ export function* watchDeleteBoxProvider() {
 
 export default function* rootSaga() {
   yield [
+    watchLogout(),
     watchFetchUser(),
     watchFetchUsers(),
 

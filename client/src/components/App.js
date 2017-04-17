@@ -19,7 +19,12 @@ class App extends Component {
 
     return (
         <div>
-          <MyNavbar router={this.props.router} />
+          <MyNavbar
+              username={this.props.myUsername}
+              isStaff={this.props.isStaff}
+              onLogout={this.props.logout}
+              router={this.props.router}
+          />
           <div style={{marginTop: '60px'}}>
             {this.props.children}
           </div>
@@ -29,11 +34,20 @@ class App extends Component {
 }
 
 function mapStateToProps(state, props) {
+  const myUsername = state.myUsername;
+  let user;
+  if (myUsername) {
+    user = state.entities.users[myUsername];
+  }
+  const isStaff = user && user.is_staff;
   return {
-    myUsername: state.myUsername,
+    myUsername,
+    user,
+    isStaff,
   }
 }
 
 export default connect(mapStateToProps, {
   loadUser: actions.loadUser,
+  logout: actions.logout,
 })(App)
