@@ -20,6 +20,7 @@ class BoxVersionForm extends Component {
               type='textarea'
               label='Changes'
               rows='10'
+              helpText="You can use Markdown here"
           />
 
           <Button

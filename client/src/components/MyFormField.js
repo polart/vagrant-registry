@@ -12,6 +12,7 @@ const OMIT_PROPS = [
   'errors',
   'fieldChange',
   'items',
+  'helpText',
 ];
 
 class MyFormField extends Component {
@@ -73,6 +74,13 @@ class MyFormField extends Component {
     );
   };
 
+  renderHelpText = () => {
+    if (!this.props.helpText) {
+      return null;
+    }
+    return <HelpBlock>{this.props.helpText}</HelpBlock>;
+  };
+
   getValidationState = () => {
     if (this.props.errors) {
       return 'error';
@@ -89,6 +97,7 @@ class MyFormField extends Component {
         >
           <ControlLabel>{this.props.label}</ControlLabel>
           {this.renderInput()}
+          {this.renderHelpText()}
           {this.renderErrors()}
         </FormGroup>
     );

@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
 import {PageHeader, Panel, Badge, Well, Tabs, Tab} from 'react-bootstrap';
+import ReactMarkdown from 'react-markdown';
 import * as actions from "../actions";
 import BoxVersionList from "./BoxVersionList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
@@ -43,7 +44,7 @@ class BoxDetail extends Component {
         }
         {!!this.props.box.description.length &&
           <Panel header="Description">
-            {this.props.box.description}
+            <ReactMarkdown source={this.props.box.description} />
           </Panel>
         }
       </div>

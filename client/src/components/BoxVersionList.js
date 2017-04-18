@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
 import {ListGroup, ListGroupItem, Label, Pagination} from 'react-bootstrap';
+import ReactMarkdown from 'react-markdown';
 import Moment from 'moment';
 import * as actions from "../actions";
 import MySpinner from "./MySpinner";
@@ -80,7 +81,7 @@ class BoxVersionList extends Component {
                 Last updated: {Moment(version.date_updated).fromNow()}
               </small>
             </h4>
-            <p>{version.changes}</p>
+            <ReactMarkdown source={version.changes} />
             {this.renderProviders(version)}
           </ListGroupItem>
       );

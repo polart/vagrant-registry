@@ -26,6 +26,7 @@ class BoxForm extends Component {
               type='textarea'
               label='Description'
               rows='10'
+              helpText="You can use Markdown here"
           />
           <MyFormField
               model='box.visibility'

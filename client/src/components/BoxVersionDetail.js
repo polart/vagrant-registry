@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import {PageHeader, Panel } from 'react-bootstrap';
 import Moment from 'moment';
 import {isEmpty} from 'lodash';
+import ReactMarkdown from 'react-markdown';
 import * as actions from "../actions";
 import BoxProviderList from "./BoxProviderList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
@@ -97,7 +98,7 @@ class BoxVersionDetail extends Component {
         </p>
         {!isEmpty(this.props.boxVersion.changes) &&
           <Panel header="Changes">
-            {this.props.boxVersion.changes}
+            <ReactMarkdown source={this.props.boxVersion.changes} />
           </Panel>
         }
         {this.renderNewProviderButton()}
