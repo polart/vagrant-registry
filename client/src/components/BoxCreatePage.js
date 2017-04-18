@@ -1,9 +1,8 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button, PageHeader} from "react-bootstrap";
+import {PageHeader} from "react-bootstrap";
 import * as actions from "../actions";
-import MyFormField from "./MyFormField";
-import MyFormError from "./MyFormError";
+import BoxForm from "./BoxForm";
 
 
 class BoxCreatePage extends Component {
@@ -18,52 +17,21 @@ class BoxCreatePage extends Component {
     this.props.createBox(this.props.myUsername, this.props.form.data);
   };
 
+  onCancel = () => {
+      this.props.router.push('/');
+  };
+
   render() {
     return (
         <div>
           <PageHeader>Create new box</PageHeader>
-          <form
+          <BoxForm
+              pending={this.props.form.pending}
+              submitTitle='Create'
+              submitPendingTitle="Creating..."
               onSubmit={this.onSubmit}
-          >
-            <MyFormError model="box" />
-
-            <MyFormField
-                model='box.name'
-                type='text'
-                label='Name *'
-            />
-
-            <MyFormField
-                model='box.short_description'
-                type='text'
-                label='Short description'
-            />
-
-            <MyFormField
-                model='box.description'
-                type='textarea'
-                label='Description'
-                rows='10'
-            />
-
-            <MyFormField
-                model='box.visibility'
-                type='select'
-                label='Visibility'
-                items={[
-                  {value: 'PT', label: 'Private'},
-                  {value: 'PC', label: 'Public'},
-                ]}
-            />
-
-            <Button
-                bsStyle="success"
-                type="submit"
-                disabled={this.props.form.pending}
-            >
-              Create
-            </Button>
-          </form>
+              onCancel={this.onCancel}
+          />
         </div>
     );
   }

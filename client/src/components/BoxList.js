@@ -3,6 +3,7 @@ import {ListGroup, ListGroupItem} from "react-bootstrap";
 import Moment from "moment";
 import BoxOrdering from "./BoxOrdering";
 import MyPagination from "./MyPagination";
+import MySpinner from "./MySpinner";
 
 
 export default class BoxList extends Component {
@@ -16,16 +17,7 @@ export default class BoxList extends Component {
   };
 
   renderBoxesList = () => {
-    if (!this.boxPages) {
-      return <p>Loading...</p>
-    }
-    if (this.boxPages.count === 0) {
-      return <p>No boxes</p>
-    }
-
-    const boxTags = this.boxPages.pages[this.activePage] || [];
-
-    return boxTags.map(tag => {
+    return this.boxTags.map(tag => {
       const box = this.props.boxes[tag];
       return (
           <ListGroupItem
@@ -41,26 +33,50 @@ export default class BoxList extends Component {
             <small title={Moment(box.date_updated).format('LLL')}>
               Last updated: {Moment(box.date_updated).fromNow()}
             </small>
-            {/*<div className="clearfix"></div>*/}
           </ListGroupItem>
       );
     });
   };
 
-  render() {
-    this.activePage = parseInt(this.props.router.location.query.page || 1, 10);
-    this.boxPages = this.props.boxesPages;
-    const boxCount = (this.boxPages && this.boxPages.count) || 0;
+  renderPagination = () => {
+    if (this.boxPages.count <= 10) {
+      return null;
+    }
+    return (
+        <MyPagination
+            router={this.props.router}
+            itemsCount={this.boxPages.count}
+        />
+    );
+  };
+
+  renderList = () => {
+    if (!this.boxPages || !this.boxTags.length) {
+      return <MySpinner />;
+    }
+
+    if (this.boxPages.count === 0) {
+      return <p>No boxes</p>
+    }
+
     return (
         <div>
-          <BoxOrdering router={this.props.router} />
           <ListGroup>
             {this.renderBoxesList()}
           </ListGroup>
-          <MyPagination
-              router={this.props.router}
-              itemsCount={boxCount}
-          />
+          {this.renderPagination()}
+        </div>
+    )
+  };
+
+  render() {
+    this.activePage = parseInt(this.props.router.location.query.page || 1, 10);
+    this.boxPages = this.props.boxesPages;
+    this.boxTags = (this.boxPages && this.boxPages.pages[this.activePage]) || [];
+    return (
+        <div>
+          <BoxOrdering router={this.props.router} />
+          {this.renderList()}
         </div>
     );
   }

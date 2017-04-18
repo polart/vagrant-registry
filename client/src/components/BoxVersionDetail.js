@@ -8,6 +8,7 @@ import BoxProviderList from "./BoxProviderList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import {Link} from "react-router";
 import {parsePerms} from "../utils";
+import MySpinner from "./MySpinner";
 
 
 class BoxVersionDetail extends Component {
@@ -83,7 +84,7 @@ class BoxVersionDetail extends Component {
 
   renderDetails = () => {
     if (!this.props.boxVersion) {
-      return;
+      return <MySpinner />;
     }
 
     return (
@@ -100,6 +101,14 @@ class BoxVersionDetail extends Component {
           </Panel>
         }
         {this.renderNewProviderButton()}
+        <BoxProviderList
+            boxTag={this.props.boxTag}
+            version={this.props.version}
+            providers={this.props.boxProviders}
+            onDelete={this.onBoxProviderDelete}
+            canDelete={this.canDeleteProvider()}
+            canEdit={this.canEditProvider()}
+        />
       </div>
     );
   };
@@ -110,14 +119,6 @@ class BoxVersionDetail extends Component {
           <PageHeader>{this.props.versionTag}</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
           {this.renderDetails()}
-          <BoxProviderList
-              boxTag={this.props.boxTag}
-              version={this.props.version}
-              providers={this.props.boxProviders}
-              onDelete={this.onBoxProviderDelete}
-              canDelete={this.canDeleteProvider()}
-              canEdit={this.canEditProvider()}
-          />
         </div>
     );
   }

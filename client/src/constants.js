@@ -4,3 +4,4 @@ export const BOX_ORDERING = {
 };
 export const DEFAULT_BOX_ORDERING = BOX_ORDERING.pulls;
 export const BOX_PER_PAGE = 10;
+export const BOX_VERSION_PER_PAGE = 10;

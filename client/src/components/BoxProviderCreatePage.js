@@ -1,12 +1,10 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button, PageHeader} from "react-bootstrap";
+import {PageHeader} from "react-bootstrap";
 import {merge} from "lodash";
 import * as actions from "../actions";
-import MyFormField from "./MyFormField";
-import MyFormError from "./MyFormError";
 import MyBreadcrumbs from "./MyBreadcrumbs";
-import BoxFileFormField from "./BoxFileFormField";
+import BoxProviderForm from "./BoxProviderForm";
 
 
 class BoxProviderCreatePage extends Component {
@@ -33,36 +31,25 @@ class BoxProviderCreatePage extends Component {
     this.setState({ file });
   };
 
+  onCancel = () => {
+      this.props.router.push(
+          `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+      );
+  };
+
   render() {
     return (
         <div>
           <PageHeader>New box provider</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
-          <form
+          <BoxProviderForm
+              pending={this.props.form.pending}
+              submitTitle='Create'
+              submitPendingTitle="Creating..."
               onSubmit={this.onSubmit}
-          >
-            <MyFormError model="boxProvider" />
-
-            <MyFormField
-                model='boxProvider.provider'
-                type='text'
-                label='Provider *'
-            />
-
-            <BoxFileFormField
-                model='boxProvider.file'
-                label='Box file'
-                onChange={this.onFileInputChange}
-            />
-
-            <Button
-                bsStyle="success"
-                type="submit"
-                disabled={this.props.form.pending}
-            >
-              Create
-            </Button>
-          </form>
+              onCancel={this.onCancel}
+              onFileInputChange={this.onFileInputChange}
+          />
         </div>
     );
   }
@@ -72,6 +59,7 @@ function mapStateToProps(state, props) {
   const {username, boxName, version} = props.router.params;
   const boxTag = `${username}/${boxName}`;
   return {
+    myUsername: state.myUsername,
     form: state.forms.boxProvider,
     boxTag,
     username,

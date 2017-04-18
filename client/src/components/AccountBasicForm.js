@@ -1,10 +1,10 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button} from "react-bootstrap";
 import * as actions from "../actions";
 import MyFormField from "./MyFormField";
 import MyFormError from "./MyFormError";
 import {isEqual} from "lodash";
+import MySubmitButton from "./MySubmitButton";
 
 
 class AccountBasicForm extends Component {
@@ -14,7 +14,7 @@ class AccountBasicForm extends Component {
 
   componentDidUpdate(prevProps) {
     if (!isEqual(prevProps.user, this.props.user)) {
-      // For a case, when changing page or ordering.
+      // For a case when user data loaded
       this.props.setFormData('account', this.props.user);
     }
   }
@@ -41,13 +41,11 @@ class AccountBasicForm extends Component {
               label='Username *'
           />
 
-          <Button
-              bsStyle="success"
-              type="submit"
-              disabled={this.props.form.pending}
-          >
-            Edit
-          </Button>
+          <MySubmitButton
+              title="Edit"
+              pendingTitle="Saving..."
+              pending={this.props.form.pending}
+          />
           {' '}
           {this.props.form.message && <span>{this.props.form.message}</span>}
         </form>

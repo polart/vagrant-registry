@@ -1,10 +1,9 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button, PageHeader} from "react-bootstrap";
+import {PageHeader} from "react-bootstrap";
 import * as actions from "../actions";
-import MyFormField from "./MyFormField";
-import MyFormError from "./MyFormError";
-import {Link} from "react-router";
+import BoxForm from "./BoxForm";
+import {isEqual} from "lodash";
 
 
 class BoxEditPage extends Component {
@@ -13,7 +12,18 @@ class BoxEditPage extends Component {
       this.props.router.push(`/login/?next=${location.pathname}`);
       return;
     }
+    if (!this.props.box) {
+      this.props.loadBox(this.props.tag);
+      return;
+    }
     this.props.setFormData('box', this.props.box);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!isEqual(prevProps.box, this.props.box)) {
+      // For a case when box data loaded
+      this.props.setFormData('box', this.props.box);
+    }
   }
 
   onSubmit = (e) => {
@@ -21,54 +31,21 @@ class BoxEditPage extends Component {
     this.props.editBox(this.props.tag, this.props.form.data);
   };
 
+  onCancel = () => {
+      this.props.router.push(`/boxes/${this.props.tag}/`);
+  };
+
   render() {
     return (
         <div>
           <PageHeader>Edit box</PageHeader>
-          <form
+          <BoxForm
+              pending={this.props.form.pending}
+              submitTitle='Save'
+              submitPendingTitle="Saving..."
               onSubmit={this.onSubmit}
-          >
-            <MyFormError model="box" />
-
-            <MyFormField
-                model='box.name'
-                type='text'
-                label='Name *'
-            />
-
-            <MyFormField
-                model='box.short_description'
-                type='text'
-                label='Short description'
-            />
-
-            <MyFormField
-                model='box.description'
-                type='textarea'
-                label='Description'
-                rows='10'
-            />
-
-            <MyFormField
-                model='box.visibility'
-                type='select'
-                label='Visibility'
-                items={[
-                  {value: 'PT', label: 'Private'},
-                  {value: 'PC', label: 'Public'},
-                ]}
-            />
-
-            <Button
-                bsStyle="success"
-                type="submit"
-                disabled={this.props.form.pending}
-            >
-              Edit
-            </Button>
-            {' '}
-            <Link to={`/boxes/${this.props.tag}/`}>Cancel</Link>
-          </form>
+              onCancel={this.onCancel}
+          />
         </div>
     );
   }
@@ -87,6 +64,7 @@ function mapStateToProps(state, props) {
 }
 
 export default connect(mapStateToProps, {
+  loadBox: actions.loadBox,
   editBox: actions.editBox,
   setFormData: actions.form.setData,
 })(BoxEditPage)

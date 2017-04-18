@@ -6,6 +6,7 @@ import BoxVersionList from "./BoxVersionList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import {Link} from "react-router";
 import {parsePerms} from "../utils";
+import MySpinner from "./MySpinner";
 
 
 class BoxDetail extends Component {
@@ -13,9 +14,17 @@ class BoxDetail extends Component {
     this.props.fetchBox(this.props.boxTag);
   }
 
+  onTabSelect = (eventKey) => {
+    if (eventKey === 'info') {
+      this.props.router.push(`/boxes/${this.props.boxTag}/`);
+    } else if (eventKey === 'versions') {
+      this.props.router.push(`/boxes/${this.props.boxTag}/versions/`);
+    }
+  };
+
   renderBoxDetails = () => {
     if (!this.props.box) {
-      return <div>Loading...</div>
+      return <MySpinner />;
     }
 
     return (
@@ -85,6 +94,7 @@ class BoxDetail extends Component {
   };
 
   render() {
+    const activeTab = this.props.location.pathname.endsWith('/versions/') ? 'versions' : 'info';
     return (
         <div>
           <PageHeader>{this.props.boxTag}</PageHeader>
@@ -92,11 +102,15 @@ class BoxDetail extends Component {
           {this.renderEditOption()}
           {' '}
           {this.renderDeleteOption()}
-          <Tabs id="box-tabs">
-            <Tab eventKey={1} title="Box Info">
+          <Tabs
+              id="box-tabs"
+              defaultActiveKey={activeTab}
+              onSelect={this.onTabSelect}
+          >
+            <Tab eventKey={'info'} title="Box Info">
               {this.renderBoxDetails()}
             </Tab>
-            <Tab eventKey={2} title="Versions">
+            <Tab eventKey={'versions'} title="Versions">
               {this.renderNewVersionButton()}
               <BoxVersionList boxTag={this.props.boxTag} router={this.props.router} />
             </Tab>

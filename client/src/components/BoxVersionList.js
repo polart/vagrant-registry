@@ -1,8 +1,9 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
-import {Pagination, ListGroup, ListGroupItem, Label} from 'react-bootstrap';
+import {ListGroup, ListGroupItem, Label, Pagination} from 'react-bootstrap';
 import Moment from 'moment';
 import * as actions from "../actions";
+import MySpinner from "./MySpinner";
 
 
 class BoxVersionList extends Component {
@@ -29,15 +30,11 @@ class BoxVersionList extends Component {
   };
 
   renderPagination = () => {
-    if (!this.props.boxVersionsPages) {
-      return;
-    }
-
-    if (this.props.boxVersionsPages.count <= 10) {
+    if (this.pages.count <= 10) {
       return null;
     }
 
-    const items = Math.ceil(this.props.boxVersionsPages.count / 10);
+    const items = Math.ceil(this.pages.count / 10);
     return (
         <Pagination
             prev
@@ -69,16 +66,7 @@ class BoxVersionList extends Component {
   };
 
   renderVersionsList = () => {
-    if (!this.props.boxVersionsPages) {
-      return;
-    }
-
-    const versionTags = this.props.boxVersionsPages.pages[this.state.page];
-    if (!versionTags) {
-      return;
-    }
-
-    return versionTags.map(tag => {
+    return this.versionTags.map(tag => {
       const version = this.props.boxVersions[tag];
       return (
           <ListGroupItem
@@ -99,25 +87,24 @@ class BoxVersionList extends Component {
     });
   };
 
-  renderVersions = () => {
-    // if (!this.props.box) {
-    //   return <div>Loading...</div>
-    // }
-
-    return (
-      <div>
-        <ListGroup>
-          {this.renderVersionsList()}
-        </ListGroup>
-        {this.renderPagination()}
-      </div>
-    );
-  };
-
   render() {
+    this.pages = this.props.boxVersionsPages;
+    this.versionTags = (this.pages && this.pages.pages[this.state.page]) || [];
+
+    if (!this.pages || !this.versionTags.length) {
+      return <MySpinner />;
+    }
+
+    if (this.pages.count === 0) {
+      return <p>No versions</p>
+    }
+
     return (
         <div>
-          {this.renderVersions()}
+          <ListGroup>
+            {this.renderVersionsList()}
+          </ListGroup>
+          {this.renderPagination()}
         </div>
     );
   }

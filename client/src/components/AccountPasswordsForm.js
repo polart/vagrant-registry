@@ -1,9 +1,9 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button} from "react-bootstrap";
 import * as actions from "../actions";
 import MyFormField from "./MyFormField";
 import MyFormError from "./MyFormError";
+import MySubmitButton from "./MySubmitButton";
 
 
 class AccountPasswordsForm extends Component {
@@ -35,13 +35,11 @@ class AccountPasswordsForm extends Component {
               label='Repeat password *'
           />
 
-          <Button
-              bsStyle="success"
-              type="submit"
-              disabled={this.props.form.pending}
-          >
-            Change
-          </Button>
+          <MySubmitButton
+              title="Change"
+              pendingTitle="Saving..."
+              pending={this.props.form.pending}
+          />
           {' '}
           {this.props.form.message && <span>{this.props.form.message}</span>}
         </form>

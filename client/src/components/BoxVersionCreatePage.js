@@ -1,10 +1,9 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button, PageHeader} from "react-bootstrap";
+import {PageHeader} from "react-bootstrap";
 import * as actions from "../actions";
-import MyFormField from "./MyFormField";
-import MyFormError from "./MyFormError";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import BoxVersionForm from "./BoxVersionForm";
 
 
 class BoxVersionCreatePage extends Component {
@@ -19,37 +18,24 @@ class BoxVersionCreatePage extends Component {
     this.props.createBoxVersion(this.props.boxTag, this.props.form.data);
   };
 
+  onCancel = () => {
+      this.props.router.push(
+          `/boxes/${this.props.boxTag}/versions/`
+      );
+  };
+
   render() {
     return (
         <div>
           <PageHeader>New box version</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
-          <form
+          <BoxVersionForm
+              pending={this.props.form.pending}
+              submitTitle='Create'
+              submitPendingTitle="Creating..."
               onSubmit={this.onSubmit}
-          >
-            <MyFormError model="boxVersion" />
-
-            <MyFormField
-                model='boxVersion.version'
-                type='text'
-                label='Version *'
-            />
-
-            <MyFormField
-                model='boxVersion.changes'
-                type='textarea'
-                label='Changes'
-                rows='10'
-            />
-
-            <Button
-                bsStyle="success"
-                type="submit"
-                disabled={this.props.form.pending}
-            >
-              Create
-            </Button>
-          </form>
+              onCancel={this.onCancel}
+          />
         </div>
     );
   }
@@ -59,6 +45,7 @@ function mapStateToProps(state, props) {
   const {username, boxName} = props.router.params;
   const boxTag = `${username}/${boxName}`;
   return {
+    myUsername: state.myUsername,
     form: state.forms.boxVersion,
     boxTag,
     username,

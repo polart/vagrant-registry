@@ -33,7 +33,11 @@ export default class BoxProviderList extends Component {
 
   renderProvidersList = () => {
     if (!this.props.providers) {
-      return;
+      return null;
+    }
+
+    if (!this.props.providers.length) {
+      return <p>No providers</p>;
     }
 
     return this.props.providers.map(provider => {

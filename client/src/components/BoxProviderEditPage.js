@@ -1,12 +1,10 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Button, PageHeader} from "react-bootstrap";
-import {merge} from "lodash";
+import {PageHeader} from "react-bootstrap";
+import {isEqual, merge} from "lodash";
 import * as actions from "../actions";
-import MyFormField from "./MyFormField";
-import MyFormError from "./MyFormError";
 import MyBreadcrumbs from "./MyBreadcrumbs";
-import BoxFileFormField from "./BoxFileFormField";
+import BoxProviderForm from "./BoxProviderForm";
 
 
 class BoxProviderEditPage extends Component {
@@ -19,7 +17,18 @@ class BoxProviderEditPage extends Component {
       this.props.router.push(`/login/?next=${location.pathname}`);
       return;
     }
+    if (!this.props.boxProvider) {
+      this.props.loadBoxVersion(this.props.boxTag, this.props.version);
+      return;
+    }
     this.props.setFormData('boxProvider', this.props.boxProvider);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!isEqual(prevProps.boxProvider, this.props.boxProvider)) {
+      // For a case when box provider data loaded
+      this.props.setFormData('boxProvider', this.props.boxProvider);
+    }
   }
 
   onSubmit = (e) => {
@@ -32,6 +41,12 @@ class BoxProviderEditPage extends Component {
     );
   };
 
+  onCancel = () => {
+      this.props.router.push(
+          `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+      );
+  };
+
   onFileInputChange = (file) => {
     this.setState({ file });
   };
@@ -41,31 +56,14 @@ class BoxProviderEditPage extends Component {
         <div>
           <PageHeader>Edit box provider</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
-          <form
+          <BoxProviderForm
+              pending={this.props.form.pending}
+              submitTitle='Save'
+              submitPendingTitle="Saving..."
               onSubmit={this.onSubmit}
-          >
-            <MyFormError model="boxProvider" />
-
-            <MyFormField
-                model='boxProvider.provider'
-                type='text'
-                label='Provider *'
-            />
-
-            <BoxFileFormField
-                model='boxProvider.file'
-                label='Box file'
-                onChange={this.onFileInputChange}
-            />
-
-            <Button
-                bsStyle="success"
-                type="submit"
-                disabled={this.props.form.pending}
-            >
-              Save
-            </Button>
-          </form>
+              onCancel={this.onCancel}
+              onFileInputChange={this.onFileInputChange}
+          />
         </div>
     );
   }
@@ -77,6 +75,7 @@ function mapStateToProps(state, props) {
   const providerTag = `${boxTag} v${version} ${provider}`;
   const boxProvider = state.entities.boxProviders[providerTag];
   return {
+    myUsername: state.myUsername,
     form: state.forms.boxProvider,
     boxProvider,
     boxTag,
@@ -86,6 +85,7 @@ function mapStateToProps(state, props) {
 }
 
 export default connect(mapStateToProps, {
+  loadBoxVersion: actions.loadBoxVersion,
   editBoxProvider: actions.editBoxProvider,
   setFormData: actions.form.setData,
 })(BoxProviderEditPage)
