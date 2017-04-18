@@ -9,6 +9,10 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 
 class BoxVersionEditPage extends Component {
   componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+      return;
+    }
     this.props.setFormData('boxVersion', this.props.boxVersion);
   }
 

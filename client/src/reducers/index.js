@@ -202,11 +202,23 @@ function forms(state = initialForms, action) {
   }
 }
 
+function errorPage(state = null, action) {
+  switch (action.type) {
+    case actionTypes.SET_ERROR_PAGE:
+      return action.code;
+    case actionTypes.CLEAR_ERROR_PAGE:
+      return null;
+    default:
+      return state
+  }
+}
+
 const rootReducer = combineReducers({
   myUsername,
   entities,
   pagination,
   forms,
+  errorPage,
 });
 
 export default rootReducer;

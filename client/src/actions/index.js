@@ -7,6 +7,9 @@ function action(type, payload = {}) {
   return {...payload, type}
 }
 
+export const setErrorPage = (code) => action(types.SET_ERROR_PAGE, { code });
+export const clearErrorPage = () => action(types.CLEAR_ERROR_PAGE);
+
 export const updateAccount = (username, data) => action(types.UPDATE_ACCOUNT, { username, data });
 export const changePassword = (username, data) => action(types.CHANGE_PASSWORD, { username, data });
 

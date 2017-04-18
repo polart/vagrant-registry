@@ -4,7 +4,6 @@ import {browserHistory} from "react-router";
 import * as actionTypes from "../actions/types";
 import * as actions from "../actions";
 import {getFileMD5Hash} from "../utils";
-import {isEmpty} from "lodash";
 
 
 //*********************************************************
@@ -21,6 +20,8 @@ function* callRequest(entity, apiFn, data = null) {
     yield put(entity.failure(data, error));
     if (status === 401) {
       yield put(actions.logout(location.pathname));
+    } else if (status === 404) {
+      yield put(actions.setErrorPage(404));
     }
   }
   return { response, error };
@@ -104,7 +105,7 @@ export function* watchLogout() {
     yield put(actions.setMyUsername(null));
     let url = `/login/`;
     if (nextUrl) {
-      url = `/login/?next${nextUrl}`;
+      url = `/login/?next=${nextUrl}`;
     }
     browserHistory.push(url);
   });

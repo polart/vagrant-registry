@@ -7,6 +7,12 @@ import AccountPasswordsForm from "./AccountPasswordsForm";
 
 
 class AccountPage extends Component {
+  componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+    }
+  }
+
   render() {
     return (
         <div>

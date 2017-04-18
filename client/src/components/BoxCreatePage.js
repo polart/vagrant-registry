@@ -7,6 +7,12 @@ import MyFormError from "./MyFormError";
 
 
 class BoxCreatePage extends Component {
+  componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+    }
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.createBox(this.props.myUsername, this.props.form.data);

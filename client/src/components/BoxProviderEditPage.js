@@ -15,6 +15,10 @@ class BoxProviderEditPage extends Component {
   };
 
   componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+      return;
+    }
     this.props.setFormData('boxProvider', this.props.boxProvider);
   }
 

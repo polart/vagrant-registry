@@ -9,6 +9,10 @@ import {Link} from "react-router";
 
 class BoxEditPage extends Component {
   componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+      return;
+    }
     this.props.setFormData('box', this.props.box);
   }
 
@@ -75,6 +79,7 @@ function mapStateToProps(state, props) {
   const tag = `${username}/${boxName}`;
   const box = state.entities.boxes[tag];
   return {
+    myUsername: state.myUsername,
     form: state.forms.box,
     tag,
     box,

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {Router, Route, browserHistory, IndexRoute} from "react-router";
+import {Router, Route, browserHistory, IndexRoute, Redirect} from "react-router";
 import {Provider} from "react-redux";
 import {createStore, applyMiddleware, compose} from "redux";
 import App from "./components/App";
@@ -75,6 +75,7 @@ ReactDOM.render(
           <Route path="/boxes/:username/:boxName/versions/:version/providers/new" component={BoxProviderCreatePage} />
           <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider" component={BoxVersionDetail} />
           <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider/edit" component={BoxProviderEditPage} />
+          <Redirect from="/:username/:boxName" to="/boxes/:username/:boxName" />
           <Route path="*" component={NotFound} />
         </Route>
       </Router>

@@ -5,6 +5,9 @@ function createRequestTypes(base) {
   }, {});
 }
 
+export const SET_ERROR_PAGE = 'SET_ERROR_PAGE';
+export const CLEAR_ERROR_PAGE = 'CLEAR_ERROR_PAGE';
+
 export const LOAD_USER = 'LOAD_USER';
 export const LOAD_USERS = 'LOAD_USERS';
 

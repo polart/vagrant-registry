@@ -8,6 +8,12 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxVersionCreatePage extends Component {
+  componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+    }
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.createBoxVersion(this.props.boxTag, this.props.form.data);

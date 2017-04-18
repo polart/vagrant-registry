@@ -14,6 +14,12 @@ class BoxProviderCreatePage extends Component {
     file: null,
   };
 
+  componentDidMount() {
+    if (!this.props.myUsername) {
+      this.props.router.push(`/login/?next=${location.pathname}`);
+    }
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.createBoxProvider(
