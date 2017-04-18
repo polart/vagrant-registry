@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import { connect } from 'react-redux';
-import {PageHeader, Panel, Badge, Well, Tabs, Tab} from 'react-bootstrap';
+import {PageHeader, Panel, Badge, Well, Tabs, Tab, Label} from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import * as actions from "../actions";
 import BoxVersionList from "./BoxVersionList";

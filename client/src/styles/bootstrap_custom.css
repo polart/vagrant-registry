@@ -1,0 +1,60 @@
+body {
+  background-color: #f2f2f2;
+  overflow-y: scroll;
+}
+
+.breadcrumb {
+  background-color: white;
+  padding: 12px 8px;
+}
+
+.panel-default > .panel-heading {
+  background-color: white;
+  font-weight: bold;
+  padding: 15px 15px;
+}
+
+.action-icon {
+  opacity: 0.6;
+  font-size: 0.9em;
+  padding: 0 6px;
+}
+
+
+.action-icon:hover {
+  cursor: pointer;
+  opacity: 1;
+}
+
+.page-header {
+  border-bottom-color: #e4e4e4;
+}
+
+.page-header .action-icon {
+  font-size: 0.6em;
+}
+
+.box-version-providers-panel .panel-body {
+  padding: 0;
+}
+
+.box-version-providers-panel .list-group-item {
+  margin: -1px;
+}
+
+.box-version-providers-panel .box-provider-new-button {
+  margin: 15px;
+}
+
+.label-private {
+  font-size: 0.4em;
+  border: 1px solid #777;
+  color: #777;
+  vertical-align: middle;
+  background-color: transparent;
+  padding: .3em .6em .3em;
+}
+
+.page-header-subtitle {
+  color: #777;
+}

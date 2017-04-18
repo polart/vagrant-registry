@@ -3,6 +3,15 @@ import {Breadcrumb} from "react-bootstrap";
 import {includes, capitalize} from 'lodash';
 
 
+const CAPITALIZE = [
+  'boxes',
+  'versions',
+  'new',
+  'edit',
+  'account',
+  'providers',
+];
+
 export default class MyBreadcrumbs extends Component {
   onClick = (e) => {
     e.preventDefault();
@@ -13,7 +22,7 @@ export default class MyBreadcrumbs extends Component {
   };
 
   cleanPathName = (path) => {
-    if (includes(['boxes', 'versions', 'new', 'edit', 'account'], path)) {
+    if (includes(CAPITALIZE, path)) {
       return capitalize(path);
     }
     return path;

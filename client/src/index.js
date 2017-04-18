@@ -25,6 +25,8 @@ import BoxProviderCreatePage from "./components/BoxProviderCreatePage";
 import BoxProviderEditPage from "./components/BoxProviderEditPage";
 import AccountPage from "./components/AccountPage";
 
+import './styles/bootstrap_custom.css';
+
 
 const persistedSate = loadState();
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

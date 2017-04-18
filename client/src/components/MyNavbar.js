@@ -45,7 +45,7 @@ export default class MyNavbar extends Component {
 
   render() {
     return (
-        <Navbar fixedTop inverse collapseOnSelect>
+        <Navbar inverse collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
               <Link to='/'>Vagrant Registry</Link>

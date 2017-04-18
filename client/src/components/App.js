@@ -37,7 +37,7 @@ class App extends Component {
               onLogout={this.props.logout}
               router={this.props.router}
           />
-          <div style={{marginTop: '60px'}}>
+          <div className="container">
             {this.props.children}
           </div>
         </div>

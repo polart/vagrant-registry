@@ -1,23 +1,32 @@
 import React, {Component} from "react";
-import {ListGroupItem} from "react-bootstrap";
+import {Glyphicon, ListGroupItem} from "react-bootstrap";
 import Moment from "moment";
 import Filesize from "filesize";
 import {Link} from "react-router";
+import ActionIcon from "./ActionIcon";
 
 
 export default class BoxProviderList extends Component {
-  renderProviderDeleteOption = (provider) => {
+  renderDeleteIcon = (provider) => {
     if (!this.props.canDelete) {
       return null;
     }
-    return <a href="#" onClick={this.props.onDelete.bind(null, provider.provider)}>Delete</a>;
+    return <ActionIcon
+        icon="trash"
+        title="Delete provider"
+        onClick={this.props.onDelete.bind(null, provider.provider)}
+    />;
   };
 
-  renderEditOption = (provider) => {
+  renderEditIcon = (provider) => {
     if (!this.props.canEdit) {
       return null;
     }
-    return <Link to={`/boxes/${this.props.boxTag}/versions/${this.props.version}/providers/${provider.provider}/edit/`}>Edit</Link>;
+    return <ActionIcon
+        icon="edit"
+        title="Edit provider"
+        onClick={this.props.onEdit.bind(null, provider.provider)}
+    />;
   };
 
   renderDownloadButton = (provider) => {
@@ -28,6 +37,15 @@ export default class BoxProviderList extends Component {
         <a href={provider.download_url} className="btn btn-default">
           Download box
         </a>
+    );
+  };
+
+  renderSize = (provider) => {
+    if (!provider.download_url) {
+      return null;
+    }
+    return (
+        <p>Size: {Filesize(provider.file_size)}</p>
     );
   };
 
@@ -50,22 +68,36 @@ export default class BoxProviderList extends Component {
               <small title={Moment(provider.date_updated).format('LLL')}>
                 Last updated: {Moment(provider.date_updated).fromNow()}
               </small>
+              <div className="pull-right">
+                {this.renderEditIcon(provider)}
+                {this.renderDeleteIcon(provider)}
+              </div>
             </h4>
-            <p>Size: {Filesize(provider.file_size)}</p>
+            {this.renderSize(provider)}
             {this.renderDownloadButton(provider)}
-            {' '}
-            {this.renderEditOption(provider)}
-            {' '}
-            {this.renderProviderDeleteOption(provider)}
           </ListGroupItem>
       );
     });
   };
 
+  renderNewButton = () => {
+    if (!this.props.canCreate) {
+      return null;
+    }
+    return (
+        <Link
+            to={`/boxes/${this.props.boxTag}/versions/${this.props.version}/providers/new/`}
+            className='btn btn-success box-provider-new-button'
+        >
+          New provider
+        </Link>
+    );
+  };
+
   render() {
     return (
       <div>
-        <h4>Providers</h4>
+        {this.renderNewButton()}
         {this.renderProvidersList()}
       </div>
     );
