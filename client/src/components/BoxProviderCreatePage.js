@@ -1,10 +1,11 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {PageHeader} from "react-bootstrap";
 import {merge} from "lodash";
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxProviderForm from "./BoxProviderForm";
+import BoxVersionPageHeader from "./BoxVersionPageHeader";
+import {Panel} from "react-bootstrap";
 
 
 class BoxProviderCreatePage extends Component {
@@ -16,6 +17,10 @@ class BoxProviderCreatePage extends Component {
     if (!this.props.myUsername) {
       this.props.router.push(`/login/?next=${location.pathname}`);
     }
+  }
+
+  componentWillUnmount() {
+    this.props.resetForm('boxProvider');
   }
 
   onSubmit = (e) => {
@@ -32,24 +37,26 @@ class BoxProviderCreatePage extends Component {
   };
 
   onCancel = () => {
-      this.props.router.push(
-          `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
-      );
+    this.props.router.push(
+        `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+    );
   };
 
   render() {
     return (
         <div>
-          <PageHeader>New box provider</PageHeader>
+          <BoxVersionPageHeader router={this.props.router} />
           <MyBreadcrumbs router={this.props.router} />
-          <BoxProviderForm
-              pending={this.props.form.pending}
-              submitTitle='Create'
-              submitPendingTitle="Creating..."
-              onSubmit={this.onSubmit}
-              onCancel={this.onCancel}
-              onFileInputChange={this.onFileInputChange}
-          />
+          <Panel header="New provider">
+            <BoxProviderForm
+                pending={this.props.form.pending}
+                submitTitle='Create'
+                submitPendingTitle="Creating..."
+                onSubmit={this.onSubmit}
+                onCancel={this.onCancel}
+                onFileInputChange={this.onFileInputChange}
+            />
+          </Panel>
         </div>
     );
   }
@@ -70,4 +77,5 @@ function mapStateToProps(state, props) {
 
 export default connect(mapStateToProps, {
   createBoxProvider: actions.createBoxProvider,
+  resetForm: actions.form.reset,
 })(BoxProviderCreatePage)

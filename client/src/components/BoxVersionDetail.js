@@ -1,7 +1,6 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {Label, Panel} from "react-bootstrap";
-import Moment from "moment";
+import {Panel} from "react-bootstrap";
 import {isEmpty} from "lodash";
 import ReactMarkdown from "react-markdown";
 import * as actions from "../actions";
@@ -9,7 +8,7 @@ import BoxProviderList from "./BoxProviderList";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import {parsePerms} from "../utils";
 import MySpinner from "./MySpinner";
-import ActionIcon from "./ActionIcon";
+import BoxVersionPageHeader from "./BoxVersionPageHeader";
 
 
 class BoxVersionDetail extends Component {
@@ -17,20 +16,6 @@ class BoxVersionDetail extends Component {
     this.props.fetchBox(this.props.boxTag);
     this.props.fetchBoxVersion(this.props.boxTag, this.props.params.version);
   }
-
-  onBoxVersionEdit = (e) => {
-    this.props.router.push(
-        `/boxes/${this.props.boxTag}/versions/${this.props.version}/edit/`
-    );
-  };
-
-  onBoxVersionDelete = (e) => {
-    e.preventDefault();
-    // TODO: would be good to use custom Confirm dialog
-    if (window.confirm(`Are you sure you want to delete box version ${this.props.versionTag}?`)) {
-      this.props.deleteBoxVersion(this.props.boxTag, this.props.version);
-    }
-  };
 
   onBoxProviderDelete = (provider, e) => {
     e.preventDefault();
@@ -45,36 +30,6 @@ class BoxVersionDetail extends Component {
     this.props.router.push(
         `/boxes/${this.props.boxTag}/versions/${this.props.version}/providers/${provider}/edit/`
     );
-  };
-
-  renderPrivateLabel = () => {
-    if (!this.props.box) {
-      return null;
-    }
-    if (this.props.box.visibility === 'PT') {
-      return <Label className="label-private">Private</Label>;
-    }
-    return null;
-  };
-
-  renderEditVersionIcon = () => {
-    if (!this.props.box) {
-      return null;
-    }
-    if (parsePerms(this.props.box.user_permissions).canEdit) {
-      return <ActionIcon icon="edit" title="Edit version" onClick={this.onBoxVersionEdit} />;
-    }
-    return null;
-  };
-
-  renderDeleteVersionIcon = () => {
-    if (!this.props.box) {
-      return null;
-    }
-    if (parsePerms(this.props.box.user_permissions).canDelete) {
-      return <ActionIcon icon="trash" title="Delete version" onClick={this.onBoxVersionDelete} />;
-    }
-    return null;
   };
 
   canDeleteProvider = () => {
@@ -126,33 +81,10 @@ class BoxVersionDetail extends Component {
     );
   };
 
-  renderLastUpdated = () => {
-    if (!this.props.boxVersion) {
-      return null;
-    }
-    return (
-        <span title={Moment(this.props.boxVersion.date_updated).format('LLL')}>
-          Last updated: {Moment(this.props.boxVersion.date_updated).fromNow()}
-        </span>
-    );
-  };
-
   render() {
     return (
         <div>
-          <div className="page-header">
-            <h1>
-              <span>{this.props.versionTag}</span>
-              {' '}
-              {this.renderPrivateLabel()}
-              {' '}
-              {this.renderEditVersionIcon()}
-              {this.renderDeleteVersionIcon()}
-            </h1>
-            <div className="page-header-subtitle">
-              {this.renderLastUpdated()}
-            </div>
-          </div>
+          <BoxVersionPageHeader router={this.props.router} />
           <MyBreadcrumbs router={this.props.router} />
           {this.renderDetails()}
         </div>

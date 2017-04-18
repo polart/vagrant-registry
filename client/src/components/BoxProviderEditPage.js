@@ -1,10 +1,11 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {PageHeader} from "react-bootstrap";
 import {isEqual, merge} from "lodash";
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxProviderForm from "./BoxProviderForm";
+import BoxVersionPageHeader from "./BoxVersionPageHeader";
+import {Panel} from "react-bootstrap";
 
 
 class BoxProviderEditPage extends Component {
@@ -31,6 +32,10 @@ class BoxProviderEditPage extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.resetForm('boxProvider');
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.editBoxProvider(
@@ -42,9 +47,9 @@ class BoxProviderEditPage extends Component {
   };
 
   onCancel = () => {
-      this.props.router.push(
-          `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
-      );
+    this.props.router.push(
+        `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+    );
   };
 
   onFileInputChange = (file) => {
@@ -54,16 +59,18 @@ class BoxProviderEditPage extends Component {
   render() {
     return (
         <div>
-          <PageHeader>Edit box provider</PageHeader>
+          <BoxVersionPageHeader router={this.props.router} />
           <MyBreadcrumbs router={this.props.router} />
-          <BoxProviderForm
-              pending={this.props.form.pending}
-              submitTitle='Save'
-              submitPendingTitle="Saving..."
-              onSubmit={this.onSubmit}
-              onCancel={this.onCancel}
-              onFileInputChange={this.onFileInputChange}
-          />
+          <Panel header="Edit provider">
+            <BoxProviderForm
+                pending={this.props.form.pending}
+                submitTitle='Save'
+                submitPendingTitle="Saving..."
+                onSubmit={this.onSubmit}
+                onCancel={this.onCancel}
+                onFileInputChange={this.onFileInputChange}
+            />
+          </Panel>
         </div>
     );
   }
@@ -88,4 +95,5 @@ export default connect(mapStateToProps, {
   loadBoxVersion: actions.loadBoxVersion,
   editBoxProvider: actions.editBoxProvider,
   setFormData: actions.form.setData,
+  resetForm: actions.form.reset,
 })(BoxProviderEditPage)

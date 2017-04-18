@@ -22,18 +22,18 @@ class BoxProviderForm extends Component {
               onChange={this.props.onFileInputChange}
           />
 
+          <MySubmitButton
+              title={this.props.submitTitle}
+              pendingTitle={this.props.submitPendingTitle}
+              pending={this.props.pending}
+          />
+          {' '}
           <Button
               bsStyle="link"
               onClick={this.props.onCancel}
           >
             Cancel
           </Button>
-          {' '}
-          <MySubmitButton
-              title={this.props.submitTitle}
-              pendingTitle={this.props.submitPendingTitle}
-              pending={this.props.pending}
-          />
         </form>
     );
   }
