@@ -22,18 +22,20 @@ export default class MyPagination extends Component {
 
     const items = Math.ceil(this.props.itemsCount / this.perPage);
     return (
-        <Pagination
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            items={items}
-            maxButtons={5}
-            activePage={this.activePage}
-            onSelect={this.onPageChange}
-        />
+        <div className="text-center">
+          <Pagination
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              items={items}
+              maxButtons={5}
+              activePage={this.activePage}
+              onSelect={this.onPageChange}
+          />
+        </div>
     );
   }
 }

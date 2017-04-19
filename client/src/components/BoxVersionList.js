@@ -1,10 +1,11 @@
 import React, {Component} from "react";
-import { connect } from 'react-redux';
-import {ListGroup, ListGroupItem, Label, Pagination} from 'react-bootstrap';
-import ReactMarkdown from 'react-markdown';
-import Moment from 'moment';
+import {connect} from "react-redux";
+import {Label, Pagination, Panel} from "react-bootstrap";
+import ReactMarkdown from "react-markdown";
+import Moment from "moment";
 import * as actions from "../actions";
 import MySpinner from "./MySpinner";
+import {Link} from "react-router";
 
 
 class BoxVersionList extends Component {
@@ -37,18 +38,20 @@ class BoxVersionList extends Component {
 
     const items = Math.ceil(this.pages.count / 10);
     return (
-        <Pagination
-            prev
-            next
-            first
-            last
-            ellipsis
-            boundaryLinks
-            items={items}
-            maxButtons={5}
-            activePage={this.state.page}
-            onSelect={this.onPageChange}
-        />
+        <div className="text-center">
+          <Pagination
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              items={items}
+              maxButtons={5}
+              activePage={this.state.page}
+              onSelect={this.onPageChange}
+          />
+        </div>
     );
   };
 
@@ -70,20 +73,19 @@ class BoxVersionList extends Component {
     return this.versionTags.map(tag => {
       const version = this.props.boxVersions[tag];
       return (
-          <ListGroupItem
-              key={version.version}
-              href={`/boxes/${this.props.boxTag}/versions/${version.version}/`}
-              onClick={this.onBoxVersionClick}
-          >
-            <h4 className="list-group-item-heading">
-              v{version.version} |&nbsp;
-              <small title={Moment(version.date_updated).format('LLL')}>
-                Last updated: {Moment(version.date_updated).fromNow()}
-              </small>
-            </h4>
-            <ReactMarkdown source={version.changes} />
-            {this.renderProviders(version)}
-          </ListGroupItem>
+          <Link to={`/boxes/${this.props.boxTag}/versions/${version.version}/`}>
+            <Panel key={version.version}>
+              <h4 className="list-group-item-heading">
+                v{version.version}
+                {' '}
+                <small title={Moment(version.date_updated).format('LLL')}>
+                  | Last updated: {Moment(version.date_updated).fromNow()}
+                </small>
+              </h4>
+              <ReactMarkdown source={version.changes} />
+              {this.renderProviders(version)}
+            </Panel>
+          </Link>
       );
     });
   };
@@ -102,9 +104,9 @@ class BoxVersionList extends Component {
 
     return (
         <div>
-          <ListGroup>
+          <div className="box-version-list">
             {this.renderVersionsList()}
-          </ListGroup>
+          </div>
           {this.renderPagination()}
         </div>
     );

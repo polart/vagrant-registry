@@ -58,3 +58,42 @@ body {
 .page-header-subtitle {
   color: #777;
 }
+
+.nav-tabs {
+  border-bottom: 1px solid #337ab7;
+  margin-bottom: 20px;
+}
+
+.nav-tabs > li > a,
+.nav-tabs > li > a:focus,
+.nav-tabs > li > a:hover {
+  border-color: transparent;
+  background-color: transparent;
+  color: #777;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+  background-color: #f2f2f2;
+  border: 1px solid #337ab7;
+  border-bottom-color: #f2f2f2;
+  color: #337ab7;
+}
+
+.box-version-new-button {
+  margin-bottom: 20px;
+}
+
+.box-version-list a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.box-version-list .panel-body h4 {
+  color: #337ab7;
+}
+
+.box-quick-start-panel pre {
+  margin: 0;
+}

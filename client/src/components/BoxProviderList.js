@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Glyphicon, ListGroupItem} from "react-bootstrap";
+import {ListGroupItem} from "react-bootstrap";
 import Moment from "moment";
 import Filesize from "filesize";
 import {Link} from "react-router";
