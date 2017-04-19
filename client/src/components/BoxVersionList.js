@@ -88,12 +88,12 @@ class BoxVersionList extends Component {
     this.pages = this.props.boxVersionsPages;
     this.versionTags = (this.pages && this.pages.pages[this.state.page]) || [];
 
-    if (!this.pages || !this.versionTags.length) {
-      return <MySpinner />;
+    if (this.pages && this.pages.count === 0) {
+      return <p className="text-center">No versions</p>
     }
 
-    if (this.pages.count === 0) {
-      return <p>No versions</p>
+    if (!this.pages || !this.versionTags.length) {
+      return <MySpinner />;
     }
 
     return (

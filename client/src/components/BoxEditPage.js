@@ -1,9 +1,11 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {PageHeader} from "react-bootstrap";
+import {Panel} from "react-bootstrap";
 import * as actions from "../actions";
 import BoxForm from "./BoxForm";
 import {isEqual} from "lodash";
+import BoxPageHeader from "./BoxPageHeader";
+import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxEditPage extends Component {
@@ -26,26 +28,33 @@ class BoxEditPage extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.resetForm('box');
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.editBox(this.props.tag, this.props.form.data);
   };
 
   onCancel = () => {
-      this.props.router.push(`/boxes/${this.props.tag}/`);
+    this.props.router.push(`/boxes/${this.props.tag}/`);
   };
 
   render() {
     return (
         <div>
-          <PageHeader>Edit box</PageHeader>
-          <BoxForm
-              pending={this.props.form.pending}
-              submitTitle='Save'
-              submitPendingTitle="Saving..."
-              onSubmit={this.onSubmit}
-              onCancel={this.onCancel}
-          />
+          <BoxPageHeader router={this.props.router} />
+          <MyBreadcrumbs router={this.props.router} />
+          <Panel header="Edit box">
+            <BoxForm
+                pending={this.props.form.pending}
+                submitTitle='Save'
+                submitPendingTitle="Saving..."
+                onSubmit={this.onSubmit}
+                onCancel={this.onCancel}
+            />
+          </Panel>
         </div>
     );
   }
@@ -67,4 +76,5 @@ export default connect(mapStateToProps, {
   loadBox: actions.loadBox,
   editBox: actions.editBox,
   setFormData: actions.form.setData,
+  resetForm: actions.form.reset,
 })(BoxEditPage)

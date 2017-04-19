@@ -1,8 +1,9 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {PageHeader} from "react-bootstrap";
+import {PageHeader, Panel} from "react-bootstrap";
 import * as actions from "../actions";
 import BoxForm from "./BoxForm";
+import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class BoxCreatePage extends Component {
@@ -12,26 +13,33 @@ class BoxCreatePage extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.resetForm('box');
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.createBox(this.props.myUsername, this.props.form.data);
   };
 
   onCancel = () => {
-      this.props.router.push('/');
+    this.props.router.push('/');
   };
 
   render() {
     return (
         <div>
-          <PageHeader>Create new box</PageHeader>
-          <BoxForm
-              pending={this.props.form.pending}
-              submitTitle='Create'
-              submitPendingTitle="Creating..."
-              onSubmit={this.onSubmit}
-              onCancel={this.onCancel}
-          />
+          <PageHeader>{this.props.myUsername}</PageHeader>
+          <MyBreadcrumbs router={this.props.router} />
+          <Panel header="New box">
+            <BoxForm
+                pending={this.props.form.pending}
+                submitTitle='Create'
+                submitPendingTitle="Creating..."
+                onSubmit={this.onSubmit}
+                onCancel={this.onCancel}
+            />
+          </Panel>
         </div>
     );
   }
@@ -46,4 +54,5 @@ function mapStateToProps(state) {
 
 export default connect(mapStateToProps, {
   createBox: actions.createBox,
+  resetForm: actions.form.reset,
 })(BoxCreatePage)

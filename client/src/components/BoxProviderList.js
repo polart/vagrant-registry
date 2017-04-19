@@ -55,7 +55,7 @@ export default class BoxProviderList extends Component {
     }
 
     if (!this.props.providers.length) {
-      return <p>No providers</p>;
+      return <p className="text-center">No providers</p>;
     }
 
     return this.props.providers.map(provider => {

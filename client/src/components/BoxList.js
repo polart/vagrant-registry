@@ -47,12 +47,12 @@ export default class BoxList extends Component {
   };
 
   renderList = () => {
-    if (!this.boxPages || !this.boxTags.length) {
-      return <MySpinner />;
+    if (this.boxPages && this.boxPages.count === 0) {
+      return <p className="text-center">No boxes</p>
     }
 
-    if (this.boxPages.count === 0) {
-      return <p>No boxes</p>
+    if (!this.boxPages || !this.boxTags.length) {
+      return <MySpinner />;
     }
 
     return (
