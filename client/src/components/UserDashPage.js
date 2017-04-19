@@ -6,6 +6,7 @@ import * as actions from "../actions";
 import {BOX_ORDERING, DEFAULT_BOX_ORDERING} from "../constants";
 import BoxList from "./BoxList";
 import {Link} from "react-router";
+import MyBreadcrumbs from "./MyBreadcrumbs";
 
 
 class UserDashPage extends Component {
@@ -33,7 +34,11 @@ class UserDashPage extends Component {
     return (
         <div>
           <PageHeader>My boxes</PageHeader>
-          <Link className='btn btn-success' to='/boxes/new/'>
+          <MyBreadcrumbs router={this.props.router} />
+          <Link
+              className='btn btn-success box-new-button'
+              to='/boxes/new/'
+          >
             New box
           </Link>
           <BoxList

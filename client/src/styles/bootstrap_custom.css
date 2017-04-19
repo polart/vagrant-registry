@@ -85,15 +85,19 @@ body {
   margin-bottom: 20px;
 }
 
-.box-version-list a {
+.box-list a {
   text-decoration: none;
   color: inherit;
 }
 
-.box-version-list .panel-body h4 {
+.box-list .panel-body h4 {
   color: #337ab7;
 }
 
 .box-quick-start-panel pre {
   margin: 0;
+}
+
+.box-new-button {
+  margin-bottom: 15px;
 }

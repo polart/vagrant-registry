@@ -98,7 +98,7 @@ class BoxVersionList extends Component {
 
     return (
         <div>
-          <div className="box-version-list">
+          <div className="box-list">
             {this.renderVersionsList()}
           </div>
           {this.renderPagination()}

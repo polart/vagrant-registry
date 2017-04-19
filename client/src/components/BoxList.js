@@ -1,39 +1,35 @@
 import React, {Component} from "react";
-import {ListGroup, ListGroupItem} from "react-bootstrap";
+import {Panel} from "react-bootstrap";
 import Moment from "moment";
 import BoxOrdering from "./BoxOrdering";
 import MyPagination from "./MyPagination";
 import MySpinner from "./MySpinner";
+import {Link} from "react-router";
 
 
 export default class BoxList extends Component {
-  onBoxClick = (e) => {
-    e.preventDefault();
-    this.props.router.push(
-        // Relative url
-        e.currentTarget.getAttribute("href")
-    );
-    return false;
-  };
-
   renderBoxesList = () => {
     return this.boxTags.map(tag => {
       const box = this.props.boxes[tag];
       return (
-          <ListGroupItem
+          <Link
+              to={`/boxes/${box.tag}`}
               key={box.tag}
-              href={`/boxes/${box.tag}`}
-              onClick={this.onBoxClick}
           >
-            <div>
-              <h4>{box.tag}</h4>
-              <p>{box.short_description}</p>
-            </div>
-            <div>{box.pulls} pulls</div>
-            <small title={Moment(box.date_updated).format('LLL')}>
-              Last updated: {Moment(box.date_updated).fromNow()}
-            </small>
-          </ListGroupItem>
+            <Panel>
+              <div>
+                <h4>
+                  {box.tag}
+                  {' | '}
+                  <small>{box.pulls} pulls</small>
+                </h4>
+                <p>{box.short_description}</p>
+              </div>
+              <small title={Moment(box.date_updated).format('LLL')}>
+                Last updated: {Moment(box.date_updated).fromNow()}
+              </small>
+            </Panel>
+          </Link>
       );
     });
   };
@@ -61,9 +57,9 @@ export default class BoxList extends Component {
 
     return (
         <div>
-          <ListGroup>
+          <div className="box-list">
             {this.renderBoxesList()}
-          </ListGroup>
+          </div>
           {this.renderPagination()}
         </div>
     )
