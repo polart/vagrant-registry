@@ -404,7 +404,7 @@ export function* watchDeleteBoxProvider() {
 
     if (success) {
       yield put(actions.loadBoxVersion(tag, version));
-      // browserHistory.push(`/boxes/${tag}/versions/${version}/`);
+      browserHistory.push(`/boxes/${tag}/versions/${version}/`);
     }
   });
 }

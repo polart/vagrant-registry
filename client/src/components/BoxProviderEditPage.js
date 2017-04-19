@@ -4,8 +4,8 @@ import {isEqual, merge} from "lodash";
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxProviderForm from "./BoxProviderForm";
-import BoxVersionPageHeader from "./BoxVersionPageHeader";
 import {Panel} from "react-bootstrap";
+import BoxProviderPageHeader from "./BoxProviderPageHeader";
 
 
 class BoxProviderEditPage extends Component {
@@ -59,7 +59,7 @@ class BoxProviderEditPage extends Component {
   render() {
     return (
         <div>
-          <BoxVersionPageHeader router={this.props.router} />
+          <BoxProviderPageHeader router={this.props.router} />
           <MyBreadcrumbs router={this.props.router} />
           <Panel header="Edit provider">
             <BoxProviderForm
