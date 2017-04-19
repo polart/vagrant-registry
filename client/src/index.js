@@ -78,8 +78,8 @@ ReactDOM.render(
           <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider" component={BoxVersionDetail} />
           <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider/edit" component={BoxProviderEditPage} />
           <Redirect from="/:username/:boxName" to="/boxes/:username/:boxName" />
-          <Route path="*" component={NotFound} />
         </Route>
+        <Route path="*" component={NotFound} />
       </Router>
     </Provider>,
     document.getElementById('root')
