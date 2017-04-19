@@ -1,9 +1,10 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {PageHeader} from "react-bootstrap";
+import {Panel} from "react-bootstrap";
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxVersionForm from "./BoxVersionForm";
+import BoxPageHeader from "./BoxPageHeader";
 
 
 class BoxVersionCreatePage extends Component {
@@ -13,29 +14,35 @@ class BoxVersionCreatePage extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.resetForm('boxVersion');
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.createBoxVersion(this.props.boxTag, this.props.form.data);
   };
 
   onCancel = () => {
-      this.props.router.push(
-          `/boxes/${this.props.boxTag}/versions/`
-      );
+    this.props.router.push(
+        `/boxes/${this.props.boxTag}/versions/`
+    );
   };
 
   render() {
     return (
         <div>
-          <PageHeader>New box version</PageHeader>
+          <BoxPageHeader router={this.props.router} />
           <MyBreadcrumbs router={this.props.router} />
-          <BoxVersionForm
-              pending={this.props.form.pending}
-              submitTitle='Create'
-              submitPendingTitle="Creating..."
-              onSubmit={this.onSubmit}
-              onCancel={this.onCancel}
-          />
+          <Panel header="New version">
+            <BoxVersionForm
+                pending={this.props.form.pending}
+                submitTitle='Create'
+                submitPendingTitle="Creating..."
+                onSubmit={this.onSubmit}
+                onCancel={this.onCancel}
+            />
+          </Panel>
         </div>
     );
   }
@@ -55,4 +62,5 @@ function mapStateToProps(state, props) {
 
 export default connect(mapStateToProps, {
   createBoxVersion: actions.createBoxVersion,
+  resetForm: actions.form.reset,
 })(BoxVersionCreatePage)

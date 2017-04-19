@@ -1,10 +1,11 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
-import {PageHeader} from "react-bootstrap";
 import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxVersionForm from "./BoxVersionForm";
 import {isEqual} from "lodash";
+import {Panel} from "react-bootstrap";
+import BoxVersionPageHeader from "./BoxVersionPageHeader";
 
 
 class BoxVersionEditPage extends Component {
@@ -27,6 +28,10 @@ class BoxVersionEditPage extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.resetForm('boxVersion');
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     this.props.editBoxVersion(
@@ -37,23 +42,25 @@ class BoxVersionEditPage extends Component {
   };
 
   onCancel = () => {
-      this.props.router.push(
-          `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
-      );
+    this.props.router.push(
+        `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+    );
   };
 
   render() {
     return (
         <div>
-          <PageHeader>Edit box version</PageHeader>
+          <BoxVersionPageHeader router={this.props.router} />
           <MyBreadcrumbs router={this.props.router} />
-          <BoxVersionForm
-              pending={this.props.form.pending}
-              submitTitle='Save'
-              submitPendingTitle="Saving..."
-              onSubmit={this.onSubmit}
-              onCancel={this.onCancel}
-          />
+          <Panel header="Edit version">
+            <BoxVersionForm
+                pending={this.props.form.pending}
+                submitTitle='Save'
+                submitPendingTitle="Saving..."
+                onSubmit={this.onSubmit}
+                onCancel={this.onCancel}
+            />
+          </Panel>
         </div>
     );
   }
@@ -79,4 +86,5 @@ export default connect(mapStateToProps, {
   fetchBoxVersion: actions.loadBoxVersion,
   editBoxVersion: actions.editBoxVersion,
   setFormData: actions.form.setData,
+  resetForm: actions.form.reset,
 })(BoxVersionEditPage)

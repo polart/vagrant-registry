@@ -22,15 +22,6 @@ class BoxVersionList extends Component {
     this.setState({page});
   };
 
-  onBoxVersionClick = (e) => {
-    e.preventDefault();
-    this.props.router.push(
-        // Relative url
-        e.currentTarget.getAttribute("href")
-    );
-    return false;
-  };
-
   renderPagination = () => {
     if (this.pages.count <= 10) {
       return null;
@@ -73,8 +64,11 @@ class BoxVersionList extends Component {
     return this.versionTags.map(tag => {
       const version = this.props.boxVersions[tag];
       return (
-          <Link to={`/boxes/${this.props.boxTag}/versions/${version.version}/`}>
-            <Panel key={version.version}>
+          <Link
+              to={`/boxes/${this.props.boxTag}/versions/${version.version}/`}
+              key={version.version}
+          >
+            <Panel>
               <h4 className="list-group-item-heading">
                 v{version.version}
                 {' '}
