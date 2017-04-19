@@ -88,6 +88,15 @@ function myUsername(state = null, action) {
 }
 
 const initialForms = {
+  login: {
+    message: null,
+    pending: false,
+    data: {
+      username: '',
+      password: '',
+    },
+    errors: {},
+  },
   account: {
     message: null,
     pending: false,

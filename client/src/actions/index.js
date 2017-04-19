@@ -13,6 +13,7 @@ export const clearErrorPage = () => action(types.CLEAR_ERROR_PAGE);
 export const updateAccount = (username, data) => action(types.UPDATE_ACCOUNT, { username, data });
 export const changePassword = (username, data) => action(types.CHANGE_PASSWORD, { username, data });
 
+export const login = (data) => action(types.LOGIN, {data});
 export const logout = (nextUrl) => action(types.LOGOUT, {nextUrl});
 
 export const setMyUsername = (username) => action(types.SET_MY_USERNAME, { username });

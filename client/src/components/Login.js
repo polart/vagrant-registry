@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
-import { FormGroup, FormControl, Button, Alert } from 'react-bootstrap';
-import { Link } from 'react-router';
-import { LocalForm, Control } from 'react-redux-form';
-import { connect } from 'react-redux';
-
-import * as auth from '../auth';
+import React, {Component} from "react";
+import {Link} from "react-router";
+import {connect} from "react-redux";
 import * as actions from "../actions";
-import '../styles/login.css';
+import "../styles/login.css";
+import MyFormError from "./MyFormError";
+import MyFormField from "./MyFormField";
+import MySubmitButton from "./MySubmitButton";
 
 
 class Login extends Component {
@@ -14,64 +13,49 @@ class Login extends Component {
     formError: null,
   };
 
-  onFormSubmit = (values) => {
-    auth.login(values.username, values.password, (loginData) => {
-      if (loginData.authenticated) {
-        this.props.setMyUsername(values.username);
-        this.props.router.push(
-            this.props.router.location.query.next || '/'
-        );
-      } else {
-        const errors = loginData.data;
-        if (errors.non_field_errors) {
-          this.setState({formError: errors.non_field_errors.join(', ')});
-        }
-      }
-    })
+  onFormSubmit = (e) => {
+    e.preventDefault();
+    this.props.login(this.props.form.data);
   };
 
   render() {
     return (
-        <LocalForm
-            onSubmit={this.onFormSubmit}
-            className="login-form"
-        >
+        <div>
           <h1 className="text-center">Vagrant Registry</h1>
-          <h3>Please sign in</h3>
 
-          {this.state.formError && <Alert bsStyle="danger">{this.state.formError}</Alert>}
+          <form onSubmit={this.onFormSubmit} className="login-form">
+            <MyFormError model="login" />
 
-          <FormGroup>
-            <Control
-                model=".username"
-                type="text"
-                placeholder="Username"
-                component={FormControl}
-                required
+            <MyFormField
+                model='login.username'
+                type='text'
+                label='Username'
             />
-          </FormGroup>
-          <FormGroup>
-            <Control
-                model=".password"
-                type="password"
-                placeholder="Password"
-                component={FormControl}
-                required
+            <MyFormField
+                model='login.password'
+                type='password'
+                label='Password'
             />
-          </FormGroup>
 
-          <Button type="submit" bsStyle="primary">
-            Sign in
-          </Button>
-
-          <Link className='login-view-boxes-link' to='/boxes/'>
-            Or view public boxes
-          </Link>
-        </LocalForm>
+            <MySubmitButton
+                title='Sign In'
+                pending={this.props.pending}
+            />
+            <Link className='login-view-boxes-link' to='/boxes/'>
+              Or view public boxes
+            </Link>
+          </form>
+        </div>
     );
   }
 }
 
-export default connect(null, {
-  setMyUsername: actions.setMyUsername,
-})(Login)
+function mapStateToProps(state) {
+  return {
+    form: state.forms.login,
+  }
+}
+
+export default connect(mapStateToProps, {
+  login: actions.login,
+})(Login);

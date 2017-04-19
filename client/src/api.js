@@ -144,6 +144,10 @@ const boxSchema = new schema.Entity(
 const boxSchemaArray = new schema.Array(boxSchema);
 
 
+export const getToken = ({ data }) => postApi(
+    `tokens/`, null, data
+);
+
 export const fetchUser = ({ username }) => getApi(`users/${username}/`, userSchema);
 export const fetchUsers = () => getApi('users/', userSchemaArray);
 export const editUser = ({ username, data }) => patchApi(

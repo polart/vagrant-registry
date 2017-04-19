@@ -98,6 +98,22 @@ export function* watchChangePassword() {
   });
 }
 
+export function* watchLogin() {
+  yield takeLatest(actionTypes.LOGIN, function* ({data}) {
+    yield put(actions.form.setPending('login', true));
+    const {response, error} = yield call(api.getToken, {data});
+    if (response) {
+      yield put(actions.setMyUsername(data.username));
+      localStorage.token = response.token;
+      browserHistory.push('/');
+      yield put(actions.form.reset('login'));
+    } else if (error) {
+      yield put(actions.form.setErrors('login', error));
+      yield put(actions.form.setPending('login', false));
+    }
+  });
+}
+
 export function* watchLogout() {
   yield takeLatest(actionTypes.LOGOUT, function* ({nextUrl}) {
     localStorage.removeItem('token');
@@ -415,6 +431,7 @@ export default function* rootSaga() {
     watchUpdateAccount(),
     watchChangePassword(),
 
+    watchLogin(),
     watchLogout(),
     watchFetchUser(),
     watchFetchUsers(),
