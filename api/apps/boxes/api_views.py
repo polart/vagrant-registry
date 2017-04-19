@@ -183,8 +183,15 @@ class BoxVersionViewSet(UserBoxMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         box = self.get_box_object()
-        version = serializer.save(box=box)
-        logger.info('New version created: {}'.format(version))
+        try:
+            version = serializer.save(box=box)
+            logger.info('New version created: {}'.format(version))
+        except IntegrityError:
+            raise ValidationError({
+                'detail': "Version '{}' already exists".format(
+                    serializer.initial_data['version']
+                )
+            })
 
 
 class BoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
@@ -202,8 +209,15 @@ class BoxProviderViewSet(UserBoxMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         version = self.get_box_version_object()
-        provider = serializer.save(version=version)
-        logger.info('New provider created: {}'.format(provider))
+        try:
+            provider = serializer.save(version=version)
+            logger.info('New provider created: {}'.format(provider))
+        except IntegrityError:
+            raise ValidationError({
+                'detail': "Provider '{}' already exists".format(
+                    serializer.initial_data['provider']
+                )
+            })
 
 
 class BoxMetadataViewSet(UserBoxViewSet):
