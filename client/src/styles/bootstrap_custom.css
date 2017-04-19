@@ -101,3 +101,40 @@ body {
 .box-new-button {
   margin-bottom: 15px;
 }
+
+.navbar {
+  border-radius: 0;
+  background-color: #37474F;
+  border-color: #37474F;
+}
+
+.navbar .navbar-brand {
+  color: #E0E0E0;
+}
+
+.navbar .navbar-nav > li > a {
+  color: #E0E0E0;
+}
+
+.navbar .navbar-nav > .open > a,
+.navbar .navbar-nav > .open > a:focus,
+.navbar .navbar-nav > .open > a:hover {
+  background-color: #263238;
+}
+
+.search-button {
+  color: #37474F;
+  background-color: #B0BEC5;
+  border-color: #B0BEC5;
+  padding-bottom: 7px;
+}
+
+.search-input {
+  background-color: #CFD8DC;
+}
+
+.search-input:focus {
+  background-color: #ECEFF1;
+  border-color: #ECEFF1;
+  box-shadow: none;
+}

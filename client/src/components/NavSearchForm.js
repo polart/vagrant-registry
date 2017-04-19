@@ -18,6 +18,9 @@ export default class NavSearchForm extends Component {
   };
 
   onSearch = () => {
+    if (!this.state.searchValue.length) {
+      return;
+    }
     const location = this.props.router.createLocation({
       pathname: '/boxes/search/',
       query: {
@@ -35,12 +38,13 @@ export default class NavSearchForm extends Component {
               <FormControl
                   type="text"
                   placeholder="Search"
+                  className="search-input"
                   value={this.state.searchValue}
                   onChange={this.onSearchChange}
                   onKeyPress={this.onSearchKeyPress}
               />
               <InputGroup.Button>
-                <Button onClick={this.onSearch}>
+                <Button className="search-button" onClick={this.onSearch}>
                   <Glyphicon glyph="search" />
                 </Button>
               </InputGroup.Button>
