@@ -10,6 +10,8 @@ import {parsePerms} from "../utils";
 import MySpinner from "./MySpinner";
 import BoxVersionPageHeader from "./BoxVersionPageHeader";
 
+import '../styles/BoxVersionDetail.css';
+
 
 class BoxVersionDetail extends Component {
   componentDidMount() {

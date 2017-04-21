@@ -1,0 +1,16 @@
+.search-button {
+  color: #37474F;
+  background-color: #B0BEC5;
+  border-color: #B0BEC5;
+  padding-bottom: 7px;
+}
+
+.search-input {
+  background-color: #CFD8DC;
+}
+
+.search-input:focus {
+  background-color: #ECEFF1;
+  border-color: #ECEFF1;
+  box-shadow: none;
+}

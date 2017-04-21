@@ -10,6 +10,8 @@ import {parsePerms} from "../utils";
 import MySpinner from "./MySpinner";
 import BoxPageHeader from "./BoxPageHeader";
 
+import '../styles/BoxDetail.css';
+
 
 class BoxDetail extends Component {
   componentDidMount() {

@@ -1,18 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {Router, Route, browserHistory, IndexRoute, Redirect} from "react-router";
+import {browserHistory, IndexRoute, Redirect, Route, Router} from "react-router";
 import {Provider} from "react-redux";
-import {createStore, applyMiddleware, compose} from "redux";
-import App from "./components/App";
-import NotFound from "./components/NotFound";
-import BoxListPage from "./components/BoxListPage";
-import Login from "./components/Login";
+import {applyMiddleware, compose, createStore} from "redux";
+import createSagaMiddleware from "redux-saga";
+import {throttle} from "lodash";
+
+// Loading global styles before specific styles for components
+import "bootstrap/dist/css/bootstrap.css";
+import "./styles/bootstrap_custom.css";
+import "./styles/common.css";
+
 import * as auth from "./auth";
 import reducers from "./reducers";
-import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas";
 import {loadState, saveState} from "./localStorage";
-import {throttle} from "lodash";
+import App from "./components/App";
 import BoxDetail from "./components/BoxDetail";
 import BoxVersionDetail from "./components/BoxVersionDetail";
 import BoxSearchPage from "./components/BoxSearchPage";
@@ -24,8 +27,9 @@ import BoxVersionEditPage from "./components/BoxVersionEditPage";
 import BoxProviderCreatePage from "./components/BoxProviderCreatePage";
 import BoxProviderEditPage from "./components/BoxProviderEditPage";
 import AccountPage from "./components/AccountPage";
-
-import './styles/bootstrap_custom.css';
+import NotFound from "./components/NotFound";
+import BoxListPage from "./components/BoxListPage";
+import Login from "./components/Login";
 
 
 const persistedSate = loadState();

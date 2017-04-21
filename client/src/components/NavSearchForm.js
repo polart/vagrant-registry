@@ -1,6 +1,8 @@
 import React, {Component} from "react";
 import {Button, FormControl, FormGroup, Glyphicon, InputGroup, Navbar} from "react-bootstrap";
 
+import '../styles/NavSearchForm.css';
+
 
 export default class NavSearchForm extends Component {
   state = {

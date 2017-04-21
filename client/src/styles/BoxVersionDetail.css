@@ -1,0 +1,11 @@
+.box-version-providers-panel .panel-body {
+  padding: 0;
+}
+
+.box-version-providers-panel .list-group-item {
+  margin: -1px;
+}
+
+.box-version-providers-panel .box-provider-new-button {
+  margin: 15px;
+}

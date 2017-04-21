@@ -8,6 +8,8 @@ import BoxList from "./BoxList";
 import {Link} from "react-router";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 
+import '../styles/UserDashPage.css';
+
 
 class UserDashPage extends Component {
   componentDidMount() {

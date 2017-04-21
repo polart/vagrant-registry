@@ -1,0 +1,36 @@
+.action-icon {
+  opacity: 0.6;
+  font-size: 0.9em;
+  padding: 0 6px;
+}
+
+.action-icon:hover {
+  cursor: pointer;
+  opacity: 1;
+}
+
+.page-header .action-icon {
+  font-size: 0.6em;
+}
+
+.label-private {
+  font-size: 0.4em;
+  border: 1px solid #777;
+  color: #777;
+  vertical-align: middle;
+  background-color: transparent;
+  padding: .3em .6em .3em;
+}
+
+.page-header-subtitle {
+  color: #777;
+}
+
+.box-list a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.box-list .panel-body h4 {
+  color: #337ab7;
+}
