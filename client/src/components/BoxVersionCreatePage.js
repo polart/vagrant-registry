@@ -5,6 +5,7 @@ import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxVersionForm from "./BoxVersionForm";
 import BoxPageHeader from "./BoxPageHeader";
+import {getBoxTag} from "../selectors";
 
 
 class BoxVersionCreatePage extends Component {
@@ -49,14 +50,10 @@ class BoxVersionCreatePage extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
   return {
     myUsername: state.myUsername,
     form: state.forms.boxVersion,
-    boxTag,
-    username,
-    boxName,
+    boxTag: getBoxTag(props),
   }
 }
 

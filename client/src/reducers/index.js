@@ -3,7 +3,7 @@ import { merge, mergeWith, isArray, set } from 'lodash';
 import * as actionTypes from '../actions/types';
 
 
-// Pagination and related objects represented by arrays.
+// Pagination and related objects are represented by arrays.
 // On merge those arrays should be overridden, not merged,
 // in order to prevent unexpected results.
 function overrideArray(objValue, srcValue) {

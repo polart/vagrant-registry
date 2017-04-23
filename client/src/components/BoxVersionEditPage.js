@@ -6,6 +6,7 @@ import BoxVersionForm from "./BoxVersionForm";
 import {isEqual} from "lodash";
 import {Panel} from "react-bootstrap";
 import BoxVersionPageHeader from "./BoxVersionPageHeader";
+import {getBoxTag, getBoxVersion} from "../selectors";
 
 
 class BoxVersionEditPage extends Component {
@@ -15,7 +16,7 @@ class BoxVersionEditPage extends Component {
       return;
     }
     if (!this.props.boxVersion) {
-      this.props.fetchBoxVersion(this.props.boxTag, this.props.version);
+      this.props.fetchBoxVersion(this.props.boxTag, this.props.params.version);
       return;
     }
     this.props.setFormData('boxVersion', this.props.boxVersion);
@@ -36,14 +37,14 @@ class BoxVersionEditPage extends Component {
     e.preventDefault();
     this.props.editBoxVersion(
         this.props.boxTag,
-        this.props.version,
+        this.props.params.version,
         this.props.form.data
     );
   };
 
   onCancel = () => {
     this.props.router.push(
-        `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+        `/boxes/${this.props.boxTag}/versions/${this.props.params.version}/`
     );
   };
 
@@ -67,18 +68,11 @@ class BoxVersionEditPage extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName, version} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
-  const versionTag = `${boxTag} v${version}`;
-  const boxVersion = state.entities.boxVersions[versionTag];
   return {
     myUsername: state.myUsername,
     form: state.forms.boxVersion,
-    boxVersion,
-    boxTag,
-    username,
-    boxName,
-    version,
+    boxVersion: getBoxVersion(state, props),
+    boxTag: getBoxTag(props),
   }
 }
 

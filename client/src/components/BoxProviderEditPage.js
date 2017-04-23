@@ -6,6 +6,7 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxProviderForm from "./BoxProviderForm";
 import {Panel} from "react-bootstrap";
 import BoxProviderPageHeader from "./BoxProviderPageHeader";
+import {getBoxProvider, getBoxTag} from "../selectors";
 
 
 class BoxProviderEditPage extends Component {
@@ -19,7 +20,7 @@ class BoxProviderEditPage extends Component {
       return;
     }
     if (!this.props.boxProvider) {
-      this.props.loadBoxVersion(this.props.boxTag, this.props.version);
+      this.props.loadBoxVersion(this.props.boxTag, this.props.params.version);
       return;
     }
     this.props.setFormData('boxProvider', this.props.boxProvider);
@@ -40,15 +41,15 @@ class BoxProviderEditPage extends Component {
     e.preventDefault();
     this.props.editBoxProvider(
         this.props.boxTag,
-        this.props.version,
-        this.props.provider,
+        this.props.params.version,
+        this.props.params.provider,
         merge({}, this.props.form.data, {file: this.state.file})
     );
   };
 
   onCancel = () => {
     this.props.router.push(
-        `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+        `/boxes/${this.props.boxTag}/versions/${this.props.params.version}/`
     );
   };
 
@@ -77,17 +78,11 @@ class BoxProviderEditPage extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName, version, provider} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
-  const providerTag = `${boxTag} v${version} ${provider}`;
-  const boxProvider = state.entities.boxProviders[providerTag];
   return {
     myUsername: state.myUsername,
     form: state.forms.boxProvider,
-    boxProvider,
-    boxTag,
-    version,
-    provider,
+    boxProvider: getBoxProvider(state, props),
+    boxTag: getBoxTag(props),
   }
 }
 

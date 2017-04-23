@@ -6,6 +6,7 @@ import BoxForm from "./BoxForm";
 import {isEqual} from "lodash";
 import BoxPageHeader from "./BoxPageHeader";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import {getBox, getBoxTag} from "../selectors";
 
 
 class BoxEditPage extends Component {
@@ -15,7 +16,7 @@ class BoxEditPage extends Component {
       return;
     }
     if (!this.props.box) {
-      this.props.loadBox(this.props.tag);
+      this.props.loadBox(this.props.boxTag);
       return;
     }
     this.props.setFormData('box', this.props.box);
@@ -34,11 +35,11 @@ class BoxEditPage extends Component {
 
   onSubmit = (e) => {
     e.preventDefault();
-    this.props.editBox(this.props.tag, this.props.form.data);
+    this.props.editBox(this.props.boxTag, this.props.form.data);
   };
 
   onCancel = () => {
-    this.props.router.push(`/boxes/${this.props.tag}/`);
+    this.props.router.push(`/boxes/${this.props.boxTag}/`);
   };
 
   render() {
@@ -61,14 +62,11 @@ class BoxEditPage extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName} = props.router.params;
-  const tag = `${username}/${boxName}`;
-  const box = state.entities.boxes[tag];
   return {
     myUsername: state.myUsername,
     form: state.forms.box,
-    tag,
-    box,
+    box: getBox(state, props),
+    boxTag: getBoxTag(props),
   }
 }
 

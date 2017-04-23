@@ -2,9 +2,11 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Label} from "react-bootstrap";
 import Moment from "moment";
+import PropTypes from 'prop-types';
 import * as actions from "../actions";
 import {parsePerms} from "../utils";
 import ActionIcon from "./ActionIcon";
+import {getBoxProvider, getBoxProviderTag, getBoxTag, getBox} from "../selectors";
 
 
 class BoxProviderPageHeader extends Component {
@@ -12,7 +14,11 @@ class BoxProviderPageHeader extends Component {
     e.preventDefault();
     // TODO: would be good to use custom Confirm dialog
     if (window.confirm(`Are you sure you want to delete box provider ${this.props.providerTag}?`)) {
-      this.props.deleteBoxProvider(this.props.boxTag, this.props.version, this.props.provider);
+      this.props.deleteBoxProvider(
+          this.props.boxTag,
+          this.props.router.params.version,
+          this.props.router.params.provider
+      );
     }
   };
 
@@ -65,19 +71,16 @@ class BoxProviderPageHeader extends Component {
   }
 }
 
-function mapStateToProps(state, props) {
-  const {username, boxName, version, provider} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
-  const providerTag = `${username}/${boxName} v${version} ${provider}`;
-  const boxProvider = state.entities.boxProviders[providerTag];
+BoxProviderPageHeader.propTypes = {
+  router: PropTypes.object.isRequired,
+};
 
+function mapStateToProps(state, props) {
   return {
-    box: state.entities.boxes[boxTag],
-    boxTag,
-    providerTag,
-    version,
-    provider,
-    boxProvider,
+    box: getBox(state, props),
+    boxTag: getBoxTag(props),
+    providerTag: getBoxProviderTag(props),
+    boxProvider: getBoxProvider(state, props),
   }
 }
 

@@ -1,16 +1,16 @@
 import React, {Component} from "react";
 import {Panel} from "react-bootstrap";
 import Moment from "moment";
+import PropTypes from 'prop-types';
 import BoxOrdering from "./BoxOrdering";
 import MyPagination from "./MyPagination";
 import MySpinner from "./MySpinner";
 import {Link} from "react-router";
 
 
-export default class BoxList extends Component {
+class BoxList extends Component {
   renderBoxesList = () => {
-    return this.boxTags.map(tag => {
-      const box = this.props.boxes[tag];
+    return this.props.boxes.map(box => {
       return (
           <Link
               to={`/boxes/${box.tag}`}
@@ -35,23 +35,23 @@ export default class BoxList extends Component {
   };
 
   renderPagination = () => {
-    if (this.boxPages.count <= 10) {
+    if (this.props.totalCount <= 10) {
       return null;
     }
     return (
         <MyPagination
             router={this.props.router}
-            itemsCount={this.boxPages.count}
+            itemsCount={this.props.totalCount}
         />
     );
   };
 
   renderList = () => {
-    if (this.boxPages && this.boxPages.count === 0) {
+    if (this.props.totalCount === 0) {
       return <p className="text-center">No boxes</p>
     }
 
-    if (!this.boxPages || !this.boxTags.length) {
+    if (!this.props.boxes.length) {
       return <MySpinner />;
     }
 
@@ -66,9 +66,6 @@ export default class BoxList extends Component {
   };
 
   render() {
-    this.activePage = parseInt(this.props.router.location.query.page || 1, 10);
-    this.boxPages = this.props.boxesPages;
-    this.boxTags = (this.boxPages && this.boxPages.pages[this.activePage]) || [];
     return (
         <div>
           <BoxOrdering router={this.props.router} />
@@ -77,3 +74,11 @@ export default class BoxList extends Component {
     );
   }
 }
+
+BoxList.propTypes = {
+  router: PropTypes.object.isRequired,
+  boxes: PropTypes.array.isRequired,
+  totalCount: PropTypes.number.isRequired,
+};
+
+export default BoxList;

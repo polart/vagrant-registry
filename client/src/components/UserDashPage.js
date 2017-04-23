@@ -7,6 +7,7 @@ import {BOX_ORDERING, DEFAULT_BOX_ORDERING} from "../constants";
 import BoxList from "./BoxList";
 import {Link} from "react-router";
 import MyBreadcrumbs from "./MyBreadcrumbs";
+import {getBoxes} from "../selectors";
 
 import '../styles/UserDashPage.css';
 
@@ -35,7 +36,7 @@ class UserDashPage extends Component {
   render() {
     return (
         <div>
-          <PageHeader>My boxes</PageHeader>
+          <PageHeader>My boxes  ({this.props.totalCount})</PageHeader>
           <MyBreadcrumbs router={this.props.router} />
           <Link
               className='btn btn-success box-new-button'
@@ -46,7 +47,7 @@ class UserDashPage extends Component {
           <BoxList
               router={this.props.router}
               boxes={this.props.boxes}
-              boxesPages={this.props.boxesPages}
+              totalCount={this.props.totalCount}
           />
         </div>
     );
@@ -56,8 +57,7 @@ class UserDashPage extends Component {
 function mapStateToProps(state, props) {
   return {
     myUsername: state.myUsername,
-    boxes: state.entities.boxes,
-    boxesPages: state.pagination.boxes[state.myUsername],
+    ...getBoxes(state, props, state.myUsername),
   }
 }
 

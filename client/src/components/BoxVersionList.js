@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Label, Pagination, Panel} from "react-bootstrap";
+import PropTypes from 'prop-types';
 import ReactMarkdown from "react-markdown";
 import Moment from "moment";
 import * as actions from "../actions";
@@ -106,6 +107,10 @@ class BoxVersionList extends Component {
     );
   }
 }
+
+BoxVersionList.propTypes = {
+  boxTag: PropTypes.string.isRequired,
+};
 
 function mapStateToProps(state, props) {
   return {

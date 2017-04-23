@@ -6,6 +6,7 @@ import * as actions from "../actions";
 import MyBreadcrumbs from "./MyBreadcrumbs";
 import {BOX_ORDERING, DEFAULT_BOX_ORDERING} from "../constants";
 import BoxList from "./BoxList";
+import {getBoxes} from "../selectors";
 
 
 class BoxListPage extends Component {
@@ -49,7 +50,7 @@ class BoxListPage extends Component {
           <BoxList
               router={this.props.router}
               boxes={this.props.boxes}
-              boxesPages={this.props.boxesPages}
+              totalCount={this.props.totalCount}
           />
         </div>
     );
@@ -58,10 +59,7 @@ class BoxListPage extends Component {
 
 function mapStateToProps(state, props) {
   return {
-    boxes: state.entities.boxes,
-    boxesPages: state.pagination.boxes[
-        props.params.username || '__all__'
-    ],
+    ...getBoxes(state, props, props.params.username || '__all__'),
   }
 }
 

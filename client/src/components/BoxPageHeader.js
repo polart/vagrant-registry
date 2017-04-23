@@ -2,9 +2,11 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Badge, Label} from "react-bootstrap";
 import Moment from "moment";
+import PropTypes from 'prop-types';
 import * as actions from "../actions";
 import {parsePerms} from "../utils";
 import ActionIcon from "./ActionIcon";
+import {getBox, getBoxTag} from "../selectors";
 
 
 class BoxPageHeader extends Component {
@@ -94,13 +96,14 @@ class BoxPageHeader extends Component {
   }
 }
 
-function mapStateToProps(state, props) {
-  const {username, boxName} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
+BoxPageHeader.propTypes = {
+  router: PropTypes.object.isRequired,
+};
 
+function mapStateToProps(state, props) {
   return {
-    box: state.entities.boxes[boxTag],
-    boxTag,
+    box: getBox(state, props),
+    boxTag: getBoxTag(props),
   }
 }
 

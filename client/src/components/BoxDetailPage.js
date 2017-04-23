@@ -9,11 +9,12 @@ import {Link} from "react-router";
 import {parsePerms} from "../utils";
 import MySpinner from "./MySpinner";
 import BoxPageHeader from "./BoxPageHeader";
+import {getBox, getBoxTag} from "../selectors";
 
-import '../styles/BoxDetail.css';
+import '../styles/BoxDetailPage.css';
 
 
-class BoxDetail extends Component {
+class BoxDetailPage extends Component {
   componentDidMount() {
     this.props.fetchBox(this.props.boxTag);
   }
@@ -84,10 +85,7 @@ class BoxDetail extends Component {
             </Tab>
             <Tab eventKey={'versions'} title="Versions">
               {this.renderNewVersionButton()}
-              <BoxVersionList
-                  boxTag={this.props.boxTag}
-                  router={this.props.router}
-              />
+              <BoxVersionList boxTag={this.props.boxTag} />
             </Tab>
           </Tabs>
         </div>
@@ -96,15 +94,13 @@ class BoxDetail extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName} = props.params;
-  const boxTag = `${username}/${boxName}`;
   return {
-    box: state.entities.boxes[boxTag],
-    boxTag,
+    box: getBox(state, props),
+    boxTag: getBoxTag(props),
   }
 }
 
 export default connect(mapStateToProps, {
   fetchBox: actions.loadBox,
   deleteBox: actions.deleteBox,
-})(BoxDetail)
+})(BoxDetailPage)

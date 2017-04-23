@@ -6,6 +6,7 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 import BoxProviderForm from "./BoxProviderForm";
 import BoxVersionPageHeader from "./BoxVersionPageHeader";
 import {Panel} from "react-bootstrap";
+import {getBoxTag} from "../selectors";
 
 
 class BoxProviderCreatePage extends Component {
@@ -27,7 +28,7 @@ class BoxProviderCreatePage extends Component {
     e.preventDefault();
     this.props.createBoxProvider(
         this.props.boxTag,
-        this.props.version,
+        this.props.params.version,
         merge({}, this.props.form.data, {file: this.state.file})
     );
   };
@@ -38,7 +39,7 @@ class BoxProviderCreatePage extends Component {
 
   onCancel = () => {
     this.props.router.push(
-        `/boxes/${this.props.boxTag}/versions/${this.props.version}/`
+        `/boxes/${this.props.boxTag}/versions/${this.props.params.version}/`
     );
   };
 
@@ -63,15 +64,10 @@ class BoxProviderCreatePage extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName, version} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
   return {
     myUsername: state.myUsername,
     form: state.forms.boxProvider,
-    boxTag,
-    username,
-    boxName,
-    version,
+    boxTag: getBoxTag(props),
   }
 }
 

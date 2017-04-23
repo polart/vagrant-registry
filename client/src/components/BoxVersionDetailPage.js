@@ -9,11 +9,12 @@ import MyBreadcrumbs from "./MyBreadcrumbs";
 import {parsePerms} from "../utils";
 import MySpinner from "./MySpinner";
 import BoxVersionPageHeader from "./BoxVersionPageHeader";
+import {getBox, getBoxTag, getBoxVersion, getBoxVersionTag, getBoxProviders} from "../selectors";
 
-import '../styles/BoxVersionDetail.css';
+import '../styles/BoxVersionDetailPage.css';
 
 
-class BoxVersionDetail extends Component {
+class BoxVersionDetailPage extends Component {
   componentDidMount() {
     this.props.fetchBox(this.props.boxTag);
     this.props.fetchBoxVersion(this.props.boxTag, this.props.params.version);
@@ -30,7 +31,7 @@ class BoxVersionDetail extends Component {
   onBoxProviderEdit = (provider, e) => {
     e.preventDefault();
     this.props.router.push(
-        `/boxes/${this.props.boxTag}/versions/${this.props.version}/providers/${provider}/edit/`
+        `/boxes/${this.props.boxTag}/versions/${this.props.params.version}/providers/${provider}/edit/`
     );
   };
 
@@ -70,7 +71,7 @@ class BoxVersionDetail extends Component {
         <Panel header="Providers" className="box-version-providers-panel">
           <BoxProviderList
               boxTag={this.props.boxTag}
-              version={this.props.version}
+              version={this.props.params.version}
               providers={this.props.boxProviders}
               canDelete={this.canDeleteProvider()}
               canEdit={this.canEditProvider()}
@@ -95,22 +96,12 @@ class BoxVersionDetail extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const {username, boxName, version} = props.params;
-  const boxTag = `${username}/${boxName}`;
-  const versionTag = `${username}/${boxName} v${version}`;
-  const boxVersion = state.entities.boxVersions[versionTag];
-
-  let boxProviders;
-  if (boxVersion && boxVersion.providers) {
-    boxProviders = boxVersion.providers.map(p => state.entities.boxProviders[p]);
-  }
   return {
-    box: state.entities.boxes[boxTag],
-    boxVersion,
-    boxProviders,
-    boxTag,
-    versionTag,
-    version,
+    box: getBox(state, props),
+    boxTag: getBoxTag(props),
+    boxVersion: getBoxVersion(state, props),
+    versionTag: getBoxVersionTag(props),
+    boxProviders: getBoxProviders(state, props),
   }
 }
 
@@ -119,4 +110,4 @@ export default connect(mapStateToProps, {
   fetchBoxVersion: actions.loadBoxVersion,
   deleteBoxVersion: actions.deleteBoxVersion,
   deleteBoxProvider: actions.deleteBoxProvider,
-})(BoxVersionDetail)
+})(BoxVersionDetailPage)

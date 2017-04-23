@@ -5,6 +5,7 @@ import {isEqual} from "lodash";
 import * as actions from "../actions";
 import {BOX_ORDERING, DEFAULT_BOX_ORDERING} from "../constants";
 import BoxList from "./BoxList";
+import {getBoxes} from "../selectors";
 
 
 class BoxSearchPage extends Component {
@@ -31,11 +32,11 @@ class BoxSearchPage extends Component {
   render() {
     return (
         <div>
-          <PageHeader>Search results</PageHeader>
+          <PageHeader>Search results ({this.props.totalCount})</PageHeader>
           <BoxList
               router={this.props.router}
               boxes={this.props.boxes}
-              boxesPages={this.props.boxesPages}
+              totalCount={this.props.totalCount}
           />
         </div>
     );
@@ -44,8 +45,7 @@ class BoxSearchPage extends Component {
 
 function mapStateToProps(state, props) {
   return {
-    boxes: state.entities.boxes,
-    boxesPages: state.pagination.boxes['__search__'],
+    ...getBoxes(state, props, '__search__'),
   }
 }
 

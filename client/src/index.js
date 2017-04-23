@@ -16,8 +16,8 @@ import reducers from "./reducers";
 import rootSaga from "./sagas";
 import {loadState, saveState} from "./localStorage";
 import App from "./components/App";
-import BoxDetail from "./components/BoxDetail";
-import BoxVersionDetail from "./components/BoxVersionDetail";
+import BoxDetailPage from "./components/BoxDetailPage";
+import BoxVersionDetailPage from "./components/BoxVersionDetailPage";
 import BoxSearchPage from "./components/BoxSearchPage";
 import UserDashPage from "./components/UserDashPage";
 import BoxCreatePage from "./components/BoxCreatePage";
@@ -71,15 +71,15 @@ ReactDOM.render(
           <Route path="/boxes/search" component={BoxSearchPage} />
           <Route path="/boxes/new" component={BoxCreatePage} />
           <Route path="/boxes(/:username)" component={BoxListPage} />
-          <Route path="/boxes/:username/:boxName" component={BoxDetail} />
+          <Route path="/boxes/:username/:boxName" component={BoxDetailPage} />
           <Route path="/boxes/:username/:boxName/edit" component={BoxEditPage} />
-          <Route path="/boxes/:username/:boxName/versions" component={BoxDetail} />
+          <Route path="/boxes/:username/:boxName/versions" component={BoxDetailPage} />
           <Route path="/boxes/:username/:boxName/versions/new" component={BoxVersionCreatePage} />
-          <Route path="/boxes/:username/:boxName/versions/:version" component={BoxVersionDetail} />
+          <Route path="/boxes/:username/:boxName/versions/:version" component={BoxVersionDetailPage} />
           <Route path="/boxes/:username/:boxName/versions/:version/edit" component={BoxVersionEditPage} />
-          <Route path="/boxes/:username/:boxName/versions/:version/providers" component={BoxVersionDetail} />
+          <Route path="/boxes/:username/:boxName/versions/:version/providers" component={BoxVersionDetailPage} />
           <Route path="/boxes/:username/:boxName/versions/:version/providers/new" component={BoxProviderCreatePage} />
-          <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider" component={BoxVersionDetail} />
+          <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider" component={BoxVersionDetailPage} />
           <Route path="/boxes/:username/:boxName/versions/:version/providers/:provider/edit" component={BoxProviderEditPage} />
           <Redirect from="/:username/:boxName" to="/boxes/:username/:boxName" />
         </Route>

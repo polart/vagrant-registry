@@ -2,15 +2,17 @@ import React, {Component} from "react";
 import {connect} from "react-redux";
 import {Label} from "react-bootstrap";
 import Moment from "moment";
+import PropTypes from 'prop-types';
 import * as actions from "../actions";
 import {parsePerms} from "../utils";
 import ActionIcon from "./ActionIcon";
+import {getBox, getBoxTag, getBoxVersionTag} from "../selectors";
 
 
 class BoxVersionPageHeader extends Component {
   onBoxVersionEdit = (e) => {
     this.props.router.push(
-        `/boxes/${this.props.boxTag}/versions/${this.props.version}/edit/`
+        `/boxes/${this.props.boxTag}/versions/${this.props.params.version}/edit/`
     );
   };
 
@@ -18,7 +20,10 @@ class BoxVersionPageHeader extends Component {
     e.preventDefault();
     // TODO: would be good to use custom Confirm dialog
     if (window.confirm(`Are you sure you want to delete box version ${this.props.versionTag}?`)) {
-      this.props.deleteBoxVersion(this.props.boxTag, this.props.version);
+      this.props.deleteBoxVersion(
+          this.props.boxTag,
+          this.props.params.version
+      );
     }
   };
 
@@ -82,18 +87,15 @@ class BoxVersionPageHeader extends Component {
   }
 }
 
-function mapStateToProps(state, props) {
-  const {username, boxName, version} = props.router.params;
-  const boxTag = `${username}/${boxName}`;
-  const versionTag = `${username}/${boxName} v${version}`;
-  const boxVersion = state.entities.boxVersions[versionTag];
+BoxVersionPageHeader.propTypes = {
+  router: PropTypes.object.isRequired,
+};
 
+function mapStateToProps(state, props) {
   return {
-    box: state.entities.boxes[boxTag],
-    boxVersion,
-    boxTag,
-    versionTag,
-    version,
+    box: getBox(state, props),
+    boxTag: getBoxTag(props),
+    versionTag: getBoxVersionTag(props),
   }
 }
 
