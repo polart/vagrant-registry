@@ -12,7 +12,7 @@ import {getBoxTag, getBoxVersion} from "../selectors";
 class BoxVersionEditPage extends Component {
   componentDidMount() {
     if (!this.props.myUsername) {
-      this.props.router.push(`/login/?next=${location.pathname}`);
+      this.props.router.push(`/login/?next=${window.location.pathname}`);
       return;
     }
     if (!this.props.boxVersion) {

@@ -11,7 +11,7 @@ export function* callRequest(entity, apiFn, data = null) {
   else {
     yield put(entity.failure(data, error));
     if (status === 401) {
-      yield put(actions.logout(location.pathname));
+      yield put(actions.logout(window.location.pathname));
     } else if (status === 404) {
       yield put(actions.setErrorPage(404));
     }

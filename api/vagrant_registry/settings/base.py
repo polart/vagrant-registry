@@ -15,8 +15,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+SECRET_KEY = 'SUPER_SECRET_KEY_MUST_NOT_BE_EMPTY'
 
+ALLOWED_HOSTS = '*'
 
 # Application definition
 
@@ -91,7 +92,7 @@ DATABASES = {
         'NAME': 'vagrant_registry',
         'USER': 'vagrant_registry',
         'PASSWORD': 'vagrant_registry',
-        'HOST': '127.0.0.1',
+        'HOST': 'postgres',
         'PORT': '5432',
     }
 }

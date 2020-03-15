@@ -443,7 +443,7 @@ class UserBoxUploadViewSetTestCase(APITestCase):
         version = BoxVersionFactory(box=box)
         provider = BoxProviderFactory(version=version)
         BoxUploadFactory(provider=provider)
-        BoxUploadFactory(provider=provider)
+        BoxUploadFactory(provider=provider, file_content=b'test2')
 
         request = self.factory.get('/url/')
         force_authenticate(request, user=user)
@@ -518,6 +518,7 @@ class UserBoxUploadHandlerViewSetTestCase(APITestCase):
             version=bu_factory.version.version,
             provider=bu_factory.provider.provider,
             pk=bu_factory.pk,
+            checksum=bu_factory.checksum,
         )
 
     def test_unsupported_media_type(self):

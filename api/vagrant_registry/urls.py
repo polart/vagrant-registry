@@ -115,7 +115,7 @@ api_v1_urlpatterns = [
 api_urlpatterns = [
     url(r'^v1/', include(api_v1_urlpatterns, namespace='v1')),
     # Latest API without explicit version
-    url(r'^', include(api_v1_urlpatterns, namespace='v1')),
+    # url(r'^', include(api_v1_urlpatterns, namespace='v1')),
 ]
 
 urlpatterns = [

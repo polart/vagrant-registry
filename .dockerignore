@@ -2,6 +2,7 @@
 **/*.py[cod]
 
 .git/
+.vscode/
 .idea
 .gitignore
 Procfile

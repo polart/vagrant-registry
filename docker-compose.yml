@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  client:
+    build:
+      context: client/
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./client:/project
+
+  api:
+    build:
+      context: api/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./api:/project
+    environment:
+      - DJANGO_SETTINGS_MODULE=vagrant_registry.settings.base
+
+  postgres:
+    image: postgres:12.2-alpine
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=vagrant_registry
+      - POSTGRES_USER=vagrant_registry
+      - POSTGRES_DB=vagrant_registry
+
+volumes:
+  db:

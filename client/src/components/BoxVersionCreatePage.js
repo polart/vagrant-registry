@@ -11,7 +11,7 @@ import {getBoxTag} from "../selectors";
 class BoxVersionCreatePage extends Component {
   componentDidMount() {
     if (!this.props.myUsername) {
-      this.props.router.push(`/login/?next=${location.pathname}`);
+      this.props.router.push(`/login/?next=${window.location.pathname}`);
     }
   }
 
