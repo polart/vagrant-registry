@@ -1,7 +1,7 @@
-Django==1.11.17
+Django==1.11.28
 psycopg2==2.8.4
 pytz
-djangorestframework==3.5.4
+djangorestframework==3.9.1
 django-rest-swagger==2.1.1
 django-sendfile==0.3.10
 humanize==0.5.1
