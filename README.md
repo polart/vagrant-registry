@@ -62,7 +62,7 @@ $ docker run \
     -v vr-db:/var/lib/postgresql \
     -p 8080:80 \
     --name vagrant-registry \
-    polart/vagrant-registry:0.1.0
+    polart/vagrant-registry:0.1.1
 ```
 
 Make sure to run Vagrant Registry behind [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy)
