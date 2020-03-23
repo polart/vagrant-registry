@@ -15,7 +15,7 @@ module.exports = function (app) {
     );
     app.get('*', (req, res, next) => {
         if (req.get('User-Agent').includes('Vagrant')) {
-            res.redirect(301, `http://localhost:8000/box-metadata${req.path}`);
+            res.redirect(301, `http://localhost:3000/box-metadata${req.originalUrl}`);
             return;
         }
         next();

@@ -318,17 +318,17 @@ class BoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
                 "file size ({}) specified when upload was initiated."
                 .format(crange.total, box_upload.file_size))
         # Range is zero-indexed
-        if crange.end >= crange.total:
+        if crange.end > crange.total:
             return self._get_range_not_satisfiable_response(
                 'Last byte position ({}) is greater than complete '
                 'length ({}).'
                 .format(crange.end, crange.total))
         # Range is zero-indexed
-        if new_chunk.size != crange.end - crange.start + 1:
+        if new_chunk.size != crange.end - crange.start:
             return self._get_range_not_satisfiable_response(
                 "Uploaded content length ({}) doesn't much content "
                 "range ({}) specified in the header."
-                .format(new_chunk.size, crange.end - crange.start + 1))
+                .format(new_chunk.size, crange.end - crange.starts))
 
         try:
             box_upload.append_chunk(new_chunk)
@@ -338,7 +338,7 @@ class BoxUploadHandlerViewSet(UserBoxMixin, RetrieveModelMixin,
 
         serializer = self.get_serializer(box_upload)
         # Range is zero-indexed
-        if crange.end == crange.total - 1:
+        if crange.end == crange.total:
             return Response(data=serializer.data,
                             status=status.HTTP_201_CREATED)
         else:

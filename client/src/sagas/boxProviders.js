@@ -32,7 +32,7 @@ function* uploadChunks({file, offset, tag, version, provider, upload}) {
       data: data,
       range: {
         start: loaded,
-        end: loaded + dataSize - 1,
+        end: loaded + dataSize,
         total: totalSize,
       }
     });
