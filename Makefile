@@ -10,7 +10,7 @@ build-client:
 	docker-compose run client yarn build
 
 build-prod: build-client
-	docker build -t polart/vagrant-registry:0.1.1 .
+	docker build -t polart/vagrant-registry:0.1.2 .
 
 install_client:
 	docker-compose run client yarn --frozen-lockfile

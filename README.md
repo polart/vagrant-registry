@@ -25,7 +25,18 @@ $ vagrant up
 
 ### Private boxes
 
-TODO
+Log in into Vagrant Registry using [Vagrant Registry plugin](https://github.com/polart/vagrant-registry-plugin)
+```
+$ vagrant registry login http://localhost:3000
+```
+
+Init and launch a box
+```
+$ vagrant init polart/jessie64 http://localhost:3000/polart/jessie64
+$ vagrant up
+```
+
+<p align="center"><img src="img/vr.gif?raw=true"/></p>
 
 ## Production deploy
 
@@ -62,7 +73,7 @@ $ docker run \
     -v vr-db:/var/lib/postgresql \
     -p 8080:80 \
     --name vagrant-registry \
-    polart/vagrant-registry:0.1.1
+    polart/vagrant-registry:0.1.2
 ```
 
 Make sure to run Vagrant Registry behind [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy)
